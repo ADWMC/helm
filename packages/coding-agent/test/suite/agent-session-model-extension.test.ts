@@ -1,5 +1,12 @@
 import type { AgentTool, ThinkingLevel } from "@earendil-works/pi-agent-core";
-import { fauxAssistantMessage, fauxToolCall, type Model, type Usage } from "@earendil-works/pi-ai";
+import {
+	fauxAssistantMessage,
+	fauxToolCall,
+	getCurrentSystemPrompt,
+	type JsonObject,
+	type Model,
+	type Usage,
+} from "@earendil-works/pi-ai";
 import { Type } from "typebox";
 import { afterEach, describe, expect, it } from "vitest";
 import type { BuildSystemPromptOptions, ExtensionAPI } from "../../src/index.ts";
@@ -110,6 +117,7 @@ describe("AgentSession model and extension characterization", () => {
 				{ id: "faux-1", name: "One", reasoning: true },
 				{ id: "faux-2", name: "Two", reasoning: true },
 			],
+			settings: { defaultThinkingLevel: "medium" },
 		});
 		harnesses.push(harness);
 
@@ -125,10 +133,24 @@ describe("AgentSession model and extension characterization", () => {
 		await harness.session.setModel(model2);
 		expect(harness.session.thinkingLevel).toBe("low");
 
-		// Switch back to faux-1 → no per-model override, carries session level
+		// Switch back to faux-1 → no per-model override, uses global default
 		const model1 = harness.getModel("faux-1")!;
 		await harness.session.setModel(model1);
-		expect(harness.session.thinkingLevel).toBe("low");
+		expect(harness.session.thinkingLevel).toBe("medium");
+	});
+
+	it("falls back to current session thinking level when no per-model or global default is configured", async () => {
+		const harness = await createHarness({
+			models: [
+				{ id: "faux-1", name: "One", reasoning: true },
+				{ id: "faux-2", name: "Two", reasoning: true },
+			],
+		});
+		harnesses.push(harness);
+
+		harness.session.setThinkingLevel("high");
+		await harness.session.setModel(harness.getModel("faux-2")!);
+		expect(harness.session.thinkingLevel).toBe("high");
 	});
 
 	it("per-model override takes priority over global default during model switch", async () => {
@@ -324,7 +346,12 @@ describe("AgentSession model and extension characterization", () => {
 
 		expect(getAssistantTexts(harness)).toContain("patched result");
 		const toolResult = harness.session.messages.find(
-			(message) => message.role === "toolResult" && message.details?.patched === true,
+			(message) =>
+				message.role === "toolResult" &&
+				typeof message.details === "object" &&
+				message.details !== null &&
+				!Array.isArray(message.details) &&
+				(message.details as JsonObject).patched === true,
 		);
 		expect(observedToolUsage).toEqual(toolUsage);
 		expect(toolResult).toBeDefined();
@@ -459,7 +486,7 @@ describe("AgentSession model and extension characterization", () => {
 		let sawInjectedUserMessage = false;
 		harness.setResponses([
 			(context) => {
-				providerSystemPrompt = context.systemPrompt ?? "";
+				providerSystemPrompt = getCurrentSystemPrompt(context.messages);
 				sawInjectedUserMessage = context.messages.some(
 					(message) =>
 						message.role === "user" &&
