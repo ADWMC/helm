@@ -133,7 +133,7 @@ const CUBE_VALUES = [0, 95, 135, 175, 215, 255] as const;
 const GRAY_VALUES = Array.from({ length: 24 }, (_, index) => 8 + index * 10);
 
 function indexedToRgb(index: number): RgbChannels {
-	if (index < 16) return BASIC_COLORS[index];
+	if (index < 16) return { ...BASIC_COLORS[index] };
 	if (index < 232) {
 		const cubeIndex = index - 16;
 		return {

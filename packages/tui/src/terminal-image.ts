@@ -74,7 +74,7 @@ function detectCapabilitiesFromEnvironment(tmuxForwardsHyperlink: () => boolean)
 	const terminalEmulator = process.env.TERMINAL_EMULATOR?.toLowerCase() || "";
 	const term = process.env.TERM?.toLowerCase() || "";
 	const colorTerm = process.env.COLORTERM?.toLowerCase() || "";
-	const hasTrueColorHint = colorTerm === "truecolor" || colorTerm === "24bit";
+	const hasTrueColorHint = colorTerm === "truecolor" || colorTerm === "24bit" || term.endsWith("-direct");
 	const isWindowsConsole = process.platform === "win32";
 	const capabilities = (images: ImageProtocol, trueColor: boolean, hyperlinks: boolean): TerminalCapabilities => ({
 		images,
