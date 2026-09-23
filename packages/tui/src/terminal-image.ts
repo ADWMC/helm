@@ -621,8 +621,7 @@ export function renderImage(
 	}
 
 	const maxWidth = options.maxWidthCells ?? 80;
-	// Kitty places into an explicit cell rectangle; nearest rows reduce stretching.
-	// iTerm2 uses automatic pixel height and still needs ceiling-based row reservation.
+	// Round Kitty's cell-aligned height to reduce stretching.
 	const size = calculateImageCellSize(
 		imageDimensions,
 		maxWidth,
