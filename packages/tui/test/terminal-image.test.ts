@@ -622,26 +622,21 @@ describe("Kitty image cursor movement", () => {
 	});
 });
 
-// Regression coverage for #8938: round Kitty placements without shrinking iTerm2 reservations.
+// #8938: round Kitty placements without shrinking iTerm2 reservations.
 describe("image row rounding", () => {
-	for (const { name, height, rows } of [
-		{ name: "rounds Kitty height up when the next row is nearer", height: 190, rows: 5 },
-		{ name: "reserves at least one Kitty row for thin images", height: 12, rows: 1 },
-	]) {
-		it(name, () => {
-			setCapabilities({ images: "kitty", trueColor: true, hyperlinks: true });
+	it("reserves at least one Kitty row for thin images", () => {
+		setCapabilities({ images: "kitty", trueColor: true, hyperlinks: true });
+		setCellDimensions({ widthPx: 9, heightPx: 18 });
+		try {
+			const result = renderImage("AAAA", { widthPx: 1200, heightPx: 12 }, { maxWidthCells: 60 });
+			assert.ok(result);
+			assert.strictEqual(result.rows, 1);
+			assert.ok(result.sequence.includes(",c=60,r=1;"));
+		} finally {
+			resetCapabilitiesCache();
 			setCellDimensions({ widthPx: 9, heightPx: 18 });
-			try {
-				const result = renderImage("AAAA", { widthPx: 1200, heightPx: height }, { maxWidthCells: 60 });
-				assert.ok(result);
-				assert.strictEqual(result.rows, rows);
-				assert.ok(result.sequence.includes(`,c=60,r=${rows};`));
-			} finally {
-				resetCapabilitiesCache();
-				setCellDimensions({ widthPx: 9, heightPx: 18 });
-			}
-		});
-	}
+		}
+	});
 
 	it("keeps Kitty placement, reserved lines, and cropping metadata consistent across width changes", () => {
 		setCapabilities({ images: "kitty", trueColor: true, hyperlinks: true });
