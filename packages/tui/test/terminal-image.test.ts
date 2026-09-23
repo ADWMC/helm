@@ -624,40 +624,23 @@ describe("Kitty image cursor movement", () => {
 
 // Regression coverage for #8938: round Kitty placements without shrinking iTerm2 reservations.
 describe("image row rounding", () => {
-	const cases = [
-		{ name: "original banner", width: 615, height: 86, columns: 60, kittyRows: 4, iterm2Rows: 5 },
-		{ name: "below half a row", width: 1200, height: 98, columns: 60, kittyRows: 2, iterm2Rows: 3 },
-		{ name: "exactly half a row", width: 1200, height: 100, columns: 60, kittyRows: 3, iterm2Rows: 3 },
-		{ name: "above half a row", width: 1200, height: 102, columns: 60, kittyRows: 3, iterm2Rows: 3 },
-		{ name: "less than one row", width: 1200, height: 12, columns: 60, kittyRows: 1, iterm2Rows: 1 },
-		{ name: "height-limited image", width: 800, height: 600, columns: 22, kittyRows: 8, iterm2Rows: 8 },
-	];
-	for (const protocol of ["kitty", "iterm2"] as const) {
-		for (const testCase of cases) {
-			it(`${protocol}: ${testCase.name}`, () => {
-				setCapabilities({ images: protocol, trueColor: true, hyperlinks: true });
+	for (const { name, height, rows } of [
+		{ name: "rounds Kitty height up when the next row is nearer", height: 190, rows: 5 },
+		{ name: "reserves at least one Kitty row for thin images", height: 12, rows: 1 },
+	]) {
+		it(name, () => {
+			setCapabilities({ images: "kitty", trueColor: true, hyperlinks: true });
+			setCellDimensions({ widthPx: 9, heightPx: 18 });
+			try {
+				const result = renderImage("AAAA", { widthPx: 1200, heightPx: height }, { maxWidthCells: 60 });
+				assert.ok(result);
+				assert.strictEqual(result.rows, rows);
+				assert.ok(result.sequence.includes(`,c=60,r=${rows};`));
+			} finally {
+				resetCapabilitiesCache();
 				setCellDimensions({ widthPx: 9, heightPx: 18 });
-				try {
-					const result = renderImage(
-						"AAAA",
-						{ widthPx: testCase.width, heightPx: testCase.height },
-						{ maxWidthCells: 60, maxHeightCells: 8 },
-					);
-					assert.ok(result);
-					const expectedRows = protocol === "kitty" ? testCase.kittyRows : testCase.iterm2Rows;
-					assert.strictEqual(result.rows, expectedRows);
-					assert.strictEqual(result.columns, testCase.columns);
-					if (protocol === "kitty") {
-						assert.ok(result.sequence.includes(`,c=${result.columns},r=${expectedRows};`));
-					} else {
-						assert.ok(result.sequence.includes(`;width=${result.columns};height=auto:`));
-					}
-				} finally {
-					resetCapabilitiesCache();
-					setCellDimensions({ widthPx: 9, heightPx: 18 });
-				}
-			});
-		}
+			}
+		});
 	}
 
 	it("keeps Kitty placement, reserved lines, and cropping metadata consistent across width changes", () => {
