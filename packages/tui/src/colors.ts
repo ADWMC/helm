@@ -1,9 +1,5 @@
 import type { RgbColor } from "./terminal-colors.ts";
 
-export interface DefaultColor {
-	readonly kind: "default";
-}
-
 export interface IndexedColor {
 	readonly kind: "indexed";
 	readonly index: number;
@@ -23,7 +19,8 @@ export interface OklchColorValue {
 	readonly h: number;
 }
 
-export type Color = DefaultColor | IndexedColor | RgbColorValue | OklchColorValue;
+/** A concrete color. Every color can be converted to sRGB, so color math never fails. */
+export type Color = IndexedColor | RgbColorValue | OklchColorValue;
 export type TerminalColorMode = "256color" | "truecolor";
 export type ColorMixSpace = "oklch" | "srgb";
 
@@ -46,8 +43,6 @@ export interface TextStyle extends TextAttributes {
 	fg?: Color;
 	bg?: Color;
 }
-
-export const defaultColor: DefaultColor = Object.freeze({ kind: "default" });
 
 function requireFinite(value: number, name: string): void {
 	if (!Number.isFinite(value)) throw new Error(`${name} must be finite`);
@@ -89,7 +84,6 @@ const OKLCH_PATTERN = new RegExp(
 
 export function parseColor(value: string | number): Color {
 	if (typeof value === "number") return indexedColor(value);
-	if (value === "") return defaultColor;
 
 	const hex = /^#([\da-f]{3}|[\da-f]{6})$/i.exec(value);
 	if (hex) {
@@ -236,8 +230,6 @@ function oklchToRgb({ l, c, h }: OklchChannels): RgbColor {
 
 export function colorToRgb(color: Color): RgbColor {
 	switch (color.kind) {
-		case "default":
-			throw new Error("The terminal default color has no concrete RGB value");
 		case "indexed":
 			return indexedToRgb(color.index);
 		case "rgb":
@@ -248,7 +240,6 @@ export function colorToRgb(color: Color): RgbColor {
 }
 
 export function colorToOklch(color: Color): OklchChannels {
-	if (color.kind === "default") throw new Error("The terminal default color has no concrete OKLCH value");
 	if (color.kind === "oklch") return { l: color.l, c: color.c, h: color.h };
 	const lab = rgbToOklab(colorToRgb(color));
 	return {
@@ -323,7 +314,6 @@ function rgbToAnsi256(color: RgbColor): number {
 }
 
 function colorAnsi(color: Color, mode: TerminalColorMode, background: boolean): string {
-	if (color.kind === "default") return background ? "\x1b[49m" : "\x1b[39m";
 	if (color.kind === "indexed") return `\x1b[${background ? 48 : 38};5;${color.index}m`;
 
 	const rgb = colorToRgb(color);
@@ -342,24 +332,35 @@ export function backgroundAnsi(color: Color, mode: TerminalColorMode): string {
 }
 
 export function styleText(text: string, options: TextStyle, mode: TerminalColorMode): string {
-	let prefix = "";
-	let suffix = "";
-	if (options.fg) {
-		prefix += foregroundAnsi(options.fg, mode);
-		suffix = "\x1b[39m";
-	}
-	if (options.bg) {
-		prefix += backgroundAnsi(options.bg, mode);
-		suffix = `\x1b[49m${suffix}`;
-	}
-	return `${prefix}${styleTextAttributes(text, options)}${suffix}`;
+	return styleTextWithAnsi(
+		text,
+		options.fg && foregroundAnsi(options.fg, mode),
+		options.bg && backgroundAnsi(options.bg, mode),
+		options,
+	);
 }
 
-/** Apply text attributes such as bold or italic. Colors in `options` are ignored. */
-export function styleTextAttributes(text: string, options: TextAttributes): string {
+/**
+ * Like `styleText()`, but with precomputed color escape sequences, e.g. cached theme colors.
+ * Colors in `options` are ignored.
+ */
+export function styleTextWithAnsi(
+	text: string,
+	fgAnsi: string | undefined,
+	bgAnsi: string | undefined,
+	options: TextAttributes,
+): string {
 	// Resets are prepended so they close in reverse order of the opening sequences.
 	let prefix = "";
 	let suffix = "";
+	if (fgAnsi) {
+		prefix += fgAnsi;
+		suffix = "\x1b[39m";
+	}
+	if (bgAnsi) {
+		prefix += bgAnsi;
+		suffix = `\x1b[49m${suffix}`;
+	}
 	if (options.bold) prefix += "\x1b[1m";
 	if (options.dim) prefix += "\x1b[2m";
 	if (options.bold || options.dim) suffix = `\x1b[22m${suffix}`;

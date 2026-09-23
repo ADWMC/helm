@@ -14,6 +14,11 @@
 			"pattern": "^[^/]+$",
 			"description": "Theme name. Must not contain '/' because it is reserved for automatic light/dark theme settings."
 		},
+		"appearance": {
+			"type": "string",
+			"enum": ["dark", "light"],
+			"description": "Background the theme is designed for. Detected from the theme colors when omitted."
+		},
 		"vars": {
 			"type": "object",
 			"description": "Reusable color variables",

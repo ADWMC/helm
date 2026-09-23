@@ -93,7 +93,7 @@ return new Text(
 );
 ```
 
-A style color can be a semantic theme token or a concrete `Color`. Access concrete colors through `theme.colors` and use utilities such as `mixColors()` from `@earendil-works/pi-tui` when color math is needed. Pi converts the result to truecolor or 256-color output based on terminal capabilities. Theme tokens are converted once per theme; compute concrete colors outside the render path when possible.
+A style color can be a semantic theme token or a concrete `Color`. Access concrete colors through `theme.colors` and use utilities such as `mixColors()` from `@earendil-works/pi-tui` when color math is needed. Tokens that a theme sets to the terminal default render with the terminal's own color; `theme.colors` reports the color the terminal announced for them, or a guess when it did not. Use `theme.appearance` (`"dark"` or `"light"`) to decide, for example, whether to lighten or darken a color. Pi converts the result to truecolor or 256-color output based on terminal capabilities. Theme tokens are converted once per theme; compute concrete colors outside the render path when possible.
 
 The existing `theme.fg()` and `theme.bg()` helpers remain available for applying one semantic color.
 

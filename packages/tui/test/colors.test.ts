@@ -10,7 +10,7 @@ import {
 	parseColor,
 	rgbColor,
 	styleText,
-	styleTextAttributes,
+	styleTextWithAnsi,
 } from "../src/index.ts";
 
 describe("colors", () => {
@@ -18,6 +18,11 @@ describe("colors", () => {
 		assert.deepStrictEqual(parseColor("#123456"), { kind: "rgb", r: 18, g: 52, b: 86 });
 		assert.deepStrictEqual(parseColor("#abc"), { kind: "rgb", r: 170, g: 187, b: 204 });
 		assert.deepStrictEqual(parseColor("oklch(62% 0.1 200)"), { kind: "oklch", l: 0.62, c: 0.1, h: 200 });
+	});
+
+	it("rejects values that are not concrete colors", () => {
+		assert.throws(() => parseColor(""), /Invalid color value/);
+		assert.throws(() => parseColor("red"), /Invalid color value/);
 	});
 
 	it("converts OKLCH to sRGB with gamut mapping", () => {
@@ -48,8 +53,12 @@ describe("colors", () => {
 
 	it("closes attributes in reverse order", () => {
 		assert.strictEqual(
-			styleTextAttributes("Ready", { bold: true, italic: true, strikethrough: true }),
+			styleTextWithAnsi("Ready", undefined, undefined, { bold: true, italic: true, strikethrough: true }),
 			"\x1b[1m\x1b[3m\x1b[9mReady\x1b[29m\x1b[23m\x1b[22m",
+		);
+		assert.strictEqual(
+			styleTextWithAnsi("Ready", "\x1b[39m", "\x1b[48;5;9m", { bold: true }),
+			"\x1b[39m\x1b[48;5;9m\x1b[1mReady\x1b[22m\x1b[49m\x1b[39m",
 		);
 	});
 

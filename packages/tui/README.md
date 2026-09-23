@@ -84,9 +84,12 @@ Colors are values that can be converted or mixed before terminal rendering:
 
 ```typescript
 import {
+  colorToRgb,
+  foregroundAnsi,
   getTerminalColorMode,
   mixColors,
   parseColor,
+  rgbColor,
   styleText,
 } from "@earendil-works/pi-tui";
 
@@ -101,7 +104,7 @@ const text = styleText(
 );
 ```
 
-`Color` supports terminal defaults, indexed ANSI colors, sRGB, and OKLCH. `styleText()` converts colors to truecolor or 256-color output based on the requested terminal mode.
+`Color` is an indexed ANSI color, an sRGB color, or an OKLCH color. Every color converts to sRGB, so color math such as `mixColors()` always works. Indices 0-15 follow the user's terminal palette, so their sRGB values are approximations. `styleText()` converts colors to truecolor or 256-color output based on the requested terminal mode.
 
 Conversions are not cached. OKLCH colors, especially ones outside the sRGB gamut, are more expensive to convert than sRGB or indexed colors. For colors used on every render, convert once and reuse the result:
 

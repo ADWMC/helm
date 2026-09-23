@@ -18,6 +18,8 @@ const ColorValueSchema = Type.Union([
 const ThemeJsonSchema = Type.Object({
 	$schema: Type.Optional(Type.String()),
 	name: Type.String(),
+	// Background the theme is designed for. Detected from the theme colors when omitted.
+	appearance: Type.Optional(Type.Union([Type.Literal("dark"), Type.Literal("light")])),
 	vars: Type.Optional(Type.Record(Type.String(), ColorValueSchema)),
 	colors: Type.Object({
 		// Core UI (11 colors)
