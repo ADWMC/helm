@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { resetCapabilitiesCache, setCapabilities, styleText } from "@earendil-works/pi-tui";
 import { afterEach, describe, expect, it } from "vitest";
-import { initTheme, loadThemeFromPath, style, type ThemeToken, theme } from "../src/modes/interactive/theme/theme.ts";
+import { initTheme, loadThemeFromPath, type ThemeToken, theme } from "../src/modes/interactive/theme/theme.ts";
 
 const tempDirs: string[] = [];
 
@@ -17,12 +17,14 @@ describe("theme styles", () => {
 		setCapabilities({ images: null, trueColor: true, hyperlinks: false });
 		initTheme("dark");
 
-		expect(style("Ready", { fg: "toolSuccessBg" })).toBe(style("Ready", { fg: theme.colors.toolSuccessBg }));
+		expect(theme.style("Ready", { fg: "toolSuccessBg" })).toBe(
+			theme.style("Ready", { fg: theme.colors.toolSuccessBg }),
+		);
 		expect(theme.style("Ready", { fg: "success", bg: "toolSuccessBg", bold: true })).toContain("Ready");
 	});
 
 	it("renders theme tokens the same as the generic text styler", () => {
-		for (const mode of ["truecolor", "256color", "16color", "none"] as const) {
+		for (const mode of ["truecolor", "256color"] as const) {
 			const loaded = loadThemeFromPath(
 				new URL("../src/modes/interactive/theme/dark.json", import.meta.url).pathname,
 				mode,
@@ -37,19 +39,11 @@ describe("theme styles", () => {
 		}
 	});
 
-	it("emits no escape sequences but still validates tokens in none mode", () => {
+	it("rejects unknown style tokens", () => {
 		const loaded = loadThemeFromPath(
 			new URL("../src/modes/interactive/theme/dark.json", import.meta.url).pathname,
-			"none",
+			"truecolor",
 		);
-
-		expect(loaded.style("Ready", { fg: "success", bg: "toolSuccessBg", bold: true })).toBe("Ready");
-		expect(loaded.bold("Ready")).toBe("Ready");
-		expect(loaded.italic("Ready")).toBe("Ready");
-		expect(loaded.underline("Ready")).toBe("Ready");
-		expect(loaded.inverse("Ready")).toBe("Ready");
-		expect(loaded.strikethrough("Ready")).toBe("Ready");
-
 		const unknownToken = "notAToken" as unknown as ThemeToken;
 		expect(() => loaded.style("Ready", { fg: unknownToken })).toThrow("Unknown theme color: notAToken");
 		expect(() => loaded.style("Ready", { bg: unknownToken })).toThrow("Unknown theme color: notAToken");

@@ -222,7 +222,6 @@ describe("detectCapabilities", () => {
 			const caps = detectCapabilities();
 			assert.strictEqual(caps.hyperlinks, false);
 			assert.strictEqual(caps.images, null);
-			assert.strictEqual(caps.colorMode, undefined);
 			assert.strictEqual(getTerminalColorMode(caps), "256color");
 		});
 	});
@@ -458,20 +457,6 @@ describe("detectCapabilities", () => {
 	it("detects truecolor from direct-color TERM values", () => {
 		withEnv({ TERM: "xterm-direct" }, () => {
 			assert.strictEqual(getTerminalColorMode(detectCapabilities()), "truecolor");
-		});
-	});
-
-	it("derives trueColor from an explicit colorMode override", () => {
-		withEnv({ TERM_PROGRAM: "kitty" }, () => {
-			setCapabilityOverrides({ colorMode: "16color" });
-			try {
-				const caps = getCapabilities();
-				assert.strictEqual(caps.trueColor, false);
-				assert.strictEqual(getTerminalColorMode(caps), "16color");
-			} finally {
-				setCapabilityOverrides({});
-				resetCapabilitiesCache();
-			}
 		});
 	});
 });

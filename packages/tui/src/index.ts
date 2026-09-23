@@ -27,7 +27,6 @@ export {
 	type OklchColorValue,
 	oklchColor,
 	parseColor,
-	type RgbChannels,
 	type RgbColorValue,
 	rgbColor,
 	styleText,

@@ -1,3 +1,5 @@
+import type { RgbColor } from "./terminal-colors.ts";
+
 export interface DefaultColor {
 	readonly kind: "default";
 }
@@ -22,14 +24,8 @@ export interface OklchColorValue {
 }
 
 export type Color = DefaultColor | IndexedColor | RgbColorValue | OklchColorValue;
-export type TerminalColorMode = "none" | "16color" | "256color" | "truecolor";
+export type TerminalColorMode = "256color" | "truecolor";
 export type ColorMixSpace = "oklch" | "srgb";
-
-export interface RgbChannels {
-	r: number;
-	g: number;
-	b: number;
-}
 
 export interface OklchChannels {
 	l: number;
@@ -114,7 +110,7 @@ export function parseColor(value: string | number): Color {
 	throw new Error(`Invalid color value: ${value}`);
 }
 
-const BASIC_COLORS: readonly RgbChannels[] = [
+const BASIC_COLORS: readonly RgbColor[] = [
 	{ r: 0, g: 0, b: 0 },
 	{ r: 128, g: 0, b: 0 },
 	{ r: 0, g: 128, b: 0 },
@@ -135,7 +131,7 @@ const BASIC_COLORS: readonly RgbChannels[] = [
 const CUBE_VALUES = [0, 95, 135, 175, 215, 255] as const;
 const GRAY_VALUES = Array.from({ length: 24 }, (_, index) => 8 + index * 10);
 
-function indexedToRgb(index: number): RgbChannels {
+function indexedToRgb(index: number): RgbColor {
 	if (index < 16) return { ...BASIC_COLORS[index] };
 	if (index < 232) {
 		const cubeIndex = index - 16;
@@ -169,7 +165,7 @@ interface LinearRgbChannels {
 	b: number;
 }
 
-function rgbToOklab({ r, g, b }: RgbChannels): OklabChannels {
+function rgbToOklab({ r, g, b }: RgbColor): OklabChannels {
 	const linearR = srgbToLinear(r / 255);
 	const linearG = srgbToLinear(g / 255);
 	const linearB = srgbToLinear(b / 255);
@@ -202,7 +198,7 @@ function isInSrgbGamut({ r, g, b }: LinearRgbChannels): boolean {
 	return r >= -epsilon && r <= 1 + epsilon && g >= -epsilon && g <= 1 + epsilon && b >= -epsilon && b <= 1 + epsilon;
 }
 
-function linearRgbToChannels({ r, g, b }: LinearRgbChannels): RgbChannels {
+function linearRgbToChannels({ r, g, b }: LinearRgbChannels): RgbColor {
 	return {
 		r: Math.round(Math.max(0, Math.min(1, linearToSrgb(r))) * 255),
 		g: Math.round(Math.max(0, Math.min(1, linearToSrgb(g))) * 255),
@@ -210,7 +206,7 @@ function linearRgbToChannels({ r, g, b }: LinearRgbChannels): RgbChannels {
 	};
 }
 
-function oklchToRgb({ l, c, h }: OklchChannels): RgbChannels {
+function oklchToRgb({ l, c, h }: OklchChannels): RgbColor {
 	// Gamut mapping keeps the hue fixed, so its direction is computed once and scaled by chroma.
 	const radians = (h * Math.PI) / 180;
 	const cos = Math.cos(radians);
@@ -238,7 +234,7 @@ function oklchToRgb({ l, c, h }: OklchChannels): RgbChannels {
 	return linearRgbToChannels(linear);
 }
 
-export function colorToRgb(color: Color): RgbChannels {
+export function colorToRgb(color: Color): RgbColor {
 	switch (color.kind) {
 		case "default":
 			throw new Error("The terminal default color has no concrete RGB value");
@@ -299,14 +295,14 @@ function findClosest(values: readonly number[], target: number): number {
 	return closestIndex;
 }
 
-function colorDistance(first: RgbChannels, second: RgbChannels): number {
+function colorDistance(first: RgbColor, second: RgbColor): number {
 	const dr = first.r - second.r;
 	const dg = first.g - second.g;
 	const db = first.b - second.b;
 	return dr * dr * 0.299 + dg * dg * 0.587 + db * db * 0.114;
 }
 
-function rgbToAnsi256(color: RgbChannels): number {
+function rgbToAnsi256(color: RgbColor): number {
 	const rIndex = findClosest(CUBE_VALUES, color.r);
 	const gIndex = findClosest(CUBE_VALUES, color.g);
 	const bIndex = findClosest(CUBE_VALUES, color.b);
@@ -326,44 +322,15 @@ function rgbToAnsi256(color: RgbChannels): number {
 	return cubeIndex;
 }
 
-const BASIC_COLORS_OKLAB = BASIC_COLORS.map(rgbToOklab);
-
-function rgbToAnsi16(color: RgbChannels): number {
-	const target = rgbToOklab(color);
-	let closestIndex = 0;
-	let closestDistance = Infinity;
-	for (let index = 0; index < BASIC_COLORS_OKLAB.length; index++) {
-		const candidate = BASIC_COLORS_OKLAB[index];
-		const distance = (target.l - candidate.l) ** 2 + (target.a - candidate.a) ** 2 + (target.b - candidate.b) ** 2;
-		if (distance < closestDistance) {
-			closestIndex = index;
-			closestDistance = distance;
-		}
-	}
-	return closestIndex;
-}
-
-function basicAnsi(index: number, background: boolean): string {
-	const base = background ? (index < 8 ? 40 : 100) : index < 8 ? 30 : 90;
-	return `\x1b[${base + (index % 8)}m`;
-}
-
 function colorAnsi(color: Color, mode: TerminalColorMode, background: boolean): string {
-	if (mode === "none") return "";
 	if (color.kind === "default") return background ? "\x1b[49m" : "\x1b[39m";
-
-	if (color.kind === "indexed" && mode !== "16color") {
-		return `\x1b[${background ? 48 : 38};5;${color.index}m`;
-	}
+	if (color.kind === "indexed") return `\x1b[${background ? 48 : 38};5;${color.index}m`;
 
 	const rgb = colorToRgb(color);
 	if (mode === "truecolor") {
 		return `\x1b[${background ? 48 : 38};2;${Math.round(rgb.r)};${Math.round(rgb.g)};${Math.round(rgb.b)}m`;
 	}
-	if (mode === "256color") {
-		return `\x1b[${background ? 48 : 38};5;${rgbToAnsi256(rgb)}m`;
-	}
-	return basicAnsi(color.kind === "indexed" && color.index < 16 ? color.index : rgbToAnsi16(rgb), background);
+	return `\x1b[${background ? 48 : 38};5;${rgbToAnsi256(rgb)}m`;
 }
 
 export function foregroundAnsi(color: Color, mode: TerminalColorMode): string {
@@ -375,8 +342,6 @@ export function backgroundAnsi(color: Color, mode: TerminalColorMode): string {
 }
 
 export function styleText(text: string, options: TextStyle, mode: TerminalColorMode): string {
-	if (mode === "none") return text;
-
 	let prefix = "";
 	let suffix = "";
 	if (options.fg) {
@@ -387,13 +352,11 @@ export function styleText(text: string, options: TextStyle, mode: TerminalColorM
 		prefix += backgroundAnsi(options.bg, mode);
 		suffix = `\x1b[49m${suffix}`;
 	}
-	return `${prefix}${styleTextAttributes(text, options, mode)}${suffix}`;
+	return `${prefix}${styleTextAttributes(text, options)}${suffix}`;
 }
 
 /** Apply text attributes such as bold or italic. Colors in `options` are ignored. */
-export function styleTextAttributes(text: string, options: TextAttributes, mode: TerminalColorMode): string {
-	if (mode === "none") return text;
-
+export function styleTextAttributes(text: string, options: TextAttributes): string {
 	// Resets are prepended so they close in reverse order of the opening sequences.
 	let prefix = "";
 	let suffix = "";

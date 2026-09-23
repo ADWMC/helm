@@ -115,9 +115,6 @@ export interface ThemeStyle extends TextAttributes {
 	bg?: ThemeToken | Color;
 }
 
-/** A theme JSON color value or a concrete color, as accepted by the `Theme` constructor. */
-export type ThemeColorInput = ColorValue | Color;
-
 type OptionalThemeColor = "scrollbarTrack" | "scrollbarThumb" | "thinkingMax" | "searchMatchText";
 type OptionalThemeBg = "searchMatchBg";
 
@@ -186,10 +183,10 @@ export class Theme {
 	private readonly bgAnsi = new Map<ThemeToken, string>();
 
 	constructor(
-		fgColors: Record<Exclude<ThemeColor, OptionalThemeColor>, ThemeColorInput> &
-			Partial<Record<OptionalThemeColor, ThemeColorInput>>,
-		bgColors: Record<Exclude<ThemeBg, OptionalThemeBg>, ThemeColorInput> &
-			Partial<Record<OptionalThemeBg, ThemeColorInput>>,
+		fgColors: Record<Exclude<ThemeColor, OptionalThemeColor>, string | number> &
+			Partial<Record<OptionalThemeColor, string | number>>,
+		bgColors: Record<Exclude<ThemeBg, OptionalThemeBg>, string | number> &
+			Partial<Record<OptionalThemeBg, string | number>>,
 		mode: TerminalColorMode,
 		options: { name?: string; sourcePath?: string; sourceInfo?: SourceInfo } = {},
 	) {
@@ -205,10 +202,10 @@ export class Theme {
 			searchMatchText: fgColors.searchMatchText ?? fgColors.text,
 			...bgColors,
 			searchMatchBg: bgColors.searchMatchBg ?? bgColors.selectedBg,
-		} as Record<ThemeToken, ThemeColorInput>;
+		} as Record<ThemeToken, string | number>;
 		const colors = {} as Record<ThemeToken, Color>;
-		for (const [token, value] of Object.entries(values) as [ThemeToken, ThemeColorInput][]) {
-			const color = typeof value === "object" ? value : parseColor(value);
+		for (const [token, value] of Object.entries(values) as [ThemeToken, string | number][]) {
+			const color = parseColor(value);
 			colors[token] = color;
 			this.fgAnsi.set(token, foregroundAnsi(color, mode));
 			this.bgAnsi.set(token, backgroundAnsi(color, mode));
@@ -228,19 +225,17 @@ export class Theme {
 			prefix += typeof bg === "string" ? this.tokenAnsi(this.bgAnsi, bg) : backgroundAnsi(bg, this.mode);
 			suffix = `\x1b[49m${suffix}`;
 		}
-		// Tokens are resolved above so unknown tokens fail in every mode, including "none".
-		if (this.mode === "none") return text;
-		return `${prefix}${styleTextAttributes(text, options, this.mode)}${suffix}`;
+		return `${prefix}${styleTextAttributes(text, options)}${suffix}`;
 	}
 
 	fg(color: ThemeColor, text: string): string {
 		const ansi = this.tokenAnsi(this.fgAnsi, color);
-		return this.mode === "none" ? text : `${ansi}${text}\x1b[39m`;
+		return `${ansi}${text}\x1b[39m`;
 	}
 
 	bg(color: ThemeBg, text: string): string {
 		const ansi = this.tokenAnsi(this.bgAnsi, color);
-		return this.mode === "none" ? text : `${ansi}${text}\x1b[49m`;
+		return `${ansi}${text}\x1b[49m`;
 	}
 
 	private tokenAnsi(ansi: Map<ThemeToken, string>, token: ThemeToken): string {
@@ -250,23 +245,23 @@ export class Theme {
 	}
 
 	bold(text: string): string {
-		return this.mode === "none" ? text : chalk.bold(text);
+		return chalk.bold(text);
 	}
 
 	italic(text: string): string {
-		return this.mode === "none" ? text : chalk.italic(text);
+		return chalk.italic(text);
 	}
 
 	underline(text: string): string {
-		return this.mode === "none" ? text : chalk.underline(text);
+		return chalk.underline(text);
 	}
 
 	inverse(text: string): string {
-		return this.mode === "none" ? text : chalk.inverse(text);
+		return chalk.inverse(text);
 	}
 
 	strikethrough(text: string): string {
-		return this.mode === "none" ? text : chalk.strikethrough(text);
+		return chalk.strikethrough(text);
 	}
 
 	getFgAnsi(color: ThemeColor): string {
@@ -662,11 +657,6 @@ export const theme: Theme = new Proxy({} as Theme, {
 		return (t as unknown as Record<string | symbol, unknown>)[prop];
 	},
 });
-
-/** Style text with colors from the active theme. */
-export function style(text: string, options: ThemeStyle): string {
-	return theme.style(text, options);
-}
 
 function setGlobalTheme(t: Theme): void {
 	(globalThis as Record<symbol, Theme>)[THEME_KEY] = t;

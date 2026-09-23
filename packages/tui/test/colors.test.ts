@@ -36,9 +36,7 @@ describe("colors", () => {
 	it("serializes colors for terminal color modes", () => {
 		assert.strictEqual(foregroundAnsi(rgbColor(18, 52, 86), "truecolor"), "\x1b[38;2;18;52;86m");
 		assert.match(foregroundAnsi(rgbColor(18, 52, 86), "256color"), /^\x1b\[38;5;\d+m$/);
-		assert.match(foregroundAnsi(rgbColor(18, 52, 86), "16color"), /^\x1b\[(?:3\d|9\d)m$/);
 		assert.strictEqual(backgroundAnsi(indexedColor(9), "truecolor"), "\x1b[48;5;9m");
-		assert.strictEqual(foregroundAnsi(rgbColor(18, 52, 86), "none"), "");
 	});
 
 	it("applies a complete text style", () => {
@@ -46,24 +44,17 @@ describe("colors", () => {
 			styleText("Ready", { fg: rgbColor(18, 52, 86), bg: indexedColor(9), bold: true }, "truecolor"),
 			"\x1b[38;2;18;52;86m\x1b[48;5;9m\x1b[1mReady\x1b[22m\x1b[49m\x1b[39m",
 		);
-		assert.strictEqual(styleText("Ready", { fg: rgbColor(18, 52, 86), bold: true }, "none"), "Ready");
 	});
 
 	it("closes attributes in reverse order", () => {
 		assert.strictEqual(
-			styleTextAttributes("Ready", { bold: true, italic: true, strikethrough: true }, "truecolor"),
+			styleTextAttributes("Ready", { bold: true, italic: true, strikethrough: true }),
 			"\x1b[1m\x1b[3m\x1b[9mReady\x1b[29m\x1b[23m\x1b[22m",
 		);
-		assert.strictEqual(styleTextAttributes("Ready", { bold: true }, "none"), "Ready");
 	});
 
 	it("gamut-maps OKLCH colors at the lightness limits to achromatic colors", () => {
 		assert.deepStrictEqual(colorToRgb(oklchColor(1, 0.3, 150)), { r: 255, g: 255, b: 255 });
 		assert.deepStrictEqual(colorToRgb(oklchColor(0, 0.3, 150)), { r: 0, g: 0, b: 0 });
-	});
-
-	it("maps colors to the basic 16-color palette", () => {
-		assert.strictEqual(foregroundAnsi(rgbColor(250, 5, 5), "16color"), "\x1b[91m");
-		assert.strictEqual(backgroundAnsi(rgbColor(0, 0, 120), "16color"), "\x1b[44m");
 	});
 });

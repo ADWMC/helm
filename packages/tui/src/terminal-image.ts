@@ -10,11 +10,6 @@ export interface TerminalCapabilities {
 	images: ImageProtocol;
 	trueColor: boolean;
 	hyperlinks: boolean;
-	/**
-	 * Explicit color mode. Detection never sets this; when omitted, the mode is
-	 * `truecolor` or `256color` depending on `trueColor`.
-	 */
-	colorMode?: TerminalColorMode;
 }
 
 export interface CellDimensions {
@@ -169,16 +164,13 @@ export function getCapabilities(): TerminalCapabilities {
 		cachedCapabilities = {
 			...detectCapabilities(hyperlinks === undefined ? undefined : () => hyperlinks),
 			...capabilityOverrides,
-			...(capabilityOverrides.colorMode !== undefined && capabilityOverrides.trueColor === undefined
-				? { trueColor: capabilityOverrides.colorMode === "truecolor" }
-				: {}),
 		};
 	}
 	return cachedCapabilities;
 }
 
 export function getTerminalColorMode(capabilities: TerminalCapabilities = getCapabilities()): TerminalColorMode {
-	return capabilities.colorMode ?? (capabilities.trueColor ? "truecolor" : "256color");
+	return capabilities.trueColor ? "truecolor" : "256color";
 }
 
 export function resetCapabilitiesCache(): void {
@@ -190,8 +182,7 @@ export function setCapabilityOverrides(overrides: Partial<TerminalCapabilities>)
 	if (
 		capabilityOverrides.images === overrides.images &&
 		capabilityOverrides.trueColor === overrides.trueColor &&
-		capabilityOverrides.hyperlinks === overrides.hyperlinks &&
-		capabilityOverrides.colorMode === overrides.colorMode
+		capabilityOverrides.hyperlinks === overrides.hyperlinks
 	) {
 		return;
 	}

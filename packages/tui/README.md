@@ -101,7 +101,7 @@ const text = styleText(
 );
 ```
 
-`Color` supports terminal defaults, indexed ANSI colors, sRGB, and OKLCH. `styleText()` converts colors to truecolor, 256-color, basic ANSI, or uncolored output based on the requested terminal mode.
+`Color` supports terminal defaults, indexed ANSI colors, sRGB, and OKLCH. `styleText()` converts colors to truecolor or 256-color output based on the requested terminal mode.
 
 Conversions are not cached. OKLCH colors, especially ones outside the sRGB gamut, are more expensive to convert than sRGB or indexed colors. For colors used on every render, convert once and reuse the result:
 

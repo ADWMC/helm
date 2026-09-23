@@ -450,11 +450,9 @@ export {
 	getSettingsListTheme,
 	highlightCode,
 	initTheme,
-	style,
 	Theme,
 	type ThemeBg,
 	type ThemeColor,
-	type ThemeColorInput,
 	type ThemeStyle,
 	type ThemeToken,
 } from "./modes/interactive/theme/theme.ts";
