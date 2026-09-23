@@ -622,6 +622,107 @@ describe("Kitty image cursor movement", () => {
 	});
 });
 
+// Regression coverage for #8938: round Kitty placements without shrinking iTerm2 reservations.
+describe("image row rounding", () => {
+	const cases = [
+		{ name: "original banner", width: 615, height: 86, columns: 60, kittyRows: 4, iterm2Rows: 5 },
+		{ name: "below half a row", width: 1200, height: 98, columns: 60, kittyRows: 2, iterm2Rows: 3 },
+		{ name: "exactly half a row", width: 1200, height: 100, columns: 60, kittyRows: 3, iterm2Rows: 3 },
+		{ name: "above half a row", width: 1200, height: 102, columns: 60, kittyRows: 3, iterm2Rows: 3 },
+		{ name: "less than one row", width: 1200, height: 12, columns: 60, kittyRows: 1, iterm2Rows: 1 },
+		{ name: "height-limited image", width: 800, height: 600, columns: 22, kittyRows: 8, iterm2Rows: 8 },
+	];
+	for (const protocol of ["kitty", "iterm2"] as const) {
+		for (const testCase of cases) {
+			it(`${protocol}: ${testCase.name}`, () => {
+				setCapabilities({ images: protocol, trueColor: true, hyperlinks: true });
+				setCellDimensions({ widthPx: 9, heightPx: 18 });
+				try {
+					const result = renderImage(
+						"AAAA",
+						{ widthPx: testCase.width, heightPx: testCase.height },
+						{ maxWidthCells: 60, maxHeightCells: 8 },
+					);
+					assert.ok(result);
+					const expectedRows = protocol === "kitty" ? testCase.kittyRows : testCase.iterm2Rows;
+					assert.strictEqual(result.rows, expectedRows);
+					assert.strictEqual(result.columns, testCase.columns);
+					if (protocol === "kitty") {
+						assert.ok(result.sequence.includes(`,c=${result.columns},r=${expectedRows};`));
+					} else {
+						assert.ok(result.sequence.includes(`;width=${result.columns};height=auto:`));
+					}
+				} finally {
+					resetCapabilitiesCache();
+					setCellDimensions({ widthPx: 9, heightPx: 18 });
+				}
+			});
+		}
+	}
+
+	it("keeps Kitty placement, reserved lines, and cropping metadata consistent across width changes", () => {
+		setCapabilities({ images: "kitty", trueColor: true, hyperlinks: true });
+		setCellDimensions({ widthPx: 9, heightPx: 18 });
+		try {
+			const image = new Image(
+				"AAAA",
+				"image/png",
+				{ fallbackColor: (value) => value },
+				{ maxWidthCells: 60, imageId: 8938 },
+				{ widthPx: 615, heightPx: 86 },
+			);
+			const lines = image.render(62);
+			assert.strictEqual(lines.length, 4);
+			assert.deepStrictEqual(lines.slice(1), ["", "", ""]);
+			assert.ok(lines[0].includes(",c=60,r=4,i=8938;"));
+			assert.deepStrictEqual(getKittyImageMetadata(lines[0]), {
+				imageId: 8938,
+				columns: 60,
+				rows: 4,
+				widthPx: 615,
+				heightPx: 86,
+			});
+			const cropped = cropKittyImageLine(lines[0], 1, 2);
+			assert.strictEqual(
+				getKittyImagePlacement(cropped)?.sequence,
+				"\x1b_Ga=p,q=2,C=1,c=60,i=8938,y=21,h=44,r=2\x1b\\",
+			);
+
+			const narrowerLines = image.render(32);
+			assert.strictEqual(narrowerLines.length, 2);
+			assert.ok(narrowerLines[0].includes(",c=30,r=2,i=8938;"));
+			assert.strictEqual(getKittyImageMetadata(narrowerLines[0])?.rows, 2);
+		} finally {
+			resetCapabilitiesCache();
+			setCellDimensions({ widthPx: 9, heightPx: 18 });
+		}
+	});
+
+	it("keeps iTerm2's ceiling-based reserved lines and cursor offset", () => {
+		setCapabilities({ images: "iterm2", trueColor: true, hyperlinks: true });
+		setCellDimensions({ widthPx: 9, heightPx: 18 });
+		try {
+			const image = new Image(
+				"AAAA",
+				"image/png",
+				{ fallbackColor: (value) => value },
+				{ maxWidthCells: 60 },
+				{ widthPx: 615, heightPx: 86 },
+			);
+			assert.deepStrictEqual(image.render(62), [
+				"",
+				"",
+				"",
+				"",
+				"\x1b[4A\x1b]1337;File=inline=1;size=3;width=60;height=auto:AAAA\x07",
+			]);
+		} finally {
+			resetCapabilitiesCache();
+			setCellDimensions({ widthPx: 9, heightPx: 18 });
+		}
+	});
+});
+
 describe("imageFallback", () => {
 	it("shortens home-prefixed absolute paths without hyperlinks", () => {
 		setCapabilities({ images: null, trueColor: false, hyperlinks: false });

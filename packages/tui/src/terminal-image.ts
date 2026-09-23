@@ -437,6 +437,7 @@ export function calculateImageCellSize(
 	maxWidthCells: number,
 	maxHeightCells?: number,
 	cellDimensions: CellDimensions = { widthPx: 9, heightPx: 18 },
+	rowRounding: "ceil" | "round" = "ceil",
 ): ImageCellSize {
 	const maxWidth = Math.max(1, Math.floor(maxWidthCells));
 	const maxHeight = maxHeightCells === undefined ? undefined : Math.max(1, Math.floor(maxHeightCells));
@@ -450,7 +451,8 @@ export function calculateImageCellSize(
 	const scaledWidthPx = imageWidth * scale;
 	const scaledHeightPx = imageHeight * scale;
 	const columns = Math.ceil(scaledWidthPx / cellDimensions.widthPx);
-	const rows = Math.ceil(scaledHeightPx / cellDimensions.heightPx);
+	const heightRows = scaledHeightPx / cellDimensions.heightPx;
+	const rows = rowRounding === "round" ? Math.round(heightRows) : Math.ceil(heightRows);
 
 	return {
 		columns: Math.max(1, Math.min(maxWidth, columns)),
@@ -619,7 +621,15 @@ export function renderImage(
 	}
 
 	const maxWidth = options.maxWidthCells ?? 80;
-	const size = calculateImageCellSize(imageDimensions, maxWidth, options.maxHeightCells, getCellDimensions());
+	// Kitty places into an explicit cell rectangle; nearest rows reduce stretching.
+	// iTerm2 uses automatic pixel height and still needs ceiling-based row reservation.
+	const size = calculateImageCellSize(
+		imageDimensions,
+		maxWidth,
+		options.maxHeightCells,
+		getCellDimensions(),
+		caps.images === "kitty" ? "round" : "ceil",
+	);
 
 	if (caps.images === "kitty") {
 		if (options.imageId !== undefined) {
