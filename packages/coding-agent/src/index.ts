@@ -451,6 +451,7 @@ export {
 	highlightCode,
 	initTheme,
 	Theme,
+	type ThemeAppearance,
 	type ThemeBg,
 	type ThemeColor,
 	type ThemeStyle,

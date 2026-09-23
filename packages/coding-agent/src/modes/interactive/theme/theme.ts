@@ -175,7 +175,7 @@ function withThemeColorFallbacks(colors: ThemeJson["colors"]): ThemeJson["colors
 // ============================================================================
 
 /** The background a theme is designed for. */
-export type ThemeAppearance = "dark" | "light";
+export type ThemeAppearance = TerminalTheme;
 
 interface TerminalDefaultColors {
 	foreground?: Color;

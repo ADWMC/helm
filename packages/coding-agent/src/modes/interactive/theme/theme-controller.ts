@@ -25,6 +25,8 @@ export class InteractiveThemeController {
 	private readonly onChanged: () => void;
 	private currentThemeSetting: string | undefined;
 	private terminalTheme: TerminalTheme = detectTerminalBackgroundFromEnv().theme;
+	// Last reported default colors; a query that times out keeps them instead of erasing them.
+	private terminalColors: { foreground?: RgbColor; background?: RgbColor } = {};
 	private activeThemeName: string | undefined;
 	private autoSyncEnabled = false;
 	private terminalColorSchemeUnsubscribe: (() => void) | undefined;
@@ -157,7 +159,11 @@ export class InteractiveThemeController {
 		const foreground = this.ui.queryTerminalForegroundColor({ timeoutMs });
 		const background = this.ui.queryTerminalBackgroundColor({ timeoutMs });
 		void Promise.all([foreground, background]).then(([foregroundColor, backgroundColor]) => {
-			setTerminalDefaultColors({ foreground: foregroundColor, background: backgroundColor });
+			this.terminalColors = {
+				foreground: foregroundColor ?? this.terminalColors.foreground,
+				background: backgroundColor ?? this.terminalColors.background,
+			};
+			setTerminalDefaultColors(this.terminalColors);
 			this.ui.invalidate();
 			this.ui.requestRender();
 		});
