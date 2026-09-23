@@ -10,7 +10,10 @@ export interface TerminalCapabilities {
 	images: ImageProtocol;
 	trueColor: boolean;
 	hyperlinks: boolean;
-	/** Detailed color support. Omitted capability objects retain the legacy truecolor/256-color behavior. */
+	/**
+	 * Explicit color mode. Detection never sets this; when omitted, the mode is
+	 * `truecolor` or `256color` depending on `trueColor`.
+	 */
 	colorMode?: TerminalColorMode;
 }
 
@@ -76,75 +79,63 @@ function detectCapabilitiesFromEnvironment(tmuxForwardsHyperlink: () => boolean)
 	const colorTerm = process.env.COLORTERM?.toLowerCase() || "";
 	const hasTrueColorHint = colorTerm === "truecolor" || colorTerm === "24bit" || term.endsWith("-direct");
 	const isWindowsConsole = process.platform === "win32";
-	const capabilities = (images: ImageProtocol, trueColor: boolean, hyperlinks: boolean): TerminalCapabilities => ({
-		images,
-		trueColor,
-		hyperlinks,
-		colorMode: trueColor
-			? "truecolor"
-			: term === "dumb"
-				? "none"
-				: term === "" || term.includes("256color")
-					? "256color"
-					: "16color",
-	});
 
 	// Emit OSC 8 hyperlinks only when tmux confirms it forwards.
 	// Image protocols are unreliable under tmux, so leave `images: null`.
 	if (process.env.TMUX || term.startsWith("tmux")) {
-		return capabilities(null, hasTrueColorHint, tmuxForwardsHyperlink());
+		return { images: null, trueColor: hasTrueColorHint, hyperlinks: tmuxForwardsHyperlink() };
 	}
 
 	// screen does not forward OSC 8 hyperlinks, so keep them off there.
 	if (term.startsWith("screen")) {
-		return capabilities(null, hasTrueColorHint, false);
+		return { images: null, trueColor: hasTrueColorHint, hyperlinks: false };
 	}
 
 	if (process.env.KITTY_WINDOW_ID || termProgram === "kitty") {
-		return capabilities("kitty", true, true);
+		return { images: "kitty", trueColor: true, hyperlinks: true };
 	}
 
 	if (termProgram === "ghostty" || term.includes("ghostty") || process.env.GHOSTTY_RESOURCES_DIR) {
-		return capabilities("kitty", true, true);
+		return { images: "kitty", trueColor: true, hyperlinks: true };
 	}
 
 	if (process.env.WEZTERM_PANE || termProgram === "wezterm") {
-		return capabilities("kitty", true, true);
+		return { images: "kitty", trueColor: true, hyperlinks: true };
 	}
 
 	// Warp supports the Kitty graphics protocol and OSC 8 hyperlinks.
 	if (termProgram === "warpterminal" || process.env.WARP_SESSION_ID || process.env.WARP_TERMINAL_SESSION_UUID) {
-		return capabilities("kitty", true, true);
+		return { images: "kitty", trueColor: true, hyperlinks: true };
 	}
 
 	if (process.env.ITERM_SESSION_ID || termProgram === "iterm.app") {
-		return capabilities("iterm2", true, true);
+		return { images: "iterm2", trueColor: true, hyperlinks: true };
 	}
 
 	if (process.env.WT_SESSION) {
-		return capabilities(null, true, true);
+		return { images: null, trueColor: true, hyperlinks: true };
 	}
 
 	if (termProgram === "alacritty" || termProgram === "vscode" || termProgram === "zed") {
-		return capabilities(null, true, true);
+		return { images: null, trueColor: true, hyperlinks: true };
 	}
 
 	if (terminalEmulator === "jetbrains-jediterm") {
-		return capabilities(null, true, false);
+		return { images: null, trueColor: true, hyperlinks: false };
 	}
 
 	// Windows Terminal does not always set WT_SESSION, for example when it hosts
 	// a cmd.exe launched directly from Win+R. Modern Windows consoles support
 	// truecolor; keep hyperlinks off unless we positively detected support above.
 	if (isWindowsConsole) {
-		return capabilities(null, true, false);
+		return { images: null, trueColor: true, hyperlinks: false };
 	}
 
 	// Unknown terminal: be conservative. OSC 8 is rendered invisibly as "just
 	// text" on terminals that swallow it, which means the URL disappears from
 	// the rendered output. Default to the legacy `text (url)` behavior unless we
 	// have positively identified a hyperlink-capable terminal above.
-	return capabilities(null, hasTrueColorHint, false);
+	return { images: null, trueColor: hasTrueColorHint, hyperlinks: false };
 }
 
 function parseBooleanCapabilityOverride(value: string | undefined): boolean | undefined {
@@ -167,7 +158,7 @@ export function detectCapabilities(tmuxForwardsHyperlink: () => boolean = probeT
 	return {
 		...detected,
 		...(images !== undefined ? { images } : {}),
-		...(trueColor !== undefined ? { trueColor, colorMode: trueColor ? "truecolor" : "256color" } : {}),
+		...(trueColor !== undefined ? { trueColor } : {}),
 		...(hyperlinks !== undefined ? { hyperlinks } : {}),
 	};
 }
@@ -178,8 +169,8 @@ export function getCapabilities(): TerminalCapabilities {
 		cachedCapabilities = {
 			...detectCapabilities(hyperlinks === undefined ? undefined : () => hyperlinks),
 			...capabilityOverrides,
-			...(capabilityOverrides.trueColor !== undefined && capabilityOverrides.colorMode === undefined
-				? { colorMode: capabilityOverrides.trueColor ? "truecolor" : "256color" }
+			...(capabilityOverrides.colorMode !== undefined && capabilityOverrides.trueColor === undefined
+				? { trueColor: capabilityOverrides.colorMode === "truecolor" }
 				: {}),
 		};
 	}

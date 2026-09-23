@@ -18,6 +18,7 @@ import {
 	getCapabilities,
 	getKittyImageMetadata,
 	getKittyImagePlacement,
+	getTerminalColorMode,
 	hyperlink,
 	imageFallback,
 	isImageLine,
@@ -221,20 +222,21 @@ describe("detectCapabilities", () => {
 			const caps = detectCapabilities();
 			assert.strictEqual(caps.hyperlinks, false);
 			assert.strictEqual(caps.images, null);
-			assert.strictEqual(caps.colorMode, "256color");
+			assert.strictEqual(caps.colorMode, undefined);
+			assert.strictEqual(getTerminalColorMode(caps), "256color");
 		});
 	});
 
 	it("applies environment overrides", () => {
 		assert.deepStrictEqual(
 			withEnv({ PI_HYPERLINKS: "1", PI_IMAGE_PROTOCOL: "kitty", PI_TRUE_COLOR: "1" }, () => detectCapabilities()),
-			{ images: "kitty", trueColor: true, hyperlinks: true, colorMode: "truecolor" },
+			{ images: "kitty", trueColor: true, hyperlinks: true },
 		);
 		assert.deepStrictEqual(
 			withEnv({ TERM_PROGRAM: "iterm.app", PI_HYPERLINKS: "0", PI_IMAGE_PROTOCOL: "none", PI_TRUE_COLOR: "0" }, () =>
 				detectCapabilities(),
 			),
-			{ images: null, trueColor: false, hyperlinks: false, colorMode: "256color" },
+			{ images: null, trueColor: false, hyperlinks: false },
 		);
 	});
 
@@ -249,7 +251,7 @@ describe("detectCapabilities", () => {
 				},
 				() => detectCapabilities(),
 			),
-			{ images: "kitty", trueColor: true, hyperlinks: true, colorMode: "truecolor" },
+			{ images: "kitty", trueColor: true, hyperlinks: true },
 		);
 	});
 
@@ -257,19 +259,9 @@ describe("detectCapabilities", () => {
 		withEnv({ PI_HYPERLINKS: "1", PI_IMAGE_PROTOCOL: "kitty", PI_TRUE_COLOR: "1" }, () => {
 			setCapabilityOverrides({ images: null, trueColor: false, hyperlinks: false });
 			try {
-				assert.deepStrictEqual(getCapabilities(), {
-					images: null,
-					trueColor: false,
-					hyperlinks: false,
-					colorMode: "256color",
-				});
+				assert.deepStrictEqual(getCapabilities(), { images: null, trueColor: false, hyperlinks: false });
 				setCapabilityOverrides({});
-				assert.deepStrictEqual(getCapabilities(), {
-					images: "kitty",
-					trueColor: true,
-					hyperlinks: true,
-					colorMode: "truecolor",
-				});
+				assert.deepStrictEqual(getCapabilities(), { images: "kitty", trueColor: true, hyperlinks: true });
 			} finally {
 				setCapabilityOverrides({});
 				resetCapabilitiesCache();
@@ -414,12 +406,7 @@ describe("detectCapabilities", () => {
 
 	it("enables Alacritty capabilities for Zed", () => {
 		withEnv({ TERM_PROGRAM: "zed" }, () => {
-			assert.deepStrictEqual(detectCapabilities(), {
-				images: null,
-				trueColor: true,
-				hyperlinks: true,
-				colorMode: "truecolor",
-			});
+			assert.deepStrictEqual(detectCapabilities(), { images: null, trueColor: true, hyperlinks: true });
 		});
 	});
 
@@ -454,21 +441,37 @@ describe("detectCapabilities", () => {
 		withEnv({ COLORTERM: "truecolor", TMUX: "/tmp/tmux-1000/default,1234,0", TERM: "tmux-256color" }, () => {
 			const caps = detectCapabilities(() => false);
 			assert.strictEqual(caps.trueColor, true);
-			assert.strictEqual(caps.colorMode, "truecolor");
+			assert.strictEqual(getTerminalColorMode(caps), "truecolor");
 			assert.strictEqual(caps.hyperlinks, false);
 			assert.strictEqual(caps.images, null);
 		});
 	});
 
-	it("detects 256-color, basic-color, and colorless terminals", () => {
-		withEnv({ TERM: "xterm-256color" }, () => {
-			assert.strictEqual(detectCapabilities().colorMode, "256color");
+	it("never downgrades detected terminals below 256 colors", () => {
+		for (const term of ["xterm-256color", "xterm", "screen", "rxvt-unicode", "linux", "dumb"]) {
+			withEnv({ TERM: term }, () => {
+				assert.strictEqual(getTerminalColorMode(detectCapabilities(() => false)), "256color", term);
+			});
+		}
+	});
+
+	it("detects truecolor from direct-color TERM values", () => {
+		withEnv({ TERM: "xterm-direct" }, () => {
+			assert.strictEqual(getTerminalColorMode(detectCapabilities()), "truecolor");
 		});
-		withEnv({ TERM: "linux" }, () => {
-			assert.strictEqual(detectCapabilities().colorMode, "16color");
-		});
-		withEnv({ TERM: "dumb" }, () => {
-			assert.strictEqual(detectCapabilities().colorMode, "none");
+	});
+
+	it("derives trueColor from an explicit colorMode override", () => {
+		withEnv({ TERM_PROGRAM: "kitty" }, () => {
+			setCapabilityOverrides({ colorMode: "16color" });
+			try {
+				const caps = getCapabilities();
+				assert.strictEqual(caps.trueColor, false);
+				assert.strictEqual(getTerminalColorMode(caps), "16color");
+			} finally {
+				setCapabilityOverrides({});
+				resetCapabilitiesCache();
+			}
 		});
 	});
 });
