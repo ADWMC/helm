@@ -1,7 +1,7 @@
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { resetCapabilitiesCache, setCapabilities } from "@earendil-works/pi-tui";
+import { resetCapabilitiesCache, setCapabilities, styleText } from "@earendil-works/pi-tui";
 import { afterEach, describe, expect, it } from "vitest";
 import { initTheme, loadThemeFromPath, style, theme } from "../src/modes/interactive/theme/theme.ts";
 
@@ -19,6 +19,22 @@ describe("theme styles", () => {
 
 		expect(style("Ready", { fg: "toolSuccessBg" })).toBe(style("Ready", { fg: theme.colors.toolSuccessBg }));
 		expect(theme.style("Ready", { fg: "success", bg: "toolSuccessBg", bold: true })).toContain("Ready");
+	});
+
+	it("renders theme tokens the same as the generic text styler", () => {
+		for (const mode of ["truecolor", "256color", "16color", "none"] as const) {
+			const loaded = loadThemeFromPath(
+				new URL("../src/modes/interactive/theme/dark.json", import.meta.url).pathname,
+				mode,
+			);
+			const expected = styleText(
+				"Ready",
+				{ fg: loaded.colors.success, bg: loaded.colors.toolSuccessBg, bold: true, italic: true },
+				mode,
+			);
+			expect(loaded.style("Ready", { fg: "success", bg: "toolSuccessBg", bold: true, italic: true })).toBe(expected);
+			expect(loaded.style("Ready", { bg: "success" })).toBe(styleText("Ready", { bg: loaded.colors.success }, mode));
+		}
 	});
 
 	it("keeps the legacy foreground and background helpers", () => {

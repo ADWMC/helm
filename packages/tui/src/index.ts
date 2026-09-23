@@ -31,7 +31,9 @@ export {
 	type RgbColorValue,
 	rgbColor,
 	styleText,
+	styleTextAttributes,
 	type TerminalColorMode,
+	type TextAttributes,
 	type TextStyle,
 } from "./colors.ts";
 // Components

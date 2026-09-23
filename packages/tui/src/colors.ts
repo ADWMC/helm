@@ -37,15 +37,18 @@ export interface OklchChannels {
 	h: number;
 }
 
-export interface TextStyle {
-	fg?: Color;
-	bg?: Color;
+export interface TextAttributes {
 	bold?: boolean;
 	dim?: boolean;
 	italic?: boolean;
 	underline?: boolean;
 	inverse?: boolean;
 	strikethrough?: boolean;
+}
+
+export interface TextStyle extends TextAttributes {
+	fg?: Color;
+	bg?: Color;
 }
 
 export const defaultColor: DefaultColor = Object.freeze({ kind: "default" });
@@ -194,11 +197,6 @@ function oklabToLinearRgb({ l, a, b }: OklabChannels): LinearRgbChannels {
 	};
 }
 
-function oklchToOklab({ l, c, h }: OklchChannels): OklabChannels {
-	const radians = (h * Math.PI) / 180;
-	return { l, a: c * Math.cos(radians), b: c * Math.sin(radians) };
-}
-
 function isInSrgbGamut({ r, g, b }: LinearRgbChannels): boolean {
 	const epsilon = 1e-7;
 	return r >= -epsilon && r <= 1 + epsilon && g >= -epsilon && g <= 1 + epsilon && b >= -epsilon && b <= 1 + epsilon;
@@ -212,15 +210,24 @@ function linearRgbToChannels({ r, g, b }: LinearRgbChannels): RgbChannels {
 	};
 }
 
-function oklchToRgb(color: OklchChannels): RgbChannels {
-	let linear = oklabToLinearRgb(oklchToOklab(color));
-	if (isInSrgbGamut(linear)) return linearRgbToChannels(linear);
+function oklchToRgb({ l, c, h }: OklchChannels): RgbChannels {
+	// Gamut mapping keeps the hue fixed, so its direction is computed once and scaled by chroma.
+	const radians = (h * Math.PI) / 180;
+	const cos = Math.cos(radians);
+	const sin = Math.sin(radians);
+	const atChroma = (chroma: number) => oklabToLinearRgb({ l, a: chroma * cos, b: chroma * sin });
 
+	const direct = atChroma(c);
+	if (isInSrgbGamut(direct)) return linearRgbToChannels(direct);
+
+	// Reduce chroma until the color fits. The achromatic color is always in gamut, so it is the
+	// fallback when no bisection step fits, e.g. `oklch(100% 0.3 150)` must map to white.
+	let linear = atChroma(0);
 	let low = 0;
-	let high = color.c;
+	let high = c;
 	for (let index = 0; index < 20; index++) {
 		const chroma = (low + high) / 2;
-		const candidate = oklabToLinearRgb(oklchToOklab({ ...color, c: chroma }));
+		const candidate = atChroma(chroma);
 		if (isInSrgbGamut(candidate)) {
 			low = chroma;
 			linear = candidate;
@@ -319,12 +326,14 @@ function rgbToAnsi256(color: RgbChannels): number {
 	return cubeIndex;
 }
 
+const BASIC_COLORS_OKLAB = BASIC_COLORS.map(rgbToOklab);
+
 function rgbToAnsi16(color: RgbChannels): number {
 	const target = rgbToOklab(color);
 	let closestIndex = 0;
 	let closestDistance = Infinity;
-	for (let index = 0; index < BASIC_COLORS.length; index++) {
-		const candidate = rgbToOklab(BASIC_COLORS[index]);
+	for (let index = 0; index < BASIC_COLORS_OKLAB.length; index++) {
+		const candidate = BASIC_COLORS_OKLAB[index];
 		const distance = (target.l - candidate.l) ** 2 + (target.a - candidate.a) ** 2 + (target.b - candidate.b) ** 2;
 		if (distance < closestDistance) {
 			closestIndex = index;
@@ -368,34 +377,44 @@ export function backgroundAnsi(color: Color, mode: TerminalColorMode): string {
 export function styleText(text: string, options: TextStyle, mode: TerminalColorMode): string {
 	if (mode === "none") return text;
 
-	const prefix: string[] = [];
-	const suffix: string[] = [];
+	let prefix = "";
+	let suffix = "";
 	if (options.fg) {
-		prefix.push(foregroundAnsi(options.fg, mode));
-		suffix.unshift("\x1b[39m");
+		prefix += foregroundAnsi(options.fg, mode);
+		suffix = "\x1b[39m";
 	}
 	if (options.bg) {
-		prefix.push(backgroundAnsi(options.bg, mode));
-		suffix.unshift("\x1b[49m");
+		prefix += backgroundAnsi(options.bg, mode);
+		suffix = `\x1b[49m${suffix}`;
 	}
-	if (options.bold) prefix.push("\x1b[1m");
-	if (options.dim) prefix.push("\x1b[2m");
-	if (options.bold || options.dim) suffix.unshift("\x1b[22m");
+	return `${prefix}${styleTextAttributes(text, options, mode)}${suffix}`;
+}
+
+/** Apply text attributes such as bold or italic. Colors in `options` are ignored. */
+export function styleTextAttributes(text: string, options: TextAttributes, mode: TerminalColorMode): string {
+	if (mode === "none") return text;
+
+	// Resets are prepended so they close in reverse order of the opening sequences.
+	let prefix = "";
+	let suffix = "";
+	if (options.bold) prefix += "\x1b[1m";
+	if (options.dim) prefix += "\x1b[2m";
+	if (options.bold || options.dim) suffix = `\x1b[22m${suffix}`;
 	if (options.italic) {
-		prefix.push("\x1b[3m");
-		suffix.unshift("\x1b[23m");
+		prefix += "\x1b[3m";
+		suffix = `\x1b[23m${suffix}`;
 	}
 	if (options.underline) {
-		prefix.push("\x1b[4m");
-		suffix.unshift("\x1b[24m");
+		prefix += "\x1b[4m";
+		suffix = `\x1b[24m${suffix}`;
 	}
 	if (options.inverse) {
-		prefix.push("\x1b[7m");
-		suffix.unshift("\x1b[27m");
+		prefix += "\x1b[7m";
+		suffix = `\x1b[27m${suffix}`;
 	}
 	if (options.strikethrough) {
-		prefix.push("\x1b[9m");
-		suffix.unshift("\x1b[29m");
+		prefix += "\x1b[9m";
+		suffix = `\x1b[29m${suffix}`;
 	}
-	return `${prefix.join("")}${text}${suffix.join("")}`;
+	return `${prefix}${text}${suffix}`;
 }

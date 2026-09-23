@@ -103,6 +103,14 @@ const text = styleText(
 
 `Color` supports terminal defaults, indexed ANSI colors, sRGB, and OKLCH. `styleText()` converts colors to truecolor, 256-color, basic ANSI, or uncolored output based on the requested terminal mode.
 
+Conversions are not cached. OKLCH colors, especially ones outside the sRGB gamut, are more expensive to convert than sRGB or indexed colors. For colors used on every render, convert once and reuse the result:
+
+```typescript
+const { r, g, b } = colorToRgb(mixColors(accent, background, 0.2));
+const foreground = rgbColor(r, g, b); // cheap to render repeatedly
+const foregroundCode = foregroundAnsi(foreground, getTerminalColorMode());
+```
+
 ### Alternate-screen viewport layouts
 
 `TuiAltScreen` can render an explicit terminal-height layout. `VStack` and `HStack` allocate constrained regions, while `ScrollView` owns scrolling for one region. These semantics are intentionally unavailable on `TuiMainScreen`, where the terminal owns scrollback.

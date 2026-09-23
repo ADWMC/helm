@@ -10,6 +10,7 @@ import {
 	parseColor,
 	rgbColor,
 	styleText,
+	styleTextAttributes,
 } from "../src/index.ts";
 
 describe("colors", () => {
@@ -46,5 +47,23 @@ describe("colors", () => {
 			"\x1b[38;2;18;52;86m\x1b[48;5;9m\x1b[1mReady\x1b[22m\x1b[49m\x1b[39m",
 		);
 		assert.strictEqual(styleText("Ready", { fg: rgbColor(18, 52, 86), bold: true }, "none"), "Ready");
+	});
+
+	it("closes attributes in reverse order", () => {
+		assert.strictEqual(
+			styleTextAttributes("Ready", { bold: true, italic: true, strikethrough: true }, "truecolor"),
+			"\x1b[1m\x1b[3m\x1b[9mReady\x1b[29m\x1b[23m\x1b[22m",
+		);
+		assert.strictEqual(styleTextAttributes("Ready", { bold: true }, "none"), "Ready");
+	});
+
+	it("gamut-maps OKLCH colors at the lightness limits to achromatic colors", () => {
+		assert.deepStrictEqual(colorToRgb(oklchColor(1, 0.3, 150)), { r: 255, g: 255, b: 255 });
+		assert.deepStrictEqual(colorToRgb(oklchColor(0, 0.3, 150)), { r: 0, g: 0, b: 0 });
+	});
+
+	it("maps colors to the basic 16-color palette", () => {
+		assert.strictEqual(foregroundAnsi(rgbColor(250, 5, 5), "16color"), "\x1b[91m");
+		assert.strictEqual(backgroundAnsi(rgbColor(0, 0, 120), "16color"), "\x1b[44m");
 	});
 });

@@ -15,9 +15,9 @@ import {
 	type RgbColor,
 	type SelectListTheme,
 	type SettingsListTheme,
-	styleText,
+	styleTextAttributes,
 	type TerminalColorMode,
-	type TextStyle,
+	type TextAttributes,
 } from "@earendil-works/pi-tui";
 import chalk from "chalk";
 import { getCustomThemesDir, getThemesDir } from "../../../config.ts";
@@ -112,7 +112,7 @@ export type ThemeBg =
 
 export type ThemeToken = ThemeColor | ThemeBg;
 
-export interface ThemeStyle extends Omit<TextStyle, "fg" | "bg"> {
+export interface ThemeStyle extends TextAttributes {
 	fg?: ThemeToken | Color;
 	bg?: ThemeToken | Color;
 }
@@ -182,6 +182,9 @@ export class Theme {
 	readonly colors: Readonly<Record<ThemeToken, Color>>;
 	sourceInfo?: SourceInfo;
 	private mode: TerminalColorMode;
+	// Precomputed escape sequences keep fg()/bg() on the render hot path to a lookup and concat.
+	private readonly fgAnsi = new Map<ThemeToken, string>();
+	private readonly bgAnsi = new Map<ThemeToken, string>();
 
 	constructor(
 		fgColors: Record<Exclude<ThemeColor, OptionalThemeColor>, ThemeColorValue> &
@@ -206,7 +209,10 @@ export class Theme {
 		} as Record<ThemeToken, ThemeColorValue>;
 		const colors = {} as Record<ThemeToken, Color>;
 		for (const [token, value] of Object.entries(values) as [ThemeToken, ThemeColorValue][]) {
-			colors[token] = typeof value === "object" ? value : parseColor(value);
+			const color = typeof value === "object" ? value : parseColor(value);
+			colors[token] = color;
+			this.fgAnsi.set(token, foregroundAnsi(color, mode));
+			this.bgAnsi.set(token, backgroundAnsi(color, mode));
 		}
 		this.colors = Object.freeze(colors);
 	}
@@ -218,24 +224,35 @@ export class Theme {
 	}
 
 	style(text: string, options: ThemeStyle): string {
-		const { fg, bg, ...attributes } = options;
-		return styleText(
-			text,
-			{
-				...attributes,
-				fg: typeof fg === "string" ? this.getColor(fg) : fg,
-				bg: typeof bg === "string" ? this.getColor(bg) : bg,
-			},
-			this.mode,
-		);
+		if (this.mode === "none") return text;
+		const { fg, bg } = options;
+		let prefix = "";
+		let suffix = "";
+		if (fg) {
+			prefix = typeof fg === "string" ? this.tokenAnsi(this.fgAnsi, fg) : foregroundAnsi(fg, this.mode);
+			suffix = "\x1b[39m";
+		}
+		if (bg) {
+			prefix += typeof bg === "string" ? this.tokenAnsi(this.bgAnsi, bg) : backgroundAnsi(bg, this.mode);
+			suffix = `\x1b[49m${suffix}`;
+		}
+		return `${prefix}${styleTextAttributes(text, options, this.mode)}${suffix}`;
 	}
 
 	fg(color: ThemeColor, text: string): string {
-		return this.style(text, { fg: color });
+		const ansi = this.tokenAnsi(this.fgAnsi, color);
+		return this.mode === "none" ? text : `${ansi}${text}\x1b[39m`;
 	}
 
 	bg(color: ThemeBg, text: string): string {
-		return this.style(text, { bg: color });
+		const ansi = this.tokenAnsi(this.bgAnsi, color);
+		return this.mode === "none" ? text : `${ansi}${text}\x1b[49m`;
+	}
+
+	private tokenAnsi(ansi: Map<ThemeToken, string>, token: ThemeToken): string {
+		const value = ansi.get(token);
+		if (value === undefined) throw new Error(`Unknown theme color: ${token}`);
+		return value;
 	}
 
 	bold(text: string): string {
@@ -259,11 +276,11 @@ export class Theme {
 	}
 
 	getFgAnsi(color: ThemeColor): string {
-		return foregroundAnsi(this.getColor(color), this.mode);
+		return this.tokenAnsi(this.fgAnsi, color);
 	}
 
 	getBgAnsi(color: ThemeBg): string {
-		return backgroundAnsi(this.getColor(color), this.mode);
+		return this.tokenAnsi(this.bgAnsi, color);
 	}
 
 	getColorMode(): TerminalColorMode {
