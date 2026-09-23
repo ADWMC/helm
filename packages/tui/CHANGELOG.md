@@ -5,6 +5,7 @@
 ### Fixed
 
 - Fixed `/skill` autocomplete appearing empty when loaded skill names did not contain the letters in `skill` ([#9944](https://github.com/earendil-works/pi/issues/9944)).
+- Reduced image stretching in terminals using the Kitty graphics protocol ([#8938](https://github.com/earendil-works/pi/issues/8938)).
 
 ## [0.87.1] - 2026-09-22
 
