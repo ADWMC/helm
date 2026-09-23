@@ -163,7 +163,7 @@ vim ~/.pi/agent/themes/my-theme.json
 - `vars` is optional. Define reusable colors here, then reference them in `colors`.
 - `colors` must define all 53 required tokens. `thinkingMax` and the two search highlight tokens are optional and use the fallbacks listed below.
 
-The `$schema` field enables editor auto-completion and validation.
+The `$schema` field enables editor auto-completion and validation. Theme objects are strict: only documented top-level fields and color tokens are accepted. Define reusable custom colors under `vars`; custom keys under `colors` or `export` and additional top-level metadata are rejected.
 
 ## Color Tokens
 
