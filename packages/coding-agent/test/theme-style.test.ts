@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { resetCapabilitiesCache, setCapabilities, styleText } from "@earendil-works/pi-tui";
 import { afterEach, describe, expect, it } from "vitest";
-import { initTheme, loadThemeFromPath, style, theme } from "../src/modes/interactive/theme/theme.ts";
+import { initTheme, loadThemeFromPath, style, type ThemeToken, theme } from "../src/modes/interactive/theme/theme.ts";
 
 const tempDirs: string[] = [];
 
@@ -35,6 +35,24 @@ describe("theme styles", () => {
 			expect(loaded.style("Ready", { fg: "success", bg: "toolSuccessBg", bold: true, italic: true })).toBe(expected);
 			expect(loaded.style("Ready", { bg: "success" })).toBe(styleText("Ready", { bg: loaded.colors.success }, mode));
 		}
+	});
+
+	it("emits no escape sequences but still validates tokens in none mode", () => {
+		const loaded = loadThemeFromPath(
+			new URL("../src/modes/interactive/theme/dark.json", import.meta.url).pathname,
+			"none",
+		);
+
+		expect(loaded.style("Ready", { fg: "success", bg: "toolSuccessBg", bold: true })).toBe("Ready");
+		expect(loaded.bold("Ready")).toBe("Ready");
+		expect(loaded.italic("Ready")).toBe("Ready");
+		expect(loaded.underline("Ready")).toBe("Ready");
+		expect(loaded.inverse("Ready")).toBe("Ready");
+		expect(loaded.strikethrough("Ready")).toBe("Ready");
+
+		const unknownToken = "notAToken" as unknown as ThemeToken;
+		expect(() => loaded.style("Ready", { fg: unknownToken })).toThrow("Unknown theme color: notAToken");
+		expect(() => loaded.style("Ready", { bg: unknownToken })).toThrow("Unknown theme color: notAToken");
 	});
 
 	it("keeps the legacy foreground and background helpers", () => {

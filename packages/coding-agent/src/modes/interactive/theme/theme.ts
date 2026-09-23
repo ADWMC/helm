@@ -31,9 +31,7 @@ import { stripBom } from "../../../utils/text.ts";
 // ============================================================================
 
 /** The schema that validates this shape lives in `theme-json.ts`; importing the type is free. */
-import type { ThemeColorValue as JsonColorValue, ValidatedThemeJson as ThemeJson } from "./theme-json.ts";
-
-type ColorValue = JsonColorValue;
+import type { ThemeColorValue as ColorValue, ValidatedThemeJson as ThemeJson } from "./theme-json.ts";
 
 export type { ValidatedThemeJson as ThemeJson } from "./theme-json.ts";
 
@@ -117,7 +115,8 @@ export interface ThemeStyle extends TextAttributes {
 	bg?: ThemeToken | Color;
 }
 
-export type ThemeColorValue = JsonColorValue | Color;
+/** A theme JSON color value or a concrete color, as accepted by the `Theme` constructor. */
+export type ThemeColorInput = ColorValue | Color;
 
 type OptionalThemeColor = "scrollbarTrack" | "scrollbarThumb" | "thinkingMax" | "searchMatchText";
 type OptionalThemeBg = "searchMatchBg";
@@ -187,10 +186,10 @@ export class Theme {
 	private readonly bgAnsi = new Map<ThemeToken, string>();
 
 	constructor(
-		fgColors: Record<Exclude<ThemeColor, OptionalThemeColor>, ThemeColorValue> &
-			Partial<Record<OptionalThemeColor, ThemeColorValue>>,
-		bgColors: Record<Exclude<ThemeBg, OptionalThemeBg>, ThemeColorValue> &
-			Partial<Record<OptionalThemeBg, ThemeColorValue>>,
+		fgColors: Record<Exclude<ThemeColor, OptionalThemeColor>, ThemeColorInput> &
+			Partial<Record<OptionalThemeColor, ThemeColorInput>>,
+		bgColors: Record<Exclude<ThemeBg, OptionalThemeBg>, ThemeColorInput> &
+			Partial<Record<OptionalThemeBg, ThemeColorInput>>,
 		mode: TerminalColorMode,
 		options: { name?: string; sourcePath?: string; sourceInfo?: SourceInfo } = {},
 	) {
@@ -206,9 +205,9 @@ export class Theme {
 			searchMatchText: fgColors.searchMatchText ?? fgColors.text,
 			...bgColors,
 			searchMatchBg: bgColors.searchMatchBg ?? bgColors.selectedBg,
-		} as Record<ThemeToken, ThemeColorValue>;
+		} as Record<ThemeToken, ThemeColorInput>;
 		const colors = {} as Record<ThemeToken, Color>;
-		for (const [token, value] of Object.entries(values) as [ThemeToken, ThemeColorValue][]) {
+		for (const [token, value] of Object.entries(values) as [ThemeToken, ThemeColorInput][]) {
 			const color = typeof value === "object" ? value : parseColor(value);
 			colors[token] = color;
 			this.fgAnsi.set(token, foregroundAnsi(color, mode));
@@ -217,14 +216,7 @@ export class Theme {
 		this.colors = Object.freeze(colors);
 	}
 
-	getColor(token: ThemeToken): Color {
-		const color = this.colors[token];
-		if (!color) throw new Error(`Unknown theme color: ${token}`);
-		return color;
-	}
-
 	style(text: string, options: ThemeStyle): string {
-		if (this.mode === "none") return text;
 		const { fg, bg } = options;
 		let prefix = "";
 		let suffix = "";
@@ -236,6 +228,8 @@ export class Theme {
 			prefix += typeof bg === "string" ? this.tokenAnsi(this.bgAnsi, bg) : backgroundAnsi(bg, this.mode);
 			suffix = `\x1b[49m${suffix}`;
 		}
+		// Tokens are resolved above so unknown tokens fail in every mode, including "none".
+		if (this.mode === "none") return text;
 		return `${prefix}${styleTextAttributes(text, options, this.mode)}${suffix}`;
 	}
 
@@ -256,23 +250,23 @@ export class Theme {
 	}
 
 	bold(text: string): string {
-		return chalk.bold(text);
+		return this.mode === "none" ? text : chalk.bold(text);
 	}
 
 	italic(text: string): string {
-		return chalk.italic(text);
+		return this.mode === "none" ? text : chalk.italic(text);
 	}
 
 	underline(text: string): string {
-		return chalk.underline(text);
+		return this.mode === "none" ? text : chalk.underline(text);
 	}
 
 	inverse(text: string): string {
-		return chalk.inverse(text);
+		return this.mode === "none" ? text : chalk.inverse(text);
 	}
 
 	strikethrough(text: string): string {
-		return chalk.strikethrough(text);
+		return this.mode === "none" ? text : chalk.strikethrough(text);
 	}
 
 	getFgAnsi(color: ThemeColor): string {
@@ -1057,7 +1051,7 @@ export function getMarkdownTheme(): MarkdownTheme {
 		bold: (text: string) => theme.bold(text),
 		italic: (text: string) => theme.italic(text),
 		underline: (text: string) => theme.underline(text),
-		strikethrough: (text: string) => chalk.strikethrough(text),
+		strikethrough: (text: string) => theme.strikethrough(text),
 		highlightCode: (code: string, lang?: string): string[] => {
 			// Validate language before highlighting to avoid stderr spam from cli-highlight
 			const validLang = lang && supportsLanguage(lang) ? lang : undefined;

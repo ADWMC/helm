@@ -454,7 +454,7 @@ export {
 	Theme,
 	type ThemeBg,
 	type ThemeColor,
-	type ThemeColorValue,
+	type ThemeColorInput,
 	type ThemeStyle,
 	type ThemeToken,
 } from "./modes/interactive/theme/theme.ts";
