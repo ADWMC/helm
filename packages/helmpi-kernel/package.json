@@ -4,6 +4,9 @@
   },
   "type": "module",
 	"exports": {
+		"./i18n": "./src/i18n/index.ts",
+		"./i18n/en.json": "./i18n/en.json",
+		"./i18n/zh-CN.json": "./i18n/zh-CN.json",
 		"./memory": "./src/memory/tool-memory.ts",
 		"./config": "./src/config-schema.ts",
 		"./package.json": "./package.json",

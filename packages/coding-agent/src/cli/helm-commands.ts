@@ -16,6 +16,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { validateHelmSpec } from "@adwmc/helm-kernel/config";
 import { exportReport, exportReportJson, reportExitCode } from "@adwmc/helm-kernel/export";
+import { resolveLocale, t } from "@adwmc/helm-kernel/i18n";
 import { Ledger } from "@adwmc/helm-kernel/ledger";
 import { openToolMemory } from "@adwmc/helm-kernel/memory";
 import { validateScopeQuery } from "@adwmc/helm-kernel/scope";
@@ -61,7 +62,7 @@ export async function runHelmCommand(args: string[], cwd: string = process.cwd()
 			}
 			mkdirSync(helmDir, { recursive: true });
 			if (existsSync(specPath) && !args.includes("--force")) {
-				console.error(`refusing to overwrite ${specPath} (use --force)`);
+				console.error(t("cli.spec.exists", { path: specPath }, resolveLocale(cwd)));
 				process.exitCode = 1;
 				return true;
 			}
@@ -84,8 +85,8 @@ export async function runHelmCommand(args: string[], cwd: string = process.cwd()
 					break;
 				}
 			}
-			console.log(`wrote ${specPath}${tpl}`);
-			console.log("fill goal + allowedTargets (or author SOW.md); helm validate-scope <target> pre-checks");
+			console.log(t("cli.spec.init.written", { path: specPath }, resolveLocale(cwd)) + tpl);
+			console.log(t("cli.spec.init.hint", {}, resolveLocale(cwd)));
 			process.exitCode = 0;
 			return true;
 		}
@@ -171,6 +172,7 @@ export async function runHelmCommand(args: string[], cwd: string = process.cwd()
 				{ name: "docker", probe: "docker --version" },
 				{ name: "nmap", probe: "nmap --version" },
 			];
+			const locale = resolveLocale(cwd);
 			const store = openToolMemory(join(cwd, ".helm", "tool-memory.db"));
 			let verified = 0;
 			let stale = 0;
@@ -190,9 +192,15 @@ export async function runHelmCommand(args: string[], cwd: string = process.cwd()
 				const after = store.verify(seeded.id);
 				if (after?.status === "verified") verified++;
 				else stale++;
-				console.log(`${after?.status === "verified" ? "ok  " : "stale"} ${p.name}`);
+				console.log(
+					t(
+						after?.status === "verified" ? "cli.doctor.line.ok" : "cli.doctor.line.stale",
+						{ name: p.name },
+						locale,
+					),
+				);
 			}
-			console.log(`tool-memory: ${verified} verified, ${stale} stale -> ${store.path}`);
+			console.log(t("cli.doctor.summary", { verified, stale, path: store.path }, locale));
 			store.close();
 			process.exitCode = 0;
 			return true;

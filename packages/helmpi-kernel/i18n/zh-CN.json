@@ -1,0 +1,15 @@
+{
+	"cli.spec.init.written": "已写入 {{path}}",
+	"cli.spec.init.hint": "填写 goal + allowedTargets（或编辑 SOW.md）；helm validate-scope <目标> 可预检",
+	"cli.spec.exists": "拒绝覆盖 {{path}}（如需覆盖加 --force）",
+	"cli.scope.deny": "目标被 Spec 拒绝（fail-closed）",
+	"cli.report.wrote": "已写出 {{path}}",
+	"cli.report.findings": "发现数={{count}}",
+	"cli.doctor.summary": "tool-memory：{{verified}} 已验证，{{stale}} 陈旧 → {{path}}",
+	"cli.doctor.line.ok": "可用 {{name}}",
+	"cli.doctor.line.stale": "陈旧 {{name}}",
+	"cli.run.specLoaded": "已载入 Spec：{{path}}（目标：{{goal}}）",
+	"cli.run.noSpec": "未发现 .helm/spec.json —— 启动普通会话（engagement 运行由 Spec 驱动）",
+	"cli.run.emptyGoal": "警告：{{path}} 的 goal 为空（先 helm spec init / 填写；严格 lint 随 W3 到位）",
+	"attack.pending": "attack-coverage：尚无 ATT&CK 映射发现（映射随 W3 engagement 落地；导航器参考：references/attack-navigator.json）"
+}
