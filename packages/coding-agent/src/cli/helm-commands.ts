@@ -14,9 +14,9 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { validateHelmSpec } from "@adwmc/helm-kernel/config";
 import { exportReport, exportReportJson, reportExitCode } from "@adwmc/helm-kernel/export";
 import { Ledger } from "@adwmc/helm-kernel/ledger";
-import { validateHelmConfig, validateHelmSpec } from "@adwmc/helm-kernel/config";
 import { validateScopeQuery } from "@adwmc/helm-kernel/scope";
 
 const HELM_COMMANDS: ReadonlySet<string> = new Set([
@@ -71,7 +71,7 @@ export async function runHelmCommand(args: string[], cwd: string = process.cwd()
 				process.exitCode = 1;
 				return true;
 			}
-			writeFileSync(specPath, `${JSON.stringify(scaffold, null, 2)}` + String.fromCharCode(10), "utf8");
+			writeFileSync(specPath, `${JSON.stringify(scaffold, null, 2)}${String.fromCharCode(10)}`, "utf8");
 			// Best-effort SOW template copy (dev layout carries docs/ next to the repo root).
 			const tplCandidates = [resolve(cwd, "docs/SOW-TEMPLATE.md"), resolve(cwd, "../../docs/SOW-TEMPLATE.md")];
 			let tpl = "";
@@ -101,13 +101,15 @@ export async function runHelmCommand(args: string[], cwd: string = process.cwd()
 			if (existsSync(path)) {
 				try {
 					const parsed: unknown = JSON.parse(readFileSync(path, "utf8"));
-				const sv = validateHelmSpec(parsed);
-				if (!sv.ok) {
-					console.error(`invalid spec schema at ${path}: ${sv.failures.map((f) => `${f.path}: ${f.message}`).join(", ")}`);
-					process.exitCode = 2;
-					return true;
-				}
-				spec = parsed;
+					const sv = validateHelmSpec(parsed);
+					if (!sv.ok) {
+						console.error(
+							`invalid spec schema at ${path}: ${sv.failures.map((f) => `${f.path}: ${f.message}`).join(", ")}`,
+						);
+						process.exitCode = 2;
+						return true;
+					}
+					spec = parsed;
 				} catch (err) {
 					console.error(`invalid spec JSON at ${path}: ${String(err)}`);
 					process.exitCode = 2;
@@ -156,7 +158,9 @@ export async function runHelmCommand(args: string[], cwd: string = process.cwd()
 
 		case "doctor": {
 			// Honest stub until W1-T06 (tool-memory probes) makes this real.
-			console.log("doctor: environment probes pending W1-T06 (tool-memory init; run helm doctor after kernel memory lands)");
+			console.log(
+				"doctor: environment probes pending W1-T06 (tool-memory init; run helm doctor after kernel memory lands)",
+			);
 			process.exitCode = 0;
 			return true;
 		}
@@ -174,7 +178,9 @@ export async function runHelmCommand(args: string[], cwd: string = process.cwd()
 					console.log(`spec loaded: ${specPath} (goal: ${goal})`);
 				} else {
 					// Full L1–L6 lint lands with W3; here we only flag the obvious.
-					console.log(`warning: spec at ${specPath} has an empty goal (run helm spec init / fill it; strict lint arrives with W3)`);
+					console.log(
+						`warning: spec at ${specPath} has an empty goal (run helm spec init / fill it; strict lint arrives with W3)`,
+					);
 				}
 			} else {
 				console.log("no .helm/spec.json — starting a plain session (engagement runs are spec-driven)");
