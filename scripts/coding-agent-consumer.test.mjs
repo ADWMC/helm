@@ -6,7 +6,7 @@ import test from "node:test";
 import { installCodingAgentConsumer, packReleasePackages, smokeTestCodingAgentConsumer } from "./coding-agent-consumer.mjs";
 
 const codingAgentName = "@adwmc/helm-coding-agent";
-const devPackages = ["pi-client", "pi-protocol", "pi-server"].map((name) => `@earendil-works/${name}`);
+const devPackages = ["client", "protocol", "server"].map((name) => `@adwmc/helm-${name}`);
 
 function createFixture(t, { importServer = false, declareServer = false } = {}) {
 	const root = mkdtempSync(join(tmpdir(), "pi-consumer-test-"));
@@ -75,7 +75,7 @@ test("installs only coding-agent directly and uses overrides only for declared r
 	const nested = join(directory, "node_modules", codingAgentName, "node_modules/@adwmc/helm-server");
 	mkdirSync(nested, { recursive: true });
 	writeFileSync(join(nested, "package.json"), JSON.stringify({ name: "@adwmc/helm-server", version: "1.0.0" }));
-	assert.throws(() => smokeTestCodingAgentConsumer(directory), /pi-server must not be installed/);
+	assert.throws(() => smokeTestCodingAgentConsumer(directory), /helm-server must not be installed/);
 	rmSync(nested, { recursive: true });
 
 	const experimental = join(directory, "node_modules", codingAgentName, "dist/experimental");
@@ -91,5 +91,5 @@ test("fails when the SDK imports an undeclared server despite a working CLI", (t
 
 test("fails if a development-only dependency is added back to the published dependency tree", (t) => {
 	const directory = createFixture(t, { declareServer: true });
-	assert.throws(() => smokeTestCodingAgentConsumer(directory), /pi-server must not be installed/);
+	assert.throws(() => smokeTestCodingAgentConsumer(directory), /helm-server must not be installed/);
 });
