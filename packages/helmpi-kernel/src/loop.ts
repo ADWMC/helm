@@ -99,6 +99,7 @@ export async function runLoop(ledger: Ledger, opts: LoopOptions): Promise<LoopRe
 			let settled = false;
 			for (let attempt = 1; attempt <= maxAttempts && !settled; attempt++) {
 				const receipt = await opts.executor.run(active, attempt);
+				ledger.recordReceipt(receipt); // W2-T06: persist for finish grounding
 				// Supervise: attempt count as step tool-call proxy (P1)
 				if (blockIfCapped(ledger, superviseCfg, active.id, attempt)) {
 					settled = true;

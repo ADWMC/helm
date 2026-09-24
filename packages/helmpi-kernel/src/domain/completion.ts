@@ -1,7 +1,8 @@
 /** Completion compiler — I4, I8, I10, kind boundaries. Pure. */
 
+import { groundExcerpt } from "./evidence.ts";
 import { assertStepTarget } from "./scope.ts";
-import type { Observation, Spec, Step, StepKind, Workspace } from "./types.ts";
+import type { Observation, Receipt, Spec, Step, StepKind, Workspace } from "./types.ts";
 
 export type CompileErrorCode =
 	| "run_not_active"
@@ -17,6 +18,7 @@ export type CompileErrorCode =
 	| "exploit_requires_test"
 	| "convergence_exhausted"
 	| "finish_without_coverage"
+	| "evidence_not_grounded"
 	| "empty_done_when";
 
 export class CompileError extends Error {
@@ -67,7 +69,7 @@ export interface FinishDecision {
 	readonly finishBasisIds: readonly string[];
 }
 
-export function compileFinish(ws: Workspace, decision: FinishDecision): void {
+export function compileFinish(ws: Workspace, decision: FinishDecision, receipts?: readonly Receipt[]): void {
 	if (ws.runStatus !== "running" && ws.runStatus !== "open" && ws.runStatus !== "paused") {
 		if (ws.runStatus === "completed") {
 			throw new CompileError("run_not_active", "run already completed");
@@ -102,6 +104,24 @@ export function compileFinish(ws: Workspace, decision: FinishDecision): void {
 		const step = stepById.get(obs.stepId);
 		if (!step || step.status !== "done") {
 			throw new CompileError("finish_basis_not_done", `basis ${id} not from done step`);
+		}
+	}
+
+	// W2-T06 G5: every basis observation must ground as an EXACT slice of its
+	// own receipt — paraphrase (not found) and truncation (partial) are rejected;
+	// no receipts passed → caller opted out (legacy paths), enforcement runs
+	// wherever receipts flow (loop/CLI).
+	if (receipts) {
+		for (const id of decision.finishBasisIds) {
+			const obs = obsById.get(id)!;
+			const r = receipts.find((x) => x.seq === obs.receiptSeq);
+			if (!r) {
+				throw new CompileError("evidence_not_grounded", `basis ${id}: receipt ${obs.receiptSeq} missing`);
+			}
+			const g = groundExcerpt([r], obs.excerpt);
+			if (!g.ok) {
+				throw new CompileError("evidence_not_grounded", `basis ${id}: ${g.reason}`);
+			}
 		}
 	}
 	// I19: negative-space coverage must be on record (or explicitly waived).

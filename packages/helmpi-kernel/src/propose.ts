@@ -2,7 +2,7 @@
 
 import { assertStepShape, CompileError, compileFinish, type FinishDecision } from "./domain/completion.ts";
 import { assertStepPlan } from "./domain/scope.ts";
-import type { Step, StepKind } from "./domain/types.ts";
+import type { Receipt, Step, StepKind } from "./domain/types.ts";
 import type { Ledger, ProposeDecision, ProposeView } from "./ledger.ts";
 import { assertPhaseForStep } from "./phase.ts";
 
@@ -103,14 +103,14 @@ export function parsePropose(raw: unknown): ProposeDecision {
 export function compileProposal(
 	ws: ReturnType<Ledger["workspace"]>,
 	decision: ProposeDecision,
-	opts: { approvedHighRisk?: boolean } = {},
+	opts: { approvedHighRisk?: boolean; receipts?: readonly Receipt[] } = {},
 ): void {
 	if (decision.finish) {
 		const finish: FinishDecision = {
 			finish: true,
 			finishBasisIds: decision.finishBasisIds,
 		};
-		compileFinish(ws, finish);
+		compileFinish(ws, finish, opts.receipts);
 		return;
 	}
 	const spec = ws.spec;
@@ -173,7 +173,7 @@ export function applyProposal(
 		? ledger.isApproved("step", newStep.id) || ws.spec.highRisk !== "hitl" || newStep.kind !== "exploit"
 		: true;
 	try {
-		compileProposal(ws, decision, { approvedHighRisk: approved === true });
+		compileProposal(ws, decision, { approvedHighRisk: approved === true, receipts: ledger.receipts() });
 	} catch (e) {
 		// I14: scope denials are first-class journal events (deny + audit trail).
 		if (e instanceof CompileError && e.code === "target_out_of_scope") {

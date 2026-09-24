@@ -10,6 +10,7 @@ import type {
 	Direction,
 	Hint,
 	Observation,
+	Receipt,
 	RunStatus,
 	Spec,
 	Step,
@@ -133,6 +134,13 @@ CREATE TABLE IF NOT EXISTS run_state (
   kind_streak TEXT NOT NULL,
   decisions_used INTEGER NOT NULL,
   tokens_used INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS receipts (
+	seq INTEGER PRIMARY KEY,
+	stdout TEXT NOT NULL,
+	stderr TEXT NOT NULL,
+	exit_code INTEGER NOT NULL,
+	timed_out INTEGER
 );
 CREATE TABLE IF NOT EXISTS coverage (
   id TEXT PRIMARY KEY,
@@ -547,6 +555,28 @@ export class Ledger {
 		}));
 	}
 
+	recordReceipt(r: Receipt): void {
+		this.db
+			.prepare("INSERT OR REPLACE INTO receipts(seq,stdout,stderr,exit_code,timed_out) VALUES(?,?,?,?,?)")
+			.run(r.seq, r.stdout, r.stderr, r.exitCode, r.timedOut === undefined ? null : r.timedOut ? 1 : 0);
+	}
+
+	receipts(): Receipt[] {
+		const rows = this.db.prepare("SELECT * FROM receipts ORDER BY seq").all() as {
+			seq: number;
+			stdout: string;
+			stderr: string;
+			exit_code: number;
+			timed_out: number | null;
+		}[];
+		return rows.map((r) => ({
+			seq: r.seq,
+			stdout: r.stdout,
+			stderr: r.stderr,
+			exitCode: r.exit_code,
+			...(r.timed_out !== null ? { timedOut: r.timed_out === 1 } : {}),
+		}));
+	}
 	addHint(hint: Hint): void {
 		this.db
 			.prepare("INSERT INTO hints(id,content,creator,created_at) VALUES(?,?,?,?)")
