@@ -3,7 +3,7 @@
  * Domain/breach stay host-agnostic; this file is the only Pi adapter.
  */
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@adwmc/helm-coding-agent";
@@ -45,7 +45,20 @@ function analysisModePath(): string {
 }
 
 function openPhaseLedger(): Ledger {
-	const dbPath = join(homedir(), ".helm-pi", "phase.db");
+	// §3.6.3 data plane: ledger lives beside CONFIG_DIR (.helm/agent), not
+	// the legacy helm-pi home dir. One-shot migration for existing data.
+	const dir = join(homedir(), ".helm", "agent");
+	const dbPath = join(dir, "phase.db");
+	const legacy = join(homedir(), ".helm-pi", "phase.db");
+	if (!existsSync(dbPath) && existsSync(legacy)) {
+		try {
+			mkdirSync(dir, { recursive: true });
+			copyFileSync(legacy, dbPath);
+			renameSync(legacy, `${legacy}.migrated.bak`);
+		} catch {
+			/* migration best-effort */
+		}
+	}
 	mkdirSync(join(dbPath, ".."), { recursive: true });
 	return new Ledger(dbPath);
 }
@@ -85,11 +98,14 @@ function loadPlaybook(id = "reverse") {
 /** Session Spec for ScopeGate: cwd spec.json → phase ledger → null (deny). */
 function loadSessionSpec(): Spec | null {
 	try {
-		const p = join(process.cwd(), "spec.json");
-		if (existsSync(p)) {
-			const raw = JSON.parse(readFileSync(p, "utf8")) as Spec;
-			if (Array.isArray(raw?.allowedTargets) && typeof raw?.highRisk === "string") {
-				return raw;
+		// §0/§1.5: product spec lives in .helm/spec.json (helm spec init);
+		// cwd root spec.json kept as helm-pi legacy fallback.
+		for (const p of [join(process.cwd(), ".helm", "spec.json"), join(process.cwd(), "spec.json")]) {
+			if (existsSync(p)) {
+				const raw = JSON.parse(readFileSync(p, "utf8")) as Spec;
+				if (Array.isArray(raw?.allowedTargets) && typeof raw?.highRisk === "string") {
+					return raw;
+				}
 			}
 		}
 	} catch {
@@ -116,6 +132,37 @@ function text(s: string): TextResult {
 export default function helmPiExtension(pi: ExtensionAPI): void {
 	// W1-T04: built-in SoL-Pi efficiency suite (default ON, §0 决策).
 	createEfficiencyExtension()(pi);
+	// ── G2 工具闸（W2-T01）：host-side scope intercept on EVERY tool_call —
+	//    independent of model cooperation (scope 事后 → 事前, §4 G2 row).
+	//    Network targets only (RE hash-scope lands W4); no target → pass.
+	pi.on("tool_call", (event: { toolName: string; input?: Record<string, unknown>; command?: unknown }) => {
+		const input = (event.input ?? {}) as Record<string, unknown>;
+		const direct = [input.target, input.url, input.uri].find(
+			(v): v is string => typeof v === "string" && v.length > 0,
+		);
+		let target = direct;
+		if (!target && typeof (input.command ?? event.command) === "string") {
+			const m = /(https?:\/\/[^\s"'`]+)/.exec(String(input.command ?? event.command));
+			if (m) target = m[1];
+		}
+		if (!target) return; // local-only call: not target-scoped (path/hash scope = W4)
+		const spec = loadSessionSpec();
+		const d = validateScopeQuery(spec, target);
+		if (d.allow) return;
+		const led = openPhaseLedger();
+		try {
+			led.journalEvent("scope_denied", {
+				tool: event.toolName,
+				target,
+				matchedBy: d.matchedBy,
+				reason: d.reason,
+				phase: "pre-exec",
+			});
+		} finally {
+			led.close();
+		}
+		return { block: true, reason: `scope_denied: ${target} (${d.matchedBy}: ${d.reason})` };
+	});
 	const config = loadConfig();
 	const wash = (s: string) => washText(s);
 	let mode: AnalysisMode = readAnalysisMode(config);
