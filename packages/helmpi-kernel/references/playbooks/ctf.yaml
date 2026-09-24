@@ -1,0 +1,44 @@
+schema: 1
+id: ctf
+title: CTF
+phases:
+  - id: scope
+    title: 范围与 flag 目标
+    deliverables:
+      - key: origin_goal
+        description: origin 与 goal 已写入
+        evidence: required
+    gate_out: all_deliverables_have_evidence
+    next: [recon]
+  - id: recon
+    title: 侦察
+    deliverables:
+      - key: surface_map
+        description: 服务面映射
+        evidence: required
+    gate_out: all_deliverables_have_evidence
+    next: [exploit]
+  - id: exploit
+    title: 利用
+    deliverables:
+      - key: foothold_evidence
+        description: 入脚/flag 片段证据
+        evidence: required
+    gate_out: all_deliverables_have_evidence
+    next: [verify]
+  - id: verify
+    title: 验证
+    deliverables:
+      - key: oracle_match
+        description: GoalVerifier/oracle 匹配
+        evidence: required
+    gate_out: all_deliverables_have_evidence
+    next: [close]
+  - id: close
+    title: 收尾
+    deliverables:
+      - key: walkthrough
+        description: 可复述步骤
+        evidence: required
+    gate_out: all_deliverables_have_evidence
+    next: []

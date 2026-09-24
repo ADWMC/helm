@@ -1,0 +1,28 @@
+{
+  "dependencies": {
+    "typebox": "1.3.27"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "description": "helm kernel: gates/evidence/ledger/playbook/report (migrated from helm-pi)",
+  "license": "MIT",
+  "name": "@adwmc/helm-kernel",
+  "private": true,
+  "peerDependencies": {
+    "@adwmc/helm-coding-agent": "0.87.1"
+  },
+  "version": "0.87.1",
+  "scripts": {
+    "test": "node --test src/*.test.ts src/memory/*.test.ts"
+  },
+  "devDependencies": {
+    "@adwmc/helm-coding-agent": "0.87.1"
+  },
+  "peerDependenciesMeta": {
+    "@adwmc/helm-coding-agent": {
+      "optional": false
+    }
+  }
+}
