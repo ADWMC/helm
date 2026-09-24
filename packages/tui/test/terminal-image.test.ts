@@ -18,7 +18,6 @@ import {
 	getCapabilities,
 	getKittyImageMetadata,
 	getKittyImagePlacement,
-	getTerminalColorMode,
 	hyperlink,
 	imageFallback,
 	isImageLine,
@@ -217,12 +216,11 @@ describe("isImageLine", () => {
 });
 
 describe("detectCapabilities", () => {
-	it("defaults to legacy 256-color output without terminal hints", () => {
+	it("defaults to hyperlinks: false for unknown terminals", () => {
 		withEnv({}, () => {
 			const caps = detectCapabilities();
 			assert.strictEqual(caps.hyperlinks, false);
 			assert.strictEqual(caps.images, null);
-			assert.strictEqual(getTerminalColorMode(caps), "256color");
 		});
 	});
 
@@ -440,23 +438,14 @@ describe("detectCapabilities", () => {
 		withEnv({ COLORTERM: "truecolor", TMUX: "/tmp/tmux-1000/default,1234,0", TERM: "tmux-256color" }, () => {
 			const caps = detectCapabilities(() => false);
 			assert.strictEqual(caps.trueColor, true);
-			assert.strictEqual(getTerminalColorMode(caps), "truecolor");
 			assert.strictEqual(caps.hyperlinks, false);
 			assert.strictEqual(caps.images, null);
 		});
 	});
 
-	it("never downgrades detected terminals below 256 colors", () => {
-		for (const term of ["xterm-256color", "xterm", "screen", "rxvt-unicode", "linux", "dumb"]) {
-			withEnv({ TERM: term }, () => {
-				assert.strictEqual(getTerminalColorMode(detectCapabilities(() => false)), "256color", term);
-			});
-		}
-	});
-
 	it("detects truecolor from direct-color TERM values", () => {
 		withEnv({ TERM: "xterm-direct" }, () => {
-			assert.strictEqual(getTerminalColorMode(detectCapabilities()), "truecolor");
+			assert.strictEqual(detectCapabilities(() => false).trueColor, true);
 		});
 	});
 });

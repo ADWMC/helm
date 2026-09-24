@@ -18,6 +18,10 @@ type ThemeResult = { success: boolean; error?: string };
 
 const TERMINAL_QUERY_TIMEOUT_MS = 100;
 
+function sameRgb(a: RgbColor | undefined, b: RgbColor | undefined): boolean {
+	return a === b || (a !== undefined && b !== undefined && a.r === b.r && a.g === b.g && a.b === b.b);
+}
+
 export class InteractiveThemeController {
 	private readonly ui: TUI;
 	private readonly getSettingsManager: () => SettingsManager;
@@ -159,11 +163,15 @@ export class InteractiveThemeController {
 		const foreground = this.ui.queryTerminalForegroundColor({ timeoutMs });
 		const background = this.ui.queryTerminalBackgroundColor({ timeoutMs });
 		void Promise.all([foreground, background]).then(([foregroundColor, backgroundColor]) => {
-			this.terminalColors = {
-				foreground: foregroundColor ?? this.terminalColors.foreground,
-				background: backgroundColor ?? this.terminalColors.background,
+			const previous = this.terminalColors;
+			const next = {
+				foreground: foregroundColor ?? previous.foreground,
+				background: backgroundColor ?? previous.background,
 			};
-			setTerminalDefaultColors(this.terminalColors);
+			// Re-rendering rebuilds every component, so skip it when nothing changed (including timeouts).
+			if (sameRgb(next.foreground, previous.foreground) && sameRgb(next.background, previous.background)) return;
+			this.terminalColors = next;
+			setTerminalDefaultColors(next);
 			this.ui.invalidate();
 			this.ui.requestRender();
 		});

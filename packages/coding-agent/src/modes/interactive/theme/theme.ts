@@ -112,9 +112,13 @@ export type ThemeBg =
 
 export type ThemeToken = ThemeColor | ThemeBg;
 
+/**
+ * Tokens are only accepted in their own slot, because "" (terminal default) means the default foreground
+ * or background depending on the slot. Use `theme.colors[token]` to use a token's color in the other slot.
+ */
 export interface ThemeStyle extends TextAttributes {
-	fg?: ThemeToken | Color;
-	bg?: ThemeToken | Color;
+	fg?: ThemeColor | Color;
+	bg?: ThemeBg | Color;
 }
 
 type OptionalThemeColor = "scrollbarTrack" | "scrollbarThumb" | "thinkingMax" | "searchMatchText";
@@ -224,8 +228,8 @@ export class Theme {
 	sourceInfo?: SourceInfo;
 	private mode: TerminalColorMode;
 	// Precomputed escape sequences keep fg()/bg() on the render hot path to a lookup and concat.
-	private readonly fgAnsi = new Map<ThemeToken, string>();
-	private readonly bgAnsi = new Map<ThemeToken, string>();
+	private readonly fgAnsi = new Map<ThemeColor, string>();
+	private readonly bgAnsi = new Map<ThemeBg, string>();
 	// Tokens set to "" have no color of their own; `colors` fills them from the terminal defaults.
 	private readonly concreteColors: Partial<Record<ThemeToken, Color>> = {};
 	private readonly defaultForegroundTokens: ThemeToken[] = [];
@@ -255,24 +259,22 @@ export class Theme {
 		const backgrounds = { ...bgColors, searchMatchBg: bgColors.searchMatchBg ?? bgColors.selectedBg };
 		const concreteForegrounds: Color[] = [];
 		const concreteBackgrounds: Color[] = [];
-		const addToken = (token: ThemeToken, value: string | number, isBackground: boolean) => {
+		// Returns the escape sequence for the token's own slot.
+		const addToken = (token: ThemeToken, value: string | number, isBackground: boolean): string => {
 			if (value === "") {
-				this.fgAnsi.set(token, "\x1b[39m");
-				this.bgAnsi.set(token, "\x1b[49m");
 				(isBackground ? this.defaultBackgroundTokens : this.defaultForegroundTokens).push(token);
-				return;
+				return isBackground ? "\x1b[49m" : "\x1b[39m";
 			}
 			const color = parseColor(value);
 			this.concreteColors[token] = color;
-			this.fgAnsi.set(token, foregroundAnsi(color, mode));
-			this.bgAnsi.set(token, backgroundAnsi(color, mode));
 			(isBackground ? concreteBackgrounds : concreteForegrounds).push(color);
+			return isBackground ? backgroundAnsi(color, mode) : foregroundAnsi(color, mode);
 		};
 		for (const [token, value] of Object.entries(foregrounds) as [ThemeColor, string | number][]) {
-			addToken(token, value, false);
+			this.fgAnsi.set(token, addToken(token, value, false));
 		}
 		for (const [token, value] of Object.entries(backgrounds) as [ThemeBg, string | number][]) {
-			addToken(token, value, true);
+			this.bgAnsi.set(token, addToken(token, value, true));
 		}
 		this.ownAppearance = options.appearance ?? detectAppearance(concreteForegrounds, concreteBackgrounds);
 	}
@@ -331,7 +333,7 @@ export class Theme {
 		return `${ansi}${text}\x1b[49m`;
 	}
 
-	private tokenAnsi(ansi: Map<ThemeToken, string>, token: ThemeToken): string {
+	private tokenAnsi<T extends ThemeToken>(ansi: Map<T, string>, token: T): string {
 		const value = ansi.get(token);
 		if (value === undefined) throw new Error(`Unknown theme color: ${token}`);
 		return value;

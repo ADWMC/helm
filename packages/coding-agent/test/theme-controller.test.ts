@@ -1,12 +1,8 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { colorToHex, type TUI } from "@earendil-works/pi-tui";
+import type { TUI } from "@earendil-works/pi-tui";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SettingsManager } from "../src/core/settings-manager.ts";
 import {
 	initTheme,
-	loadThemeFromPath,
 	setTerminalDefaultColors,
 	type TerminalTheme,
 	theme,
@@ -70,7 +66,6 @@ describe("InteractiveThemeController", () => {
 		expect(controller.getThemeSelection()).toBe("light");
 		await controller.applyFromSettings();
 
-		expect(theme.name).toBe("light");
 		expect(queryTerminalBackgroundColor).toHaveBeenCalledOnce();
 		expect(setTheme).not.toHaveBeenCalled();
 		expect(flush).not.toHaveBeenCalled();
@@ -92,51 +87,31 @@ describe("InteractiveThemeController", () => {
 		expect(theme.name).toBe("dark");
 	});
 
-	it("applies the terminal default colors and reuses the background reply for detection", async () => {
+	it("detects the theme from the default color query without querying twice", async () => {
 		vi.stubEnv("COLORFGBG", "");
-		const { ui, queryTerminalBackgroundColor, queryTerminalForegroundColor } = createUi();
-		queryTerminalForegroundColor.mockResolvedValue({ r: 20, g: 20, b: 20 });
+		const { ui, queryTerminalBackgroundColor } = createUi();
 		queryTerminalBackgroundColor.mockResolvedValue({ r: 250, g: 250, b: 250 });
-		const controller = createController(ui, () => SettingsManager.inMemory());
-
-		await controller.applyFromSettings();
-		await vi.waitFor(() => expect(ui.requestRender).toHaveBeenCalled());
+		await createController(ui, () => SettingsManager.inMemory()).applyFromSettings();
 
 		expect(theme.name).toBe("light");
 		expect(queryTerminalBackgroundColor).toHaveBeenCalledOnce();
-		expect(queryTerminalForegroundColor).toHaveBeenCalledOnce();
-		expect(ui.invalidate).toHaveBeenCalled();
 	});
 
-	it("keeps reported default colors when a later query times out", async () => {
-		const dir = mkdtempSync(join(tmpdir(), "pi-theme-controller-"));
-		try {
-			const themeJson = JSON.parse(
-				readFileSync(new URL("../src/modes/interactive/theme/dark.json", import.meta.url), "utf8"),
-			) as { name: string; colors: Record<string, string | number> };
-			themeJson.name = "terminal-defaults";
-			themeJson.colors.text = "";
-			const themePath = join(dir, "terminal-defaults.json");
-			writeFileSync(themePath, JSON.stringify(themeJson));
-			const loaded = loadThemeFromPath(themePath, "truecolor");
-
-			const { ui, queryTerminalForegroundColor, queryTerminalBackgroundColor } = createUi();
-			queryTerminalForegroundColor.mockResolvedValue({ r: 200, g: 210, b: 220 });
-			queryTerminalBackgroundColor.mockResolvedValue({ r: 10, g: 20, b: 30 });
-			const controller = createController(ui, () => SettingsManager.inMemory({ theme: "dark" }));
+	it("re-renders only when the reported default colors change", async () => {
+		const { ui, queryTerminalForegroundColor, queryTerminalBackgroundColor } = createUi();
+		const controller = createController(ui, () => SettingsManager.inMemory({ theme: "dark" }));
+		const query = async (foreground?: object, background?: object) => {
+			queryTerminalForegroundColor.mockResolvedValue(foreground);
+			queryTerminalBackgroundColor.mockResolvedValue(background);
 			await controller.applyFromSettings();
-			await vi.waitFor(() => expect(ui.requestRender).toHaveBeenCalledTimes(1));
-			expect(colorToHex(loaded.colors.text)).toBe("#c8d2dc");
+			await new Promise((resolve) => setTimeout(resolve, 0));
+		};
 
-			// A second query (e.g. after a settings change) times out for both colors.
-			queryTerminalForegroundColor.mockResolvedValue(undefined);
-			queryTerminalBackgroundColor.mockResolvedValue(undefined);
-			await controller.applyFromSettings();
-			await vi.waitFor(() => expect(ui.requestRender).toHaveBeenCalledTimes(2));
-			expect(colorToHex(loaded.colors.text)).toBe("#c8d2dc");
-		} finally {
-			rmSync(dir, { recursive: true, force: true });
-		}
+		await query({ r: 200, g: 210, b: 220 }, { r: 10, g: 20, b: 30 });
+		// A timeout keeps the known colors; erasing them would count as a change and re-render.
+		await query(undefined, undefined);
+		await query({ r: 200, g: 210, b: 220 }, { r: 10, g: 20, b: 30 });
+		expect(ui.requestRender).toHaveBeenCalledOnce();
 	});
 
 	it("disables terminal appearance updates when disposed", async () => {

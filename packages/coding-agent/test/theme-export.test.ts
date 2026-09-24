@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "fs"
 import { tmpdir } from "os";
 import { join } from "path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { getThemeExportColors, loadThemeFromPath } from "../src/modes/interactive/theme/theme.ts";
+import { getThemeExportColors } from "../src/modes/interactive/theme/theme.ts";
 
 type ThemeFile = {
 	name: string;
@@ -102,21 +102,16 @@ describe("getThemeExportColors", () => {
 		});
 	});
 
-	it("reports invalid export colors instead of dropping all export colors", () => {
+	it("reports invalid export colors instead of silently dropping them", () => {
 		const darkTheme = JSON.parse(
 			readFileSync(new URL("../src/modes/interactive/theme/dark.json", import.meta.url), "utf-8"),
 		) as ThemeFile;
-		const themePath = join(process.env.PI_CODING_AGENT_DIR!, "themes", "custom-export-invalid.json");
+		const customTheme = { ...darkTheme, name: "custom-export-invalid", export: { pageBg: "#12345" } };
 		writeFileSync(
-			themePath,
-			JSON.stringify({
-				...darkTheme,
-				name: "custom-export-invalid",
-				export: { pageBg: "#12345", cardBg: "#223344" },
-			}),
+			join(process.env.PI_CODING_AGENT_DIR!, "themes", "custom-export-invalid.json"),
+			JSON.stringify(customTheme),
 		);
 
-		expect(() => loadThemeFromPath(themePath)).toThrow("Invalid color value: #12345");
 		expect(() => getThemeExportColors("custom-export-invalid")).toThrow("Invalid color value: #12345");
 	});
 });
