@@ -9,7 +9,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const SUITE = dirname(fileURLToPath(import.meta.url));
 const FORK = process.env.FORK_ROOT ?? "/home/ci/helm";
-const BIN = join(FORK, "dist/bundle/cli.js");
+const BIN = join(FORK, "packages/coding-agent/dist/bundle/cli.js");
 const KERNEL = join(FORK, "packages/helmpi-kernel/src");
 const MODEL = process.env.GATE_MODEL ?? "xiaomi/mimo-v2.6-flash";
 const SESSIONS = join(SUITE, "evidence", "sessions");

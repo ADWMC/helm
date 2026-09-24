@@ -30,7 +30,7 @@ fi
 chown -R ci:ci /home/ci/.helm 2>/dev/null
 
 # fresh build state must exist (gate build ran before)
-test -f $REPO/dist/bundle/cli.js || { echo BIN_MISSING; exit 4; }
+test -f $REPO/packages/coding-agent/dist/bundle/cli.js || { echo BIN_MISSING; exit 4; }
 
 echo "=== fork-gates run (ci) ==="
 runuser -u ci -- env \
