@@ -4,6 +4,11 @@ import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { discoverAndLoadExtensions } from "../src/core/extensions/loader.ts";
+// Fork note (§6 builtin kernel): discoverAndLoadExtensions always prepends the
+// builtin helm kernel entry, so raw results include it. Fixture assertions below
+// describe discovered user extensions only — filter the builtin out by design.
+const fixtureExts = (result: { extensions: readonly { path: string }[] }) =>
+	result.extensions.filter((e) => !e.path.includes("helmpi-kernel"));
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -47,8 +52,8 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(2);
-		expect(result.extensions.map((e) => path.basename(e.path)).sort()).toEqual(["bar.ts", "foo.ts"]);
+		expect(fixtureExts(result)).toHaveLength(2);
+		expect(fixtureExts(result).map((e) => path.basename(e.path)).sort()).toEqual(["bar.ts", "foo.ts"]);
 	});
 
 	it("loads the coding-agent entrypoint without rewriting pi-ai provider subpaths", async () => {
@@ -66,7 +71,7 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(1);
+		expect(fixtureExts(result)).toHaveLength(1);
 	});
 
 	it("does not infer package ownership from ancestor manifests", async () => {
@@ -99,8 +104,8 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toEqual([]);
-		expect(result.extensions).toHaveLength(1);
-		expect(result.extensions[0].commands.has("physical-dependency")).toBe(true);
+		expect(fixtureExts(result)).toHaveLength(1);
+		expect(fixtureExts(result)[0].commands.has("physical-dependency")).toBe(true);
 		expect(result.warnings).toEqual([]);
 	});
 
@@ -119,7 +124,7 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toEqual([]);
-		expect(result.extensions).toHaveLength(1);
+		expect(fixtureExts(result)).toHaveLength(1);
 	});
 
 	it("discovers direct .js files in extensions/", async () => {
@@ -128,8 +133,8 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(1);
-		expect(path.basename(result.extensions[0].path)).toBe("foo.js");
+		expect(fixtureExts(result)).toHaveLength(1);
+		expect(path.basename(fixtureExts(result)[0].path)).toBe("foo.js");
 	});
 
 	it("discovers subdirectory with index.ts", async () => {
@@ -140,9 +145,9 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(1);
-		expect(result.extensions[0].path).toContain("my-extension");
-		expect(result.extensions[0].path).toContain("index.ts");
+		expect(fixtureExts(result)).toHaveLength(1);
+		expect(fixtureExts(result)[0].path).toContain("my-extension");
+		expect(fixtureExts(result)[0].path).toContain("index.ts");
 	});
 
 	it("discovers subdirectory with index.js", async () => {
@@ -153,8 +158,8 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(1);
-		expect(result.extensions[0].path).toContain("index.js");
+		expect(fixtureExts(result)).toHaveLength(1);
+		expect(fixtureExts(result)[0].path).toContain("index.js");
 	});
 
 	it("prefers index.ts over index.js", async () => {
@@ -166,8 +171,8 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(1);
-		expect(result.extensions[0].path).toContain("index.ts");
+		expect(fixtureExts(result)).toHaveLength(1);
+		expect(fixtureExts(result)[0].path).toContain("index.ts");
 	});
 
 	it("discovers subdirectory with package.json pi field", async () => {
@@ -189,9 +194,9 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(1);
-		expect(result.extensions[0].path).toContain("src");
-		expect(result.extensions[0].path).toContain("main.ts");
+		expect(fixtureExts(result)).toHaveLength(1);
+		expect(fixtureExts(result)[0].path).toContain("src");
+		expect(fixtureExts(result)[0].path).toContain("main.ts");
 	});
 
 	it("keeps package.json pi extension entries with leading tilde package-relative", async () => {
@@ -214,7 +219,7 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions.map((extension) => extension.path).sort()).toEqual(
+		expect(fixtureExts(result).map((extension) => extension.path).sort()).toEqual(
 			[directExtensionPath, slashExtensionPath].sort(),
 		);
 	});
@@ -237,7 +242,7 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(2);
+		expect(fixtureExts(result)).toHaveLength(2);
 	});
 
 	it("package.json with pi field takes precedence over index.ts", async () => {
@@ -258,11 +263,11 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(1);
-		expect(result.extensions[0].path).toContain("custom.ts");
+		expect(fixtureExts(result)).toHaveLength(1);
+		expect(fixtureExts(result)[0].path).toContain("custom.ts");
 		// Verify the right tool was registered
-		expect(result.extensions[0].tools.has("from-custom")).toBe(true);
-		expect(result.extensions[0].tools.has("from-index")).toBe(false);
+		expect(fixtureExts(result)[0].tools.has("from-custom")).toBe(true);
+		expect(fixtureExts(result)[0].tools.has("from-index")).toBe(false);
 	});
 
 	it("ignores package.json without pi field, falls back to index.ts", async () => {
@@ -280,8 +285,8 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(1);
-		expect(result.extensions[0].path).toContain("index.ts");
+		expect(fixtureExts(result)).toHaveLength(1);
+		expect(fixtureExts(result)[0].path).toContain("index.ts");
 	});
 
 	it("ignores subdirectory without index or package.json", async () => {
@@ -293,7 +298,7 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(0);
+		expect(fixtureExts(result)).toHaveLength(0);
 	});
 
 	it("does not recurse beyond one level", async () => {
@@ -307,7 +312,7 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(0);
+		expect(fixtureExts(result)).toHaveLength(0);
 	});
 
 	it("handles mixed direct files and subdirectories", async () => {
@@ -328,7 +333,7 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(3);
+		expect(fixtureExts(result)).toHaveLength(3);
 	});
 
 	it("skips non-existent paths declared in package.json", async () => {
@@ -347,8 +352,8 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(1);
-		expect(result.extensions[0].path).toContain("exists.ts");
+		expect(fixtureExts(result)).toHaveLength(1);
+		expect(fixtureExts(result)[0].path).toContain("exists.ts");
 	});
 
 	it("loads extensions and registers commands", async () => {
@@ -357,8 +362,8 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(1);
-		expect(result.extensions[0].commands.has("test")).toBe(true);
+		expect(fixtureExts(result)).toHaveLength(1);
+		expect(fixtureExts(result)[0].commands.has("test")).toBe(true);
 	});
 
 	it("loads extensions and registers tools", async () => {
@@ -367,8 +372,8 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(1);
-		expect(result.extensions[0].tools.has("my-tool")).toBe(true);
+		expect(fixtureExts(result)).toHaveLength(1);
+		expect(fixtureExts(result)[0].tools.has("my-tool")).toBe(true);
 	});
 
 	it("reports errors for invalid extension code", async () => {
@@ -378,7 +383,7 @@ describe("extensions discovery", () => {
 
 		expect(result.errors).toHaveLength(1);
 		expect(result.errors[0].path).toContain("invalid.ts");
-		expect(result.extensions).toHaveLength(0);
+		expect(fixtureExts(result)).toHaveLength(0);
 	});
 
 	it("handles explicitly configured paths", async () => {
@@ -389,8 +394,8 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([customPath], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(1);
-		expect(result.extensions[0].path).toContain("my-ext.ts");
+		expect(fixtureExts(result)).toHaveLength(1);
+		expect(fixtureExts(result)[0].path).toContain("my-ext.ts");
 	});
 
 	it("resolves dependencies from extension's own node_modules", async () => {
@@ -400,10 +405,10 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([extPath], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(1);
-		expect(result.extensions[0].path).toContain("with-deps");
+		expect(fixtureExts(result)).toHaveLength(1);
+		expect(fixtureExts(result)[0].path).toContain("with-deps");
 		// The extension registers a 'parse_duration' tool
-		expect(result.extensions[0].tools.has("parse_duration")).toBe(true);
+		expect(fixtureExts(result)[0].tools.has("parse_duration")).toBe(true);
 	});
 
 	it("registers message and entry renderers", async () => {
@@ -425,10 +430,10 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(1);
-		expect(result.extensions[0].markdownTransformer).toBeDefined();
-		expect(result.extensions[0].messageRenderers.has("my-custom-type")).toBe(true);
-		expect(result.extensions[0].entryRenderers?.has("my-entry-type")).toBe(true);
+		expect(fixtureExts(result)).toHaveLength(1);
+		expect(fixtureExts(result)[0].markdownTransformer).toBeDefined();
+		expect(fixtureExts(result)[0].messageRenderers.has("my-custom-type")).toBe(true);
+		expect(fixtureExts(result)[0].entryRenderers?.has("my-entry-type")).toBe(true);
 	});
 
 	it("reports error when extension throws during initialization", async () => {
@@ -443,7 +448,7 @@ describe("extensions discovery", () => {
 
 		expect(result.errors).toHaveLength(1);
 		expect(result.errors[0].error).toContain("Initialization failed!");
-		expect(result.extensions).toHaveLength(0);
+		expect(fixtureExts(result)).toHaveLength(0);
 	});
 
 	it("reports error when extension has no default export", async () => {
@@ -458,7 +463,7 @@ describe("extensions discovery", () => {
 
 		expect(result.errors).toHaveLength(1);
 		expect(result.errors[0].error).toContain("does not export a valid factory function");
-		expect(result.extensions).toHaveLength(0);
+		expect(fixtureExts(result)).toHaveLength(0);
 	});
 
 	it("allows multiple extensions to register different tools", async () => {
@@ -468,7 +473,7 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(2);
+		expect(fixtureExts(result)).toHaveLength(2);
 
 		const allTools = new Set<string>();
 		for (const ext of result.extensions) {
@@ -493,10 +498,10 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(1);
-		expect(result.extensions[0].handlers.has("agent_start")).toBe(true);
-		expect(result.extensions[0].handlers.has("tool_call")).toBe(true);
-		expect(result.extensions[0].handlers.has("agent_end")).toBe(true);
+		expect(fixtureExts(result)).toHaveLength(1);
+		expect(fixtureExts(result)[0].handlers.has("agent_start")).toBe(true);
+		expect(fixtureExts(result)[0].handlers.has("tool_call")).toBe(true);
+		expect(fixtureExts(result)[0].handlers.has("agent_end")).toBe(true);
 	});
 
 	it("loads extension with shortcuts", async () => {
@@ -513,8 +518,8 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(1);
-		expect(result.extensions[0].shortcuts.has("ctrl+t")).toBe(true);
+		expect(fixtureExts(result)).toHaveLength(1);
+		expect(fixtureExts(result)[0].shortcuts.has("ctrl+t")).toBe(true);
 	});
 
 	it("loads extension with flags", async () => {
@@ -531,8 +536,8 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(1);
-		expect(result.extensions[0].flags.has("my-flag")).toBe(true);
+		expect(fixtureExts(result)).toHaveLength(1);
+		expect(fixtureExts(result)[0].flags.has("my-flag")).toBe(true);
 	});
 
 	it("loadExtensions only loads explicit paths without discovery", async () => {
@@ -548,9 +553,9 @@ describe("extensions discovery", () => {
 		const result = await loadExtensions([explicitPath], tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(1);
-		expect(result.extensions[0].tools.has("explicit")).toBe(true);
-		expect(result.extensions[0].tools.has("discovered")).toBe(false);
+		expect(fixtureExts(result)).toHaveLength(1);
+		expect(fixtureExts(result)[0].tools.has("explicit")).toBe(true);
+		expect(fixtureExts(result)[0].tools.has("discovered")).toBe(false);
 	});
 
 	it("loadExtensions with no paths loads nothing", async () => {
@@ -562,6 +567,6 @@ describe("extensions discovery", () => {
 		const result = await loadExtensions([], tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(result.extensions).toHaveLength(0);
+		expect(fixtureExts(result)).toHaveLength(0);
 	});
 });

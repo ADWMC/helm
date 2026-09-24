@@ -766,6 +766,18 @@ export async function discoverAndLoadExtensions(
 		}
 	};
 
+	// 0. Builtin kernel (fork decision): helm kernel loads first so
+	//    helmpi_validate_scope registers before every other tool.
+	//    Resolved to the absolute entry file so path-level dedupe (seen)
+	//    collapses an explicit reference to the same entry (no double load).
+	const kernelEntry = fs.realpathSync(
+		path.join(
+			path.dirname(createRequire(import.meta.url).resolve("@adwmc/helm-kernel/package.json")),
+			"src",
+			"index.ts",
+		),
+	);
+	addPaths([kernelEntry]);
 	// 1. Project-local extensions: cwd/${CONFIG_DIR_NAME}/extensions/
 	const localExtDir = path.join(resolvedCwd, CONFIG_DIR_NAME, "extensions");
 	addPaths(discoverExtensionsInDir(localExtDir));
