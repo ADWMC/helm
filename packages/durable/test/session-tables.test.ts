@@ -6,7 +6,7 @@ import {
 	ReadAfterWrite,
 	type Task,
 	type TaskRecord,
-} from "@adwmc/helm-pi-durable";
+} from "@adwmc/helm-durable";
 import { describe, expect, it } from "vitest";
 import { context, createConversation, documentChanges, flush, openTestSession } from "./session-support.ts";
 

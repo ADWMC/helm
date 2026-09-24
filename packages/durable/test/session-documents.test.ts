@@ -1,5 +1,5 @@
 import type { Draft } from "@adwmc/helm-chord";
-import { defineDoc, defineDocFamily, type Id, type JsonObject } from "@adwmc/helm-pi-durable";
+import { defineDoc, defineDocFamily, type Id, type JsonObject } from "@adwmc/helm-durable";
 import { describe, expect, it } from "vitest";
 import { context, createConversation, documentChanges, flush, openTestSession } from "./session-support.ts";
 

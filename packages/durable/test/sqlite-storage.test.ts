@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import type { Context, JsonValue } from "@adwmc/helm-chord";
 import { BACKGROUND_CONTEXT } from "@adwmc/helm-chord/context";
-import { registerStorageConformance } from "@adwmc/helm-pi-durable/testing";
+import { registerStorageConformance } from "@adwmc/helm-durable/testing";
 import { afterEach, describe, expect, it } from "vitest";
 import type { SqliteStorage } from "../src/storage/sqlite/index.ts";
 import { type NodeSqliteStorageOptions, openNodeSqliteStorage } from "../src/storage/sqlite/node.ts";

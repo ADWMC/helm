@@ -7,7 +7,7 @@ import {
 	MemoryStorage,
 	type Session,
 	type Tx,
-} from "@adwmc/helm-pi-durable";
+} from "@adwmc/helm-durable";
 import { describe, expect, expectTypeOf, it } from "vitest";
 import { context } from "./session-support.ts";
 

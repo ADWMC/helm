@@ -8,7 +8,7 @@ import {
 	MemoryStorage,
 	type Seq,
 	type StorageWrite,
-} from "@adwmc/helm-pi-durable";
+} from "@adwmc/helm-durable";
 import type { CommitPublication } from "../src/session/publications.ts";
 import { SessionKernel } from "../src/session/session.ts";
 import type { DocumentCommitChange } from "../src/session/transaction.ts";
