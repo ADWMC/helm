@@ -10,7 +10,7 @@
  */
 
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -95,11 +95,19 @@ test("default-ON: all four discriminators present with no config file", async ()
 	}
 });
 
-const OPT_OUT_CASES: Array<{ key: keyof ReturnType<typeof resolveSolPiConfig>; off: (rec: FauxPi) => boolean; stillOn: (rec: FauxPi) => boolean }> = [
+const OPT_OUT_CASES: Array<{
+	key: keyof ReturnType<typeof resolveSolPiConfig>;
+	off: (rec: FauxPi) => boolean;
+	stillOn: (rec: FauxPi) => boolean;
+}> = [
 	{ key: "actionFusion", off: (r) => !hasThenRunEdit(r), stillOn: (r) => r.tools.has("obs_recall") },
 	{ key: "observationPack", off: (r) => !r.tools.has("obs_recall"), stillOn: (r) => r.tools.has("update_plan") },
 	{ key: "onlineContextCompact", off: (r) => !r.tools.has("update_plan"), stillOn: (r) => r.tools.has("obs_recall") },
-	{ key: "evidencePreservingReducer", off: (r) => !r.events.includes("tool_result"), stillOn: (r) => r.tools.has("obs_recall") },
+	{
+		key: "evidencePreservingReducer",
+		off: (r) => !r.events.includes("tool_result"),
+		stillOn: (r) => r.tools.has("obs_recall"),
+	},
 ];
 
 for (const c of OPT_OUT_CASES) {

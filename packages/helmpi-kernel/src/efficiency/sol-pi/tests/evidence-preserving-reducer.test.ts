@@ -10,17 +10,14 @@ import { isAbsolute, join, relative } from "node:path";
 import type { AssistantMessage, Context, Model } from "@adwmc/helm-ai";
 import type { ExtensionContext, ToolResultEvent } from "@adwmc/helm-coding-agent";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { archiveBody } from "../extensions/evidence-preserving-reducer/archive.ts";
 import {
 	createEvidencePreservingReducerExtension,
 	DIAGNOSTIC_COMMAND,
 	loadReducerConfig,
 	REDUCER_RECEIPT_SCHEMA,
 } from "../extensions/evidence-preserving-reducer/index.ts";
-import { archiveBody } from "../extensions/evidence-preserving-reducer/archive.ts";
-import {
-	callReducer,
-	type CompatComplete,
-} from "../extensions/evidence-preserving-reducer/provider.ts";
+import { type CompatComplete, callReducer } from "../extensions/evidence-preserving-reducer/provider.ts";
 import { runtimeRoot } from "../runtime-paths.ts";
 import { FakePi, FakeSessionManager, fakeContext } from "./helpers.ts";
 
@@ -213,9 +210,9 @@ describe("evidence-preserving reducer", () => {
 		expect(manager.entries.map((entry) => entry.type === "custom" && entry.customType)).toContain(
 			"sol-pi-evidence-preserving-reducer-v1",
 		);
-		expect(
-			manager.customEntryData().every((entry) => entry.schema === "sol-pi-evidence-preserving-reducer/1"),
-		).toBe(true);
+		expect(manager.customEntryData().every((entry) => entry.schema === "sol-pi-evidence-preserving-reducer/1")).toBe(
+			true,
+		);
 	});
 
 	it("keeps the diagnostic command trigger generic", () => {
@@ -291,7 +288,9 @@ describe("evidence-preserving reducer", () => {
 		expect(candidate).toBeTruthy();
 		const sourcePath = String(candidate?.sourcePath);
 		const localSourcePath = relative(join(runtimeRoot(context), "evidence-preserving-reducer"), sourcePath);
-		expect(localSourcePath.length > 0 && !localSourcePath.startsWith("..") && !isAbsolute(localSourcePath)).toBe(true);
+		expect(localSourcePath.length > 0 && !localSourcePath.startsWith("..") && !isAbsolute(localSourcePath)).toBe(
+			true,
+		);
 		expect(await readFile(sourcePath, "utf8")).toBe(body);
 		expect((await stat(sourcePath)).mode & 0o777).toBe(0o600);
 		expect(events.filter((entry) => entry.kind === "applied")).toHaveLength(1);
@@ -330,11 +329,11 @@ describe("evidence-preserving reducer", () => {
 				getApiKeyAndHeaders: async (model: Model<string>) => {
 					authModel = model;
 					return {
-					ok: true,
-					apiKey: "fork-test-key",
-					headers: { "x-test-header": "fork" },
-					env: { TEST_REGION: "test" },
-					baseUrl: "https://fork.example.invalid/v1",
+						ok: true,
+						apiKey: "fork-test-key",
+						headers: { "x-test-header": "fork" },
+						env: { TEST_REGION: "test" },
+						baseUrl: "https://fork.example.invalid/v1",
 					};
 				},
 			} as unknown as ExtensionContext["modelRegistry"],
@@ -501,11 +500,7 @@ describe("evidence-preserving reducer", () => {
 			}),
 		);
 
-		await pi.emit(
-			"tool_result",
-			bashEvent("ERROR truncated", { details: { fullOutputPath: outputPath } }),
-			context,
-		);
+		await pi.emit("tool_result", bashEvent("ERROR truncated", { details: { fullOutputPath: outputPath } }), context);
 		expect(input).toContain(fullBody);
 		const candidate = manager.customEntryData().find((entry) => entry.kind === "candidate");
 		expect(await readFile(String(candidate?.sourcePath), "utf8")).toBe(fullBody);
@@ -526,18 +521,14 @@ describe("evidence-preserving reducer", () => {
 	it("does not delegate small or non-diagnostic output", async () => {
 		const root = await storeRoot();
 		let calls = 0;
-		const { context, manager, pi } = load(root, async () => {
+		const { context, pi } = load(root, async () => {
 			calls++;
 			throw new Error("unexpected model call");
 		});
 
 		expect(await pi.emit("tool_result", bashEvent("ERROR short"), context)).toBeUndefined();
 		expect(
-			await pi.emit(
-				"tool_result",
-				bashEvent("x".repeat(5000), { input: { command: "rg symbol src" } }),
-				context,
-			),
+			await pi.emit("tool_result", bashEvent("x".repeat(5000), { input: { command: "rg symbol src" } }), context),
 		).toBeUndefined();
 		expect(calls).toBe(0);
 	});

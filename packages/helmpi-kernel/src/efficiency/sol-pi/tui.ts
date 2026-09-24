@@ -6,11 +6,7 @@
 import type { ExtensionContext, Theme } from "@adwmc/helm-coding-agent";
 import { type Component, Container, Text } from "@adwmc/helm-tui";
 
-export type SolPiTuiMechanism =
-	| "Action Fusion"
-	| "Observation Pack"
-	| "Luna Delegating"
-	| "Online Context Compact";
+export type SolPiTuiMechanism = "Action Fusion" | "Observation Pack" | "Luna Delegating" | "Online Context Compact";
 
 const STATUS_KEY = "sol-pi-savings";
 const STATUS_DURATION_MS = 4_000;
@@ -49,11 +45,7 @@ export function renderSolPiTool(
 	return container;
 }
 
-export function showSolPiSavings(
-	context: ExtensionContext,
-	mechanism: SolPiTuiMechanism,
-	saving: string,
-): void {
+export function showSolPiSavings(context: ExtensionContext, mechanism: SolPiTuiMechanism, saving: string): void {
 	if (context.mode !== "tui") return;
 	const message = `⚡ SoL-Pi · ${mechanism}\nMoney saved · ${saving}`;
 	context.ui.notify(message, "info");

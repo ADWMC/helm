@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 import type { ExtensionAPI, SessionEntry } from "@adwmc/helm-coding-agent";
-import { parsePlanSteps, type PlanStep } from "./plan.ts";
+import { type PlanStep, parsePlanSteps } from "./plan.ts";
 
 export const ONLINE_STATE_ENTRY = "sol-pi-online-context-state-v1";
 

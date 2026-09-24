@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { getAgentDir, type ExtensionAPI, type ExtensionContext, type ExtensionFactory } from "@adwmc/helm-coding-agent";
+import { type ExtensionAPI, type ExtensionContext, type ExtensionFactory, getAgentDir } from "@adwmc/helm-coding-agent";
 import { loadSolPiConfig, type SolPiConfig } from "./config.ts";
 import { registerActionFusion } from "./extensions/action-fusion/index.ts";
 import { registerEvidencePreservingReducer } from "./extensions/evidence-preserving-reducer/index.ts";

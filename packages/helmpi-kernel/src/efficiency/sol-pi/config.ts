@@ -6,10 +6,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { CONFIG_DIR_NAME, getAgentDir } from "@adwmc/helm-coding-agent";
-import {
-	DEFAULT_REDUCER_MODEL,
-	DEFAULT_REDUCER_PROVIDER,
-} from "./extensions/evidence-preserving-reducer/config.ts";
+import { DEFAULT_REDUCER_MODEL, DEFAULT_REDUCER_PROVIDER } from "./extensions/evidence-preserving-reducer/config.ts";
 
 export const DEFAULT_CACHE_WRITE_READ_RATIO = 12.5;
 
@@ -35,12 +32,7 @@ export const DEFAULT_CONFIG: SolPiConfig = Object.freeze({
 	cacheWriteReadRatio: DEFAULT_CACHE_WRITE_READ_RATIO,
 });
 
-const FEATURE_KEYS = [
-	"actionFusion",
-	"observationPack",
-	"evidencePreservingReducer",
-	"onlineContextCompact",
-] as const;
+const FEATURE_KEYS = ["actionFusion", "observationPack", "evidencePreservingReducer", "onlineContextCompact"] as const;
 const STRING_KEYS = ["evidencePreservingReducerModel", "evidencePreservingReducerProvider"] as const;
 const CONFIG_KEYS = new Set<string>(["version", ...FEATURE_KEYS, ...STRING_KEYS, "cacheWriteReadRatio"]);
 
@@ -92,11 +84,7 @@ export function loadSolPiConfig(
 	const cacheWriteReadRatio = Object.hasOwn(record, "cacheWriteReadRatio")
 		? record.cacheWriteReadRatio
 		: DEFAULT_CACHE_WRITE_READ_RATIO;
-	if (
-		typeof cacheWriteReadRatio !== "number" ||
-		!Number.isFinite(cacheWriteReadRatio) ||
-		cacheWriteReadRatio < 0
-	) {
+	if (typeof cacheWriteReadRatio !== "number" || !Number.isFinite(cacheWriteReadRatio) || cacheWriteReadRatio < 0) {
 		throw new Error(`SoL-Pi config cacheWriteReadRatio must be a finite non-negative number: ${path}`);
 	}
 	const evidencePreservingReducerModel = stringConfigValue(

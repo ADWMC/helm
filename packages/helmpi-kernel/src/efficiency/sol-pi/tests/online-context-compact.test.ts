@@ -110,31 +110,35 @@ describe("Online Context Compact extension", () => {
 		let context: ExtensionContext;
 		const compact = (options: CompactOptions = {}): void => {
 			compactCalls.push(options);
-			void compactionGate.then(() => pi
-				.emit(
-					"session_compact",
-					{
-						type: "session_compact",
-						fromExtension: false,
-						reason: "manual",
-						willRetry: false,
-						compactionEntry: {
-							type: "compaction",
-							id: "compact-1",
-							parentId: manager.getLeafId(),
-							timestamp: new Date().toISOString(),
-							summary: "summary",
-							firstKeptEntryId: manager.entries.at(-1)?.id ?? "message-1",
-							tokensBefore: 195_000,
+			void compactionGate
+				.then(() =>
+					pi.emit(
+						"session_compact",
+						{
+							type: "session_compact",
+							fromExtension: false,
+							reason: "manual",
+							willRetry: false,
+							compactionEntry: {
+								type: "compaction",
+								id: "compact-1",
+								parentId: manager.getLeafId(),
+								timestamp: new Date().toISOString(),
+								summary: "summary",
+								firstKeptEntryId: manager.entries.at(-1)?.id ?? "message-1",
+								tokensBefore: 195_000,
+							},
 						},
-					},
-					context,
-				))
-				.then(() => options.onComplete?.({
-					summary: "summary",
-					firstKeptEntryId: manager.entries.at(-1)?.id ?? "message-1",
-					tokensBefore: 195_000,
-				}));
+						context,
+					),
+				)
+				.then(() =>
+					options.onComplete?.({
+						summary: "summary",
+						firstKeptEntryId: manager.entries.at(-1)?.id ?? "message-1",
+						tokensBefore: 195_000,
+					}),
+				);
 		};
 		context = fakeContext(manager, {
 			abort,

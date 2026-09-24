@@ -5,32 +5,28 @@
 import type { AgentMessage, AgentToolResult } from "@adwmc/helm-agent-core";
 import {
 	buildSessionContext,
-	estimateTokens,
-	findCutPoint,
-	sessionEntryToContextMessages,
 	type ExtensionContext,
 	type ExtensionFactory,
+	estimateTokens,
+	findCutPoint,
 	type SessionEntry,
+	sessionEntryToContextMessages,
 } from "@adwmc/helm-coding-agent";
 import { formatSavingsCount, showSolPiSavings } from "../../tui.ts";
-import {
-	DEFAULT_COMPACTION_ECONOMICS,
-	decideCompaction,
-	type CompactionDecision,
-} from "./economics.ts";
+import { type CompactionDecision, DEFAULT_COMPACTION_ECONOMICS, decideCompaction } from "./economics.ts";
 import { analyzePlanTransition, formatPlanSnapshot, parsePlanSteps } from "./plan.ts";
 import {
 	appendOnlineState,
 	initialOnlineState,
+	type OnlineState,
+	type ProgressSummary,
 	recordBoundary,
 	recordCompaction,
 	recordCorrection,
 	recordProviderRequest,
 	restoreOnlineState,
-	type OnlineState,
-	type ProgressSummary,
 } from "./state.ts";
-import { registerOnlineTools, type PlanUpdateInput } from "./tools.ts";
+import { type PlanUpdateInput, registerOnlineTools } from "./tools.ts";
 
 export const DEFAULT_KEEP_RECENT_TOKENS = 20_000;
 export const DEFAULT_NATIVE_SUMMARY_TOKEN_ESTIMATE = 1_000;
@@ -70,7 +66,10 @@ function tokenEstimate(text: string): number {
 	return Math.ceil(Buffer.byteLength(text) / 4);
 }
 
-function result(text: string, details: Readonly<Record<string, unknown>>): AgentToolResult<Readonly<Record<string, unknown>>> {
+function result(
+	text: string,
+	details: Readonly<Record<string, unknown>>,
+): AgentToolResult<Readonly<Record<string, unknown>>> {
 	return { content: [{ type: "text", text }], details };
 }
 
@@ -216,16 +215,13 @@ export function createOnlineContextCompactExtension(options: OnlineContextCompac
 				}
 				save();
 
-				return result(
-					[formatPlanSnapshot(steps), ...transition.advice].join("\n"),
-					{
-						boundary: completedIds.length > 0,
-						completed_step_ids: completedIds,
-						progress_recorded: completedIds.length > 0 && input.progress !== undefined,
-						task_status: "active",
-						plan: steps,
-					},
-				);
+				return result([formatPlanSnapshot(steps), ...transition.advice].join("\n"), {
+					boundary: completedIds.length > 0,
+					completed_step_ids: completedIds,
+					progress_recorded: completedIds.length > 0 && input.progress !== undefined,
+					task_status: "active",
+					plan: steps,
+				});
 			},
 		});
 
@@ -348,10 +344,7 @@ export function createOnlineContextCompactExtension(options: OnlineContextCompac
 						onComplete: (compaction) => {
 							try {
 								compacted = true;
-								const removed = Math.max(
-									0,
-									pending.decision.archiveTokens - tokenEstimate(compaction.summary),
-								);
+								const removed = Math.max(0, pending.decision.archiveTokens - tokenEstimate(compaction.summary));
 								if (removed > 0) {
 									showSolPiSavings(
 										context,

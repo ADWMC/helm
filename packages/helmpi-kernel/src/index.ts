@@ -10,7 +10,6 @@ import type { ExtensionAPI, ExtensionContext } from "@adwmc/helm-coding-agent";
 import { Type } from "typebox";
 
 import { matchActivation } from "./activation.ts";
-import { createEfficiencyExtension } from "./efficiency/index.ts";
 import { AdvisoryLedger } from "./breach/advisory.ts";
 import { normalizeInput } from "./breach/input-normalizer.ts";
 import { classifyStance, isRefusal } from "./breach/refusal.ts";
@@ -21,6 +20,7 @@ import { loadConfig } from "./config.ts";
 import { validateScopeQuery } from "./domain/scope.ts";
 import type { Spec } from "./domain/types.ts";
 import { ACTIVATION_WORD } from "./domain/types.ts";
+import { createEfficiencyExtension } from "./efficiency/index.ts";
 import { Ledger } from "./ledger.ts";
 import { openToolMemory, ToolMemoryStore } from "./memory/tool-memory.ts";
 import { enterPhase, readPhaseState, satisfyDeliverable, startPlaybook } from "./phase.ts";

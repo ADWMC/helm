@@ -9,11 +9,7 @@ import { join } from "node:path";
 import type { AgentMessage } from "@adwmc/helm-agent-core";
 import type { ToolResultMessage } from "@adwmc/helm-ai";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-	createObservationPackExtension,
-	FULL_SENDS,
-	THRESHOLD_BYTES,
-} from "../extensions/observation-pack/index.ts";
+import { createObservationPackExtension, FULL_SENDS, THRESHOLD_BYTES } from "../extensions/observation-pack/index.ts";
 import { componentText, FakePi, FakeSessionManager, fakeContext, plainTheme } from "./helpers.ts";
 
 const roots: string[] = [];
@@ -168,8 +164,12 @@ describe("observation pack", () => {
 			expect(resultText((await pi.emitContext([message], context))[0]!)).toMatch(/^\[large tool result replaced/u);
 		}
 
-		expect(await readFile(join(sessionDir, "sol-pi", "session-a", "observation-pack", "objects", `${id}.txt`), "utf8")).toBe(body);
-		expect(await readFile(join(sessionDir, "sol-pi", "session-b", "observation-pack", "objects", `${id}.txt`), "utf8")).toBe(body);
+		expect(
+			await readFile(join(sessionDir, "sol-pi", "session-a", "observation-pack", "objects", `${id}.txt`), "utf8"),
+		).toBe(body);
+		expect(
+			await readFile(join(sessionDir, "sol-pi", "session-b", "observation-pack", "objects", `${id}.txt`), "utf8"),
+		).toBe(body);
 	});
 
 	it("breaks the prefix once per observation without remutating older placeholders", async () => {
@@ -347,7 +347,11 @@ describe("observation pack", () => {
 		expect(await project(observationPackPi(), error, sessionDir, 3)).toEqual([large, large, large]);
 		expect(await project(observationPackPi(), mixed, sessionDir, 3)).toEqual([large, large, large]);
 		const receiptText = resultText(receipt);
-		expect(await project(observationPackPi(), receipt, sessionDir, 3)).toEqual([receiptText, receiptText, receiptText]);
+		expect(await project(observationPackPi(), receipt, sessionDir, 3)).toEqual([
+			receiptText,
+			receiptText,
+			receiptText,
+		]);
 		const compoundText = resultText(compoundReceipt);
 		expect(await project(observationPackPi(), compoundReceipt, sessionDir, 3)).toEqual([
 			compoundText,

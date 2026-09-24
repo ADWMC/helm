@@ -5,14 +5,14 @@
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, expect, it, vi } from "vitest";
 import type { BashOperations, ExtensionAPI, ExtensionContext, ToolDefinition } from "@adwmc/helm-coding-agent";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { withFusedFileQueue } from "../extensions/action-fusion/file-queue.ts";
 import {
 	type ActionFusionOptions,
 	assertUnchangedBeforeCommand,
 	createActionFusionExtension,
 } from "../extensions/action-fusion/index.ts";
-import { withFusedFileQueue } from "../extensions/action-fusion/file-queue.ts";
 import { componentText, plainTheme } from "./helpers.ts";
 
 function delay(ms: number): Promise<void> {

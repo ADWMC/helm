@@ -71,7 +71,10 @@ function stringHeaders(headers: Record<string, string | null> | undefined): Reco
 	return Object.fromEntries(Object.entries(headers).filter((entry): entry is [string, string] => entry[1] !== null));
 }
 
-function operationSignal(parent: AbortSignal | undefined, timeoutMs: number): {
+function operationSignal(
+	parent: AbortSignal | undefined,
+	timeoutMs: number,
+): {
 	readonly cleanup: () => void;
 	readonly signal: AbortSignal;
 } {

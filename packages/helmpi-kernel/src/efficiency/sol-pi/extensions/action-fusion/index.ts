@@ -28,14 +28,9 @@ import {
 	type WriteToolOptions,
 } from "@adwmc/helm-coding-agent";
 import { Type } from "typebox";
-import { resolveToolPath } from "./file-queue.ts";
 import { renderSolPiTool, showSolPiSavings } from "../../tui.ts";
-import {
-	createThenRunSchema,
-	executeMutationThenRun,
-	THEN_RUN_SUCCEEDED,
-	type ThenRunInput,
-} from "./then-run.ts";
+import { resolveToolPath } from "./file-queue.ts";
+import { createThenRunSchema, executeMutationThenRun, THEN_RUN_SUCCEEDED, type ThenRunInput } from "./then-run.ts";
 
 const EDIT_THEN_RUN_DESCRIPTION =
 	"Command to run next on this file after the edit succeeds — e.g. run, build, start/restart, install, or check it; optional timeout in seconds. Skipped if the edit fails; a non-zero exit is reported but keeps the edit.";

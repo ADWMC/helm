@@ -8,9 +8,9 @@
  * (config separation: their sol-pi.json is not read by the builtin path).
  */
 
-import type { ExtensionFactory } from "@adwmc/helm-coding-agent";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import type { ExtensionFactory } from "@adwmc/helm-coding-agent";
 import { DEFAULT_CONFIG, type SolPiConfig } from "./sol-pi/config.ts";
 import { createSolPiExtension } from "./sol-pi/index.ts";
 

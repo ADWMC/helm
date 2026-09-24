@@ -48,7 +48,9 @@ function thenRunSkippedError(error: unknown): Error {
 }
 
 async function fileSha256(path: string): Promise<string> {
-	return createHash("sha256").update(await readFile(path)).digest("hex");
+	return createHash("sha256")
+		.update(await readFile(path))
+		.digest("hex");
 }
 
 export async function assertUnchangedBeforeCommand(

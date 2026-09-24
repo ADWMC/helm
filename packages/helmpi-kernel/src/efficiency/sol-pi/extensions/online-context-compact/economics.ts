@@ -84,10 +84,7 @@ export function estimateRemainingRequests(input: {
 		if (input.completedBoundaryRequestCounts.length < MINIMUM_VARIANCE_SAMPLES) {
 			lowerBound *= SMALL_SAMPLE_SCALE;
 		} else {
-			const variance = input.completedBoundaryRequestCounts.reduce(
-				(total, count) => total + (count - mean) ** 2,
-				0,
-			);
+			const variance = input.completedBoundaryRequestCounts.reduce((total, count) => total + (count - mean) ** 2, 0);
 			const deviation = Math.sqrt(variance / (input.completedBoundaryRequestCounts.length - 1));
 			lowerBound = Math.max(0, mean - input.standardDeviationK * deviation);
 		}

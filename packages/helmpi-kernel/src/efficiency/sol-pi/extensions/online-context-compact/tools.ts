@@ -90,7 +90,10 @@ export function registerOnlineTools(pi: ExtensionAPI, handlers: OnlineToolHandle
 				"Online Context Compact",
 				"compacts only when projected savings are positive",
 				new Text(
-					theme.fg(isPartial ? "warning" : "dim", isPartial ? "Updating plan..." : boundary ? "Progress boundary recorded" : "Plan recorded"),
+					theme.fg(
+						isPartial ? "warning" : "dim",
+						isPartial ? "Updating plan..." : boundary ? "Progress boundary recorded" : "Plan recorded",
+					),
 					0,
 					0,
 				),

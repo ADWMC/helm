@@ -2,11 +2,12 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: MIT
  */
+
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import type { AgentMessage } from "@adwmc/helm-agent-core";
 import type { ExtensionAPI, ExtensionContext, SessionEntry, Theme, ToolDefinition } from "@adwmc/helm-coding-agent";
 import type { Component } from "@adwmc/helm-tui";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 
 type Handler = (event: unknown, context: ExtensionContext) => unknown | Promise<unknown>;
 

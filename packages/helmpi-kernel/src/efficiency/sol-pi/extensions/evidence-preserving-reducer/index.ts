@@ -19,12 +19,7 @@
  * authentication remain with Pi; storage and run identity come from the session.
  */
 
-import type {
-	ExtensionAPI,
-	ExtensionContext,
-	ExtensionFactory,
-	ToolResultEvent,
-} from "@adwmc/helm-coding-agent";
+import type { ExtensionAPI, ExtensionContext, ExtensionFactory, ToolResultEvent } from "@adwmc/helm-coding-agent";
 import { runtimeRoot } from "../../runtime-paths.ts";
 import { formatSavingsBytes, showSolPiSavings } from "../../tui.ts";
 import { archiveBody, archiveRoot } from "./archive.ts";
@@ -176,7 +171,9 @@ export async function reduceToolResult(
 	};
 }
 
-export function createEvidencePreservingReducerExtension(options: EvidencePreservingReducerOptions = {}): ExtensionFactory {
+export function createEvidencePreservingReducerExtension(
+	options: EvidencePreservingReducerOptions = {},
+): ExtensionFactory {
 	return (pi: ExtensionAPI) => {
 		const states = new Map<string, { config: ReducerConfig; journal: Journal }>();
 		pi.on("tool_result", (event, context) => {
@@ -205,8 +202,8 @@ export {
 	REDUCER_EVENT_TYPE,
 	REDUCER_RECEIPT_PREFIX,
 	REDUCER_RECEIPT_SCHEMA,
-	type ReducerConfigOptions,
 	type ReducerConfig,
+	type ReducerConfigOptions,
 } from "./config.ts";
 export { validateReceipt } from "./receipt.ts";
 
