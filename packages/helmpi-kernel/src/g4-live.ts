@@ -48,8 +48,8 @@ function num(v: unknown): number {
 export function sumSessionUsage(entries: unknown[]): number {
 	let total = 0;
 	for (const raw of entries) {
-		const e = raw as { usage?: UsageLike } | null;
-		const u = e?.usage;
+		const e = raw as { usage?: UsageLike; message?: { usage?: UsageLike } } | null;
+		const u = e?.usage ?? e?.message?.usage;
 		if (!u) continue;
 		if (typeof u.totalTokens === "number" && u.totalTokens > 0) {
 			total += u.totalTokens;
