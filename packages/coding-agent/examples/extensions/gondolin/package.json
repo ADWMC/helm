@@ -14,6 +14,6 @@
 		]
 	},
 	"dependencies": {
-		"@earendil-works/gondolin": "0.12.0"
+		"@adwmc/helm-gondolin": "0.12.0"
 	}
 }

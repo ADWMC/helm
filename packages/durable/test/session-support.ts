@@ -1,5 +1,5 @@
-import type { Context } from "@earendil-works/chord";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
+import type { Context } from "@adwmc/helm-chord";
+import { BACKGROUND_CONTEXT } from "@adwmc/helm-chord/context";
 import {
 	type DocumentAddress,
 	type DocumentPoint,
@@ -8,7 +8,7 @@ import {
 	MemoryStorage,
 	type Seq,
 	type StorageWrite,
-} from "@earendil-works/pi-durable";
+} from "@adwmc/helm-pi-durable";
 import type { CommitPublication } from "../src/session/publications.ts";
 import { SessionKernel } from "../src/session/session.ts";
 import type { DocumentCommitChange } from "../src/session/transaction.ts";

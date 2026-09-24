@@ -1,5 +1,5 @@
-import { copyJson, type JsonValue } from "@earendil-works/chord";
-import type { Op } from "@earendil-works/chord/delta";
+import { copyJson, type JsonValue } from "@adwmc/helm-chord";
+import type { Op } from "@adwmc/helm-chord/delta";
 import type {
 	CommonDocDefinition,
 	ConversationDocFamilyToken,

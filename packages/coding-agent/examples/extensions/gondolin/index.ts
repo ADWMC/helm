@@ -15,7 +15,7 @@
  *   pi -e /path/to/pi/packages/coding-agent/examples/extensions/gondolin
  *
  * Requirements:
- *   - Node.js >= 23.6.0 for @earendil-works/gondolin
+ *   - Node.js >= 23.6.0 for @adwmc/helm-gondolin
  *   - QEMU installed (for example, `brew install qemu` on macOS)
  */
 
@@ -42,7 +42,7 @@ import {
 	truncateLine,
 	type WriteOperations,
 } from "@adwmc/helm-coding-agent";
-import { RealFSProvider, VM } from "@earendil-works/gondolin";
+import { RealFSProvider, VM } from "@adwmc/helm-gondolin";
 
 const GUEST_WORKSPACE = "/workspace";
 const DEFAULT_GREP_LIMIT = 100;
