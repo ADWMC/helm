@@ -504,10 +504,10 @@ export const APP_TITLE: string = piConfigName ? APP_NAME : "π";
 export const CONFIG_DIR_NAME: string = pkg.piConfig?.configDir || ".helm";
 export const VERSION: string = pkg.version || "0.0.0";
 
-// Env var names keep the legacy PI_ prefix for compatibility with existing
-// user environments; e.g., PI_CODING_AGENT_DIR or TAU_CODING_AGENT_DIR.
-export const ENV_AGENT_DIR = "PI_CODING_AGENT_DIR";
-export const ENV_SESSION_DIR = "PI_CODING_AGENT_SESSION_DIR";
+// Env var names are HELM_-branded per decision (2026-09): the legacy PI_ brand retired.
+// e.g., HELM_CODING_AGENT_DIR / HELM_CODING_AGENT_SESSION_DIR.
+export const ENV_AGENT_DIR = "HELM_CODING_AGENT_DIR";
+export const ENV_SESSION_DIR = "HELM_CODING_AGENT_SESSION_DIR";
 
 export function expandTildePath(path: string): string {
 	return normalizePath(path);

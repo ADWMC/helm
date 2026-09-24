@@ -16,6 +16,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { exportReport, exportReportJson, reportExitCode } from "@adwmc/helm-kernel/export";
 import { Ledger } from "@adwmc/helm-kernel/ledger";
+import { validateHelmConfig, validateHelmSpec } from "@adwmc/helm-kernel/config";
 import { validateScopeQuery } from "@adwmc/helm-kernel/scope";
 
 const HELM_COMMANDS: ReadonlySet<string> = new Set([
@@ -63,7 +64,14 @@ export async function runHelmCommand(args: string[], cwd: string = process.cwd()
 				process.exitCode = 1;
 				return true;
 			}
-			writeFileSync(specPath, `${JSON.stringify(specScaffold(), null, 2)}\n`, "utf8");
+			const scaffold = specScaffold();
+			const sv = validateHelmSpec(scaffold);
+			if (!sv.ok) {
+				console.error(`internal scaffold invalid: ${sv.failures.map((f) => `${f.path}: ${f.message}`).join(", ")}`);
+				process.exitCode = 1;
+				return true;
+			}
+			writeFileSync(specPath, `${JSON.stringify(scaffold, null, 2)}` + String.fromCharCode(10), "utf8");
 			// Best-effort SOW template copy (dev layout carries docs/ next to the repo root).
 			const tplCandidates = [resolve(cwd, "docs/SOW-TEMPLATE.md"), resolve(cwd, "../../docs/SOW-TEMPLATE.md")];
 			let tpl = "";
@@ -92,7 +100,14 @@ export async function runHelmCommand(args: string[], cwd: string = process.cwd()
 			let spec: unknown = null;
 			if (existsSync(path)) {
 				try {
-					spec = JSON.parse(readFileSync(path, "utf8"));
+					const parsed: unknown = JSON.parse(readFileSync(path, "utf8"));
+				const sv = validateHelmSpec(parsed);
+				if (!sv.ok) {
+					console.error(`invalid spec schema at ${path}: ${sv.failures.map((f) => `${f.path}: ${f.message}`).join(", ")}`);
+					process.exitCode = 2;
+					return true;
+				}
+				spec = parsed;
 				} catch (err) {
 					console.error(`invalid spec JSON at ${path}: ${String(err)}`);
 					process.exitCode = 2;

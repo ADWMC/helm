@@ -597,13 +597,13 @@ describe("NodeExecutionEnv shell", () => {
 				cwd: root,
 				shellEnv: {
 					PI_SESSION_FILE: "/stale/parent.jsonl",
-					PI_CODING_AGENT: "true",
+					HELM_CODING_AGENT: "true",
 					PI_NODE_ENV_PRESERVED_TEST: "preserved",
 				},
 			});
 			const collected = await collectShellOutput(
 				env,
-				`printf '%s:%s|%s|%s' "\${PI_SESSION_FILE+x}" "\${PI_SESSION_FILE-}" "$PI_CODING_AGENT" "$PI_NODE_ENV_PRESERVED_TEST"`,
+				`printf '%s:%s|%s|%s' "\${PI_SESSION_FILE+x}" "\${PI_SESSION_FILE-}" "$HELM_CODING_AGENT" "$PI_NODE_ENV_PRESERVED_TEST"`,
 				{ env: overrides },
 				BACKGROUND_CONTEXT,
 			);

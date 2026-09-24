@@ -4,6 +4,7 @@
   },
   "type": "module",
 	"exports": {
+		"./config": "./src/config-schema.ts",
 		"./package.json": "./package.json",
 		".": "./src/index.ts",
 		"./scope": "./src/domain/scope.ts",
