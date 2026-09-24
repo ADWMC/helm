@@ -1,0 +1,2 @@
+goal: Enumerate http://127.0.0.1:18080 (scope: this host only), identify the login endpoint, run one benign SQLi probe, and report findings with evidence.
+samples: http://127.0.0.1:18080

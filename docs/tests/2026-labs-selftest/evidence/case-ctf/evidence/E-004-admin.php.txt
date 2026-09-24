@@ -1,0 +1,5 @@
+GET http://127.0.0.1:18082/admin.php
+&lt;pre&gt;
+Login panel. Try cookie: session=demo
+&lt;!-- flag half: FLAG{ctf_ --&gt;
+&lt;/pre&gt;

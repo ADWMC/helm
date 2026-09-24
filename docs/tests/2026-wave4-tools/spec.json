@@ -1,0 +1,5 @@
+{
+  "goal": "wave4: api playbook + phase gates + evidence chain on local lab",
+  "allowedTargets": ["http://127.0.0.1:18081"],
+  "highRisk": "deny"
+}

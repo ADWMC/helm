@@ -1,0 +1,22 @@
+SCOPE: authorized target = http://127.0.0.1:18081 ONLY (weblab-api, local lab). No other host/port contacted.
+
+GET http://127.0.0.1:18081/
+HTTP/1.0 200 OK
+Server: BaseHTTP/0.6 Python/3.13.8
+Content-Type: application/json; charset=utf-8
+Content-Length: 169
+{"service": "weblab-api", "endpoints": ["/login", "/notes?id=", "/admin/config", "/files?name="], "hint": "token=base64({json uid}) ; notes?id= may not check ownership"}
+
+Path enum (status/size):
+/ -> 200 169
+/users -> 404 22
+/token -> 404 22
+/health -> 200 169
+/flag -> 404 22
+/admin -> 404 22
+/notes -> 200 49
+/files -> 404 150   (error body leaks absolute base path, see E-006)
+
+POST /admin/config -> 404 (only GET handled for that route)
+helmpi route_task: PRIMARY=web (score=2), backups har/native.
+begin_case opened ./case-18081.

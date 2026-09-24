@@ -1,0 +1,7 @@
+HTTP 200 <!doctype html><html><body>
+<h1>VulnCMS</h1>
+<ul>
+<li><a href="/login">Login</a></li>
+<li><a href="/dashboard">Dashboard</a></li>
+</ul>
+</body></html>

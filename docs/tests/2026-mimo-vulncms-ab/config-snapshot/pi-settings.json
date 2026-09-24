@@ -1,0 +1,10 @@
+{
+  "packages": [
+    "..\\..\\Documents\\GitHub\\helm-pi\\dist\\index.js",
+    "git:github.com/NVlabs/SoL-Pi"
+  ],
+  "lastChangelogVersion": "0.85.1",
+  "theme": "dark",
+  "defaultProvider": "xiaomi",
+  "defaultModel": "mimo-v2.5-pro"
+}

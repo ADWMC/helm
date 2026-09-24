@@ -1,0 +1,5 @@
+User packages:
+  ..\..\Documents\GitHub\helm-pi\dist\index.js
+    C:\Users\Administrator\Documents\GitHub\helm-pi\dist\index.js
+  git:github.com/NVlabs/SoL-Pi
+    C:\Users\Administrator\.pi\agent\git\github.com\NVlabs\SoL-Pi

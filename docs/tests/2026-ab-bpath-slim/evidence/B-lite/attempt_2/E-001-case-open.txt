@@ -1,0 +1,2 @@
+goal: 通过 IDOR / admin token 链在本地授权靶场 http://127.0.0.1:18081 上获取 FLAG，并将关键证据落盘
+samples: http://127.0.0.1:18081

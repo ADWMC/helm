@@ -1,0 +1,14 @@
+Target: http://127.0.0.1:18081 (scope: exact:http://127.0.0.1:18081, allowed)
+
+[1] GET http://127.0.0.1:18081/
+HTTP/1.0 200 OK
+{"service": "weblab-api", "endpoints": ["/login", "/notes?id=", "/admin/config", "/files?name="], "hint": "token=base64({json uid}) ; notes?id= may not check ownership"}
+
+[2] GET http://127.0.0.1:18081/login
+HTTP/1.0 200 OK
+{"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9", "uid": "1"}
+
+[3] token decode (base64 -d):
+{"uid": "1", "user": ""}
+
+结论: token 为无签名 base64(json uid)，可任意伪造 uid。

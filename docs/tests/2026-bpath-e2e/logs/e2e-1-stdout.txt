@@ -1,0 +1,19 @@
+**FLAG 原文（2 个，均在授权靶场 http://127.0.0.1:18081 内取得）**
+
+1. `FLAG{idor_user2}` — 来自 IDOR：`GET /notes?id=2` 无鉴权、无所有权校验，直接返回 admin 笔记 `admin-secret-FLAG{idor_user2}`
+2. `FLAG{api_chain_ok}` — 来自 admin token 链：`GET /login?user=admin` 返回可伪造的 base64 token `eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=`（解码 = `{"uid": "2", "user": "admin"}`），带 `Authorization: Bearer <token>` 或 `?token=` 请求 `/admin/config`，返回 `{"flag":"FLAG{api_chain_ok}","debug":true}`（无 token 时为 403 `admin only`）
+
+**攻击链摘要**
+- `/` 泄露端点清单 + 提示（token=base64、notes 不校所有权）
+- `/login?user=admin` → 伪造 admin token（服务端只解码不验签）
+- `/notes?id=2` → IDOR 读他人笔记
+- `/admin/config` + 伪造 token → admin FLAG
+- `/files?name=` 存在路径拼接（泄露服务器路径 / Errno 报错），但靶场内无 flag 文件，未利用越界
+
+**引用 E-id 列表**
+- `E-002` — GET / 端点清单与提示
+- `E-003` — IDOR /notes?id=2 拿到 FLAG{idor_user2}
+- `E-004` — admin token 链 → /admin/config 拿到 FLAG{api_chain_ok}
+- `E-005` — /files 路径行为（辅助证据）
+
+**Record findings**：2 条已落案（case-18081），分别引用 E-002/E-003 与 E-004/E-005/E-002。全程仅访问 127.0.0.1:18081（scope 校验 allow: exact）。

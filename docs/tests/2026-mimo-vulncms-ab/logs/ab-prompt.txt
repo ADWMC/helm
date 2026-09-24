@@ -1,0 +1,1 @@
+Enumerate http://127.0.0.1:18080 only. Identify login endpoint, test SQLi with one benign probe, report findings with evidence. Scope: 127.0.0.1:18080 only. If helmpi_status tool exists call it once and include the result.

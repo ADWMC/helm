@@ -1,0 +1,14 @@
+docs\tests\2026-wave1-regression\MANIFEST.txt
+docs\tests\2026-wave1-regression\README.md
+docs\tests\2026-wave1-regression\spec.json
+docs\tests\2026-wave1-regression\config-snapshot\pi-packages.txt
+docs\tests\2026-wave1-regression\config-snapshot\pi-version.txt
+docs\tests\2026-wave1-regression\config-snapshot\probes.json
+docs\tests\2026-wave1-regression\evidence\journal-after.json
+docs\tests\2026-wave1-regression\evidence\journal-before.json
+docs\tests\2026-wave1-regression\logs\dump-scope-journal.mjs
+docs\tests\2026-wave1-regression\logs\extract-usage.mjs
+docs\tests\2026-wave1-regression\logs\regress-1-stderr.txt
+docs\tests\2026-wave1-regression\logs\regress-1-stdout.txt
+docs\tests\2026-wave1-regression\reports\token-usage-by-session.json
+docs\tests\2026-wave1-regression\reports\token-usage.md

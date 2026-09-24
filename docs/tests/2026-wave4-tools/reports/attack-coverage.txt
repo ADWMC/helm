@@ -1,0 +1,3 @@
+attack-coverage: techniques=2 playbooks=2/4
+  T1078 <- api, web-pentest
+  T1190 <- api, web-pentest

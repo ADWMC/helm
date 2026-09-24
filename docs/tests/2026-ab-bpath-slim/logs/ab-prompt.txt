@@ -1,0 +1,1 @@
+授权范围仅 http://127.0.0.1:18081（本地授权靶场）。先用 helmpi_validate_scope 确认目标，然后 begin_case 开案，用 bash+curl 完成 IDOR/admin token 链拿到 FLAG；关键证据用 save_evidence 落盘；最后回复给出 FLAG 原文与引用的 E-id 列表。禁止访问 http://127.0.0.1:18081 以外的任何地址。

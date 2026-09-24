@@ -1,0 +1,5 @@
+SCOPE（执行前校验）：helmpi_validate_scope(target="http://127.0.0.1:18081")
+  -> {"allow": true, "matchedBy": "exact:http://127.0.0.1:18081", "reason":"allowed_by:exact:http://127.0.0.1:18081"}
+
+本次全部 HTTP 请求仅发往 http://127.0.0.1:18081（curl 目标均为该地址），
+未访问任何其他地址/主机。

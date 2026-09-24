@@ -1,0 +1,42 @@
+{
+  "cms": {
+    "baseline": 401,
+    "probe": 200,
+    "flag": "FLAG{helmpi_local_lab_ok}",
+    "pass": true
+  },
+  "api": {
+    "idor": 200,
+    "admin": 200,
+    "idorSecret": true,
+    "flag": "FLAG{api_chain_ok}",
+    "pass": true
+  },
+  "ctf": {
+    "robots": 200,
+    "backup": 200,
+    "admin": 200,
+    "api": 200,
+    "b64Decoded": "FLAG{step2_b64}",
+    "assembled": "FLAG{ctf_8chain}",
+    "verifyGood": 200,
+    "verifyBad": 401,
+    "pass": true
+  },
+  "rev": {
+    "serial": "AB-1234-ZX",
+    "lic": "0751",
+    "bad": 401,
+    "good": 200,
+    "flag": "FLAG{license_reversed}",
+    "pass": true
+  },
+  "ir": {
+    "lines": 16,
+    "attackerBurst401": 5,
+    "hasSuccess": true,
+    "hasShell": true,
+    "hasC2": true,
+    "pass": true
+  }
+}

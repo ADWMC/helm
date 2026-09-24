@@ -1,0 +1,10 @@
+{
+  "model": "xiaomi/mimo-v2.6-flash",
+  "max_time_ms": 240000,
+  "arms": {
+    "A": "full (现状)",
+    "B": "lite (瘦身: hcot 离面+liteHop)"
+  },
+  "n_per_arm": 3,
+  "target": "127.0.0.1:18081"
+}

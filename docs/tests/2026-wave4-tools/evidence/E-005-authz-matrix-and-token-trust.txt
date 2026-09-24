@@ -1,0 +1,9 @@
+Authz matrix (127.0.0.1:18081):
+Endpoint | Anon | uid=1 token | uid=2(admin) token | Verdict
+/notes?id=1 | 200 alice-note | 200 viewer:1 | 200 | read allowed anon
+/notes?id=2 | 200 FLAG{idor_user2} | 200 viewer:1 | 200 viewer:2 | IDOR: no ownership check; any/all principals read note 2
+/admin/config | admin only | admin only | 200 {"flag":"FLAG{api_chain_ok}","debug":true} | gated on uid=2 token
+/files?name=* | 200 or path-leak error | n/a | n/a | unauthenticated, leaks absolute path
+
+Token trust: token = base64({"uid":..,"user":..}), unsigned, no expiry, accepted verbatim as "Authorization: Bearer <t>" or "?token=<t>". Login mints uid=2/admin token for unauthenticated GET /login?user=admin (broken object-level auth at login). Forgeries with extra role/admin claims rejected -> check is on uid/user values only, but since token is unsigned base64 and login issues admin token freely, full forgery is trivial.
+Header acceptance: Bearer prefix required for header transport; query param token also works; raw header / X-Token / X-Admin-Token / cookie rejected.

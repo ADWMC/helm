@@ -1,0 +1,5 @@
+time,file,marker,usage_messages,input,output,cacheRead,cacheWrite,reasoning,provider_totalTokens_sum,grand_total_with_cache,helmpi_tools,tools_sample
+2026-09-23 12:54:23,2026-09-23T06-53-31-724Z_01a0cd0a-7ccc-77de-9aea-9f22670bd578.jsonl,B2-helmpi+solpi,7,2928,2357,123776,0,426,129061,129487,"begin_case,helmpi_status,record_finding,save_evidence","bash,begin_case,helmpi_status,record_finding,save_evidence"
+2026-09-23 12:57:45,2026-09-23T06-57-12-683Z_01a0cd0d-dbeb-777d-b982-848580619426.jsonl,A-no-extension,4,17705,1598,49344,0,160,68647,68807,,bash
+2026-09-23 13:14:24,2026-09-23T07-12-50-704Z_01a0cd1c-2c10-7310-ad5a-05c8137865e6.jsonl,D-helmpi-only,11,20495,3086,178560,0,394,202141,202535,"begin_case,helmpi_status,normalize_input,read_reference,record_finding,route_task,save_evidence,skill_index","bash,begin_case,helmpi_status,normalize_input,read_reference,record_finding,route_task,save_evidence,skill_index"
+2026-09-23 13:20:19,2026-09-23T07-19-06-742Z_01a0cd21-e8f5-75c6-b822-594546ee1c60.jsonl,A-no-extension,5,3108,2203,81280,0,749,86591,87340,,bash

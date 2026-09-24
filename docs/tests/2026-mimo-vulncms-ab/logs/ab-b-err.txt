@@ -1,0 +1,7 @@
+Extension error (C:\Users\Administrator\.pi\agent\git\github.com\NVlabs\SoL-Pi\src\sol-pi\index.ts): SoL-Pi requires a persistent Pi session directory
+Extension error (C:\Users\Administrator\.pi\agent\git\github.com\NVlabs\SoL-Pi\src\sol-pi\index.ts): SoL-Pi requires a persistent Pi session directory
+Extension error (C:\Users\Administrator\.pi\agent\git\github.com\NVlabs\SoL-Pi\src\sol-pi\index.ts): SoL-Pi requires a persistent Pi session directory
+Extension error (C:\Users\Administrator\.pi\agent\git\github.com\NVlabs\SoL-Pi\src\sol-pi\index.ts): SoL-Pi requires a persistent Pi session directory
+Extension error (C:\Users\Administrator\.pi\agent\git\github.com\NVlabs\SoL-Pi\src\sol-pi\index.ts): SoL-Pi requires a persistent Pi session directory
+Extension error (C:\Users\Administrator\.pi\agent\git\github.com\NVlabs\SoL-Pi\src\sol-pi\index.ts): SoL-Pi requires a persistent Pi session directory
+Extension error (C:\Users\Administrator\.pi\agent\git\github.com\NVlabs\SoL-Pi\src\sol-pi\index.ts): SoL-Pi requires a persistent Pi session directory

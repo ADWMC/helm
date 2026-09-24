@@ -1,0 +1,14 @@
+All to http://127.0.0.1:18081/login?user=...
+
+user=alice -> {"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogImFsaWNlIn0=", "uid": "1"}
+user=bob    -> {"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogImJvYiJ9", "uid": "1"}
+user=carol  -> {"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogImNhcm9sIn0=", "uid": "1"}
+user=user2  -> {"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogInVzZXIyIn0=", "uid": "1"}
+user=admin  -> {"token": "eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=", "uid": "2"}
+
+Decode: eyJ1aWQiOiAiMSIsICJ1c2VyIjogImFsaWNlIn0= -> {"uid": "1", "user": "alice"}
+
+Negative control: unauthenticated/garbage user still receives a valid-format token:
+GET /login?user=alicezzz_nosuch -> {"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogImFsaWNlenp6X25vc3VjaCJ9", "uid": "1"}
+
+Token = plain base64(json), NO signature/MAC. Anyone can mint one offline (see E-004).

@@ -1,0 +1,2 @@
+goal: Enumerate http://127.0.0.1:18082 (robots -> backup -> admin.php + api/flag), assemble and verify the FLAG.
+samples: (none)

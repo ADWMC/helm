@@ -1,0 +1,78 @@
+schema: 1
+id: reverse
+title: 逆向分析
+phases:
+  - id: scope
+    title: 范围
+    deliverables:
+      - key: goal_and_sample
+        description: 目标与样本已陈述
+        evidence: required
+    gate_out: all_deliverables_have_evidence
+    next: [intake]
+  - id: intake
+    title: 入库
+    deliverables:
+      - key: artifact_hash
+        description: 哈希或连接说明
+        evidence: required
+    gate_out: all_deliverables_have_evidence
+    next: [triage]
+    refs:
+      - toolbox/decision-tree.md
+  - id: triage
+    title: 分诊
+    deliverables:
+      - key: file_type_and_risk
+        description: 类型与风险面
+        evidence: required
+      - key: primary_route
+        description: PRIMARY 路由
+        evidence: required
+    gate_out: all_deliverables_have_evidence
+    next: [initial_report, deep_reverse]
+    hint_menu:
+      - 继续静态逆向最高风险函数
+      - 隔离环境动态跟踪
+      - 数据流/信任边界图
+      - 漏洞根因审查
+      - 输出简报
+      - 停止并总结
+  - id: initial_report
+    title: 初报
+    deliverables:
+      - key: evidence_table
+        description: 证据表
+        evidence: required
+      - key: unknowns
+        description: 未知与阻塞
+        evidence: required
+    gate_out: all_deliverables_have_evidence
+    next: [deep_reverse, close]
+  - id: deep_reverse
+    title: 深逆向
+    deliverables:
+      - key: behavior_model
+        description: 验证后的行为模型
+        evidence: required
+    gate_out: all_deliverables_have_evidence
+    next: [vuln_review]
+  - id: vuln_review
+    title: 漏洞研判
+    deliverables:
+      - key: root_cause
+        description: 根因与可达
+        evidence: required
+      - key: repro_evidence
+        description: 安全复现证据
+        evidence: required
+    gate_out: all_deliverables_have_evidence
+    next: [close]
+  - id: close
+    title: 关案
+    deliverables:
+      - key: report
+        description: 报告或完成链记录
+        evidence: required
+    gate_out: all_deliverables_have_evidence
+    next: []

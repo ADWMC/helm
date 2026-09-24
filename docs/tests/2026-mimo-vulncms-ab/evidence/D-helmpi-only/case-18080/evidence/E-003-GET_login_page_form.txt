@@ -1,0 +1,9 @@
+GET http://127.0.0.1:18080/login -> 200, Content-Length 308
+<h1>VulnCMS Login</h1>
+<form method="POST" action="/login">
+<label>user <input name="user"></label>
+<label>pass <input name="pass" type="password"></label>
+<button>login</button>
+</form>
+<p>Hint: classic SQLi on user field. admin/admin123 if you prefer.</p>
+=> Login endpoint = POST /login, params: user, pass (URL-encoded form).

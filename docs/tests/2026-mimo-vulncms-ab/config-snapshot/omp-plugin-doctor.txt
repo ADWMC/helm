@@ -1,0 +1,8 @@
+Plugin Health Check
+
+✔ plugins_directory: Found at C:\Users\Administrator\.omp\plugins
+⚠ package_manifest: Not created yet
+✔ node_modules: Found
+✔ plugin:@adwmc/helm-pi: v0.1.0 - Security analysis and autonomous run runtime for Pi — evidence-first, scope-hard, completion-compiled
+
+Summary: 3 ok, 1 warnings, 0 errors

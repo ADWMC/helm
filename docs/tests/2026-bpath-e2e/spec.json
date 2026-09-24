@@ -1,0 +1,6 @@
+{
+  "goal": "bpath e2e: solve local weblab-api (IDOR + admin token) and ground FLAG in evidence",
+  "allowedTargets": ["http://127.0.0.1:18081"],
+  "highRisk": "deny",
+  "requireCoverage": false
+}

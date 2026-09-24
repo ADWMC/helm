@@ -1,0 +1,7 @@
+provider  model                     context  max-out  thinking  images
+xiaomi    mimo-v2.5                 1.0M     131.1K   yes       yes   
+xiaomi    mimo-v2.5-pro             1.0M     131.1K   yes       no    
+xiaomi    mimo-v2.5-pro-ultraspeed  1.0M     131.1K   yes       no    
+xiaomi    mimo-v2.6-flash           1.0M     131.1K   yes       yes   
+xiaomi    mimo-v2.6-pro             1.0M     131.1K   yes       yes   
+xiaomi    mimo-v2.6-pro-ultraspeed  1.0M     131.1K   yes       yes   

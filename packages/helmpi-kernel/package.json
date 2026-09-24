@@ -3,6 +3,12 @@
     "typebox": "1.3.27"
   },
   "type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./scope": "./src/domain/scope.ts",
+		"./export": "./src/export.ts",
+		"./ledger": "./src/ledger.ts"
+	},
   "engines": {
     "node": ">=22.19.0"
   },

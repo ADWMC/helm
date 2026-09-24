@@ -1,0 +1,27 @@
+## FLAG
+
+主 FLAG（admin token 链，`/admin/config`）：
+
+```
+FLAG{api_chain_ok}
+```
+
+IDOR 泄露的 admin 笔记 FLAG（`/notes?id=2`）：
+
+```
+FLAG{idor_user2}
+```
+
+## 攻击链
+
+1. **范围校验**：`helmpi_validate_scope("http://127.0.0.1:18081")` → allow（exact 匹配），全程 curl 仅打该地址（E-005）。
+2. **IDOR**：`GET /notes?id=2` 无鉴权直接返回 `admin-secret-FLAG{idor_user2}` —— `/notes?id=` 不校验所有权，可枚举 id（E-002）。
+3. **路径穿越**：`GET /files?name=../server.py` 读到服务源码（500 字节截断）+ 错误信息回显绝对路径，确认 `USERS["2"].role=admin`、`FLAG = "FLAG{api_chain_ok}"`（E-004）。
+4. **弱 token → admin**：`token = base64({json uid})` 无签名；`base64('{"uid": "2"}') = eyJ1aWQiOiAiMiJ9`，以 `Authorization: Bearer eyJ1aWQiOiAiMiJ9`（或 `?token=`）访问 `/admin/config` → `{"flag":"FLAG{api_chain_ok}","debug":true}`。无 token / 错误 header（X-Token、Token、Cookie 等）均为 403 `admin only`（E-003）。
+
+## 引用 E-id
+
+- E-002 — IDOR `/notes?id=2` 越权读取 admin 笔记
+- E-003 — 弱 token 伪造 + `/admin/config` 鉴权绕过
+- E-004 — `/files?name=../server.py` 路径穿越源码泄露
+- E-005 — 授权范围校验记录（仅 127.0.0.1:18081）

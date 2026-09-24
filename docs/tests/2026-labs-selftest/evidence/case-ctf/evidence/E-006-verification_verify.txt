@@ -1,0 +1,5 @@
+GET http://127.0.0.1:18082/verify?q=FLAG%7Bctf_8chain%7D (param name must be `q`; `flag`/`f`/etc -> NO)
+&lt;h1&gt;CORRECT&lt;/h1&gt;&lt;p&gt;FLAG{ctf_8chain}&lt;/p&gt;
+
+Assembly: admin.php half "FLAG{ctf_" + api/flag half "8chain}" = FLAG{ctf_8chain}
+Backup base64 RkxBR3tzdGVwMl9iNjR9 decodes to FLAG{step2_b64} — the OLD flag, decoy.

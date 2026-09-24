@@ -1,0 +1,69 @@
+schema: 1
+id: api
+title: API 安全测试
+attack: [T1190, T1078]
+phases:
+  - id: scope
+    title: 范围
+    deliverables:
+      - key: authorized_endpoints
+        description: 授权端点清单与 out-of-scope（helmpi_validate_scope 判定留证）
+        evidence: required
+    gate_out: all_deliverables_have_evidence
+    next: [recon]
+    hint_menu:
+      - 列出全部已授权端点
+      - 声明禁扫项与速率限制
+  - id: recon
+    title: 侦察
+    deliverables:
+      - key: endpoint_inventory
+        description: 端点/方法/参数清单（含响应基线）
+        evidence: required
+      - key: auth_surface
+        description: 鉴权面：token 来源、会话机制、角色模型
+        evidence: required
+    gate_out: all_deliverables_have_evidence
+    next: [authz]
+  - id: authz
+    title: 鉴权与授权
+    deliverables:
+      - key: authz_matrix
+        description: 对象级/功能级授权矩阵（IDOR、水平/垂直越权对照）
+        evidence: required
+      - key: token_trust
+        description: token 签发/校验信任结论（可伪造？仅解码？）
+        evidence: required
+    gate_out: all_deliverables_have_evidence
+    next: [chain, report]
+    hint_menu:
+      - 仅报告可疑授权缺口
+      - 进入有证据的利用链
+      - 补充角色矩阵
+  - id: chain
+    title: 利用链（有证据）
+    deliverables:
+      - key: chain_proof
+        description: 链路每跳的请求/响应摘录（E-id 引用）
+        evidence: required
+      - key: impact_statement
+        description: 影响面（Dark-Moon 状态梯：无演示=UNCONFIRMED）
+        evidence: required
+    gate_out: all_deliverables_have_evidence
+    next: [report]
+  - id: report
+    title: 报告
+    deliverables:
+      - key: findings_block
+        description: 发现、复现步骤与修复建议（引用 E-id）
+        evidence: required
+    gate_out: all_deliverables_have_evidence
+    next: [close]
+  - id: close
+    title: 收尾
+    deliverables:
+      - key: evidence_index
+        description: E-id 索引完整
+        evidence: required
+    gate_out: all_deliverables_have_evidence
+    next: []

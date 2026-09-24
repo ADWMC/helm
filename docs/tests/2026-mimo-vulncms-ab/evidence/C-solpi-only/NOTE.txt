@@ -1,0 +1,1 @@
+Run C used SoL-Pi only: model reported helmpi_status absent; no E-id case files.

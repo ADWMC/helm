@@ -1,0 +1,32 @@
+[
+  {
+    "file": "C:\\Users\\Administrator\\.pi\\agent\\sessions\\--C--Users-Administrator-Documents-GitHub-helm-pi-docs-tests-2026-bpath-e2e--\\2026-09-23T16-27-25-313Z_01a0cf17-e700-732a-a9fe-ab7a53909d7d.jsonl",
+    "messages": 2,
+    "input": 19193,
+    "output": 818,
+    "cacheRead": 16384,
+    "cacheWrite": 0,
+    "reasoning": 459,
+    "grand_total_with_cache": 36854
+  },
+  {
+    "file": "C:\\Users\\Administrator\\.pi\\agent\\sessions\\--C--Users-Administrator-Documents-GitHub-helm-pi-docs-tests-2026-bpath-e2e--\\2026-09-23T16-25-56-983Z_01a0cf16-8df7-75b1-bf7c-afb81d019594.jsonl",
+    "messages": 7,
+    "input": 7512,
+    "output": 3020,
+    "cacheRead": 127872,
+    "cacheWrite": 0,
+    "reasoning": 245,
+    "grand_total_with_cache": 138649
+  },
+  {
+    "file": "C:\\Users\\Administrator\\.pi\\agent\\sessions\\--C--Users-Administrator-Documents-GitHub-helm-pi-docs-tests-2026-wave1-regression--\\2026-09-23T16-18-30-582Z_01a0cf0f-be36-7761-a6cd-d76f005ad29a.jsonl",
+    "messages": 2,
+    "input": 17917,
+    "output": 278,
+    "cacheRead": 17600,
+    "cacheWrite": 0,
+    "reasoning": 37,
+    "grand_total_with_cache": 35832
+  }
+]

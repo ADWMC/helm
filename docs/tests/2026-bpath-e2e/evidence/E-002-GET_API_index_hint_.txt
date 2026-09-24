@@ -1,0 +1,7 @@
+GET http://127.0.0.1:18081/
+HTTP/1.0 200 OK
+Content-Type: application/json
+
+{"service": "weblab-api", "endpoints": ["/login", "/notes?id=", "/admin/config", "/files?name="], "hint": "token=base64({json uid}) ; notes?id= may not check ownership"}
+
+解读：token 是 base64(JSON)，可伪造；/notes?id= 提示可能缺少所有权校验（IDOR）。

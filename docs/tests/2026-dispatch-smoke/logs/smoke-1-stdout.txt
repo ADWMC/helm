@@ -1,0 +1,30 @@
+【第一步】我可用的全部工具名（一行一个，未调用）：
+
+read
+bash
+edit
+write
+obs_recall
+helmpi_status
+helmpi_mode
+tool_memory
+helmpi_phase
+begin_case
+save_evidence
+record_finding
+route_task
+case_status
+read_reference
+skill_index
+normalize_input
+hcot_attack
+hcot_stats
+
+【第二步】工具列表中没有 task / 子代理类工具，因此由我直接用 curl 访问 http://127.0.0.1:18081/ 结果如下：
+
+状态码：200 OK
+（响应头摘要：Server: BaseHTTP/0.6 Python/3.13.8；Content-Type: application/json; charset=utf-8；Content-Length: 169）
+响应体前 100 字符：
+`{"service": "weblab-api", "endpoints": ["/login", "/notes?id=", "/admin/config", "/files?name="], "hint": "token=base`
+
+【TASK工具=无】

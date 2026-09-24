@@ -1,0 +1,2 @@
+goal: Identify attacker IP, reconstruct attack chain, extract IOCs from web access log at http://127.0.0.1:18084/logs; save_evidence + record_finding; concise report with line refs.
+samples: http://127.0.0.1:18084/logs

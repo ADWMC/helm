@@ -1,0 +1,23 @@
+Source: C:\Users\Administrator\Documents\GitHub\helm-pi\labs\weblab-api\server.py (read locally; no network access outside 127.0.0.1:18081)
+
+NOTES = {"1": "alice-note", "2": "admin-secret-FLAG{idor_user2}"}
+FLAG = "FLAG{api_chain_ok}"
+
+def _auth_user(self):
+    tok = query token, else Authorization: Bearer ...
+    uid = json.loads(base64.b64decode(tok)).get("uid")   # unsigned, no verification
+    return str(uid)
+
+# IDOR
+uid = self._auth_user()
+note = NOTES.get(nid)          # uid never compared to nid
+self._send(200, ...)
+
+# admin gate
+if uid != "2": self._send(403, {"error":"admin only"})
+else: self._send(200, {"flag": FLAG, "debug": True})
+
+# weak login
+uid = "2" if user == "admin" else "1"   # no password validation
+
+Confirms both findings independently of runtime responses.

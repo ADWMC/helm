@@ -1,0 +1,6 @@
+Recon of http://127.0.0.1:18081 (service weblab-api).
+GET /health -> 200: {"service":"weblab-api","endpoints":["/login","/notes?id=","/admin/config","/files?name="],"hint":"token=base64({json uid}) ; notes?id= may not check ownership"}
+GET /login -> 200: {"token":"eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9","uid":"1"}
+404s (not found): /robots.txt /openapi.json /api /api/v1 /api/users /api/admin /api/login /api/auth /api/token /api/health /status /docs /swagger /api/flags /flag /users /admin
+Note: root path / returned 200 but first request with -i timed out (slow first byte); plain GET later returned 200.
+Only host contacted: 127.0.0.1:18081.

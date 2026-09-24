@@ -1,0 +1,7 @@
+{
+  "goal": "ab bpath slim: solve weblab-api and ground FLAG",
+  "allowedTargets": [
+    "http://127.0.0.1:18081"
+  ],
+  "highRisk": "deny"
+}

@@ -1,0 +1,5 @@
+{
+  "goal": "wave1 regression: scope gate probes only (no exploitation)",
+  "allowedTargets": ["http://127.0.0.1:18081", "https://example.com"],
+  "highRisk": "deny"
+}

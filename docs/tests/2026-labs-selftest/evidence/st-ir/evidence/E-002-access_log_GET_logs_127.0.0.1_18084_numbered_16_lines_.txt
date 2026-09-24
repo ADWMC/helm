@@ -1,0 +1,18 @@
+Source: curl -s http://127.0.0.1:18084/logs | nl -ba  (captured during this session; raw copy at samples/access.log)
+
+ 1  2026-09-23T10:00:01Z INFO  ingress GET / 200 src=10.0.0.5
+ 2  2026-09-23T10:00:05Z INFO  ingress GET /login 200 src=10.0.0.5
+ 3  2026-09-23T10:00:09Z WARN  auth   POST /login 401 src=10.0.0.5 user=admin
+ 4  2026-09-23T10:00:10Z WARN  auth   POST /login 401 src=10.0.0.5 user=admin
+ 5  2026-09-23T10:00:11Z WARN  auth   POST /login 401 src=10.0.0.5 user=root
+ 6  2026-09-23T10:00:12Z WARN  auth   POST /login 401 src=198.51.100.66 user=admin
+ 7  2026-09-23T10:00:13Z WARN  auth   POST /login 401 src=198.51.100.66 user=admin
+ 8  2026-09-23T10:00:14Z WARN  auth   POST /login 401 src=198.51.100.66 user=admin
+ 9  2026-09-23T10:00:15Z WARN  auth   POST /login 401 src=198.51.100.66 user=admin
+10  2026-09-23T10:00:16Z WARN  auth   POST /login 401 src=198.51.100.66 user=admin
+11  2026-09-23T10:00:17Z ERROR auth   POST /login 200 src=198.51.100.66 user=admin note=success_after_burst
+12  2026-09-23T10:00:18Z WARN  app    GET /admin 200 src=198.51.100.66 ua=curl/8.0
+13  2026-09-23T10:00:19Z ERROR rce    POST /upload 200 src=198.51.100.66 file=shell.php
+14  2026-09-23T10:00:20Z INFO  egress  OUT 443 dst=203.0.113.9 note=c2_beacon
+15  2026-09-23T10:00:21Z INFO  ingress GET / 200 src=10.0.0.5
+16  2026-09-23T10:01:00Z WARN  auth   POST /login 401 src=10.0.0.5 user=guest

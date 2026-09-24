@@ -1,0 +1,22 @@
+[
+  {
+    "file": "C:\\Users\\Administrator\\.pi\\agent\\sessions\\--C--Users-Administrator-Documents-GitHub-helm-pi-docs-tests-2026-wave4-tools--\\2026-09-23T17-01-29-105Z_01a0cf37-168d-72c3-a14c-c3b2e67fc145.jsonl",
+    "messages": 19,
+    "input": 15807,
+    "output": 6298,
+    "cacheRead": 404992,
+    "cacheWrite": 0,
+    "reasoning": 791,
+    "grand_total_with_cache": 427888
+  },
+  {
+    "file": "C:\\Users\\Administrator\\.pi\\agent\\sessions\\--C--Users-Administrator-Documents-GitHub-helm-pi-docs-tests-2026-wave4-tools--\\2026-09-23T16-57-31-930Z_01a0cf33-7816-77d4-bceb-3fba13edf2d0.jsonl",
+    "messages": 19,
+    "input": 27568,
+    "output": 2909,
+    "cacheRead": 346304,
+    "cacheWrite": 0,
+    "reasoning": 1678,
+    "grand_total_with_cache": 378459
+  }
+]

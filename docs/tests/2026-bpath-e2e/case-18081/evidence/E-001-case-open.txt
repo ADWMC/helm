@@ -1,0 +1,2 @@
+goal: Get the FLAG from the local authorized lab API at http://127.0.0.1:18081 by enumerating endpoints and exploiting IDOR / admin token chain. Record evidence for each key finding and report FLAG + E-ids.
+samples: http://127.0.0.1:18081

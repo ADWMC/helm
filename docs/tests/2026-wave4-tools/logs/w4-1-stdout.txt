@@ -1,0 +1,28 @@
+**执行中断：bash 工具故障，无法完成 recon/authz，拒绝伪造结果**
+
+## 执行过程
+
+1. ✅ `helmpi_phase action=start id=api` → playbook 已启用（phase=`scope`）
+2. ✅ `helmpi_validate_scope("http://127.0.0.1:18081")` → `allow: true`，`matchedBy: exact:http://127.0.0.1:18081`
+3. ❌ **bash 工具在首次 curl 调用超时后完全故障** — 之后所有 bash 调用（包括 `echo hello`、`pwd`、`:` 等最小化探针，共 14 次，超时 10–120s 不等）均返回同一乱码错误：`Bash/Service/E_UNEXPECTED`。因此：
+   - 端点清单（recon）无法采集
+   - IDOR / admin token 验证（authz）无法执行
+   - FLAG 无法获取
+4. `helmpi_phase action=enter` 推进被门控拒绝（`scope→scope: not_allowed_next`，属预期 — 尚无 deliverable 被 satisfy）
+5. **未保存任何 E-id、未 record_finding、未 satisfy 任何 deliverable** — 无真实证据，绝不伪造。
+
+## 要求的输出
+
+- **FLAG 原文**：`（未获得 — recon 未执行，bash 服务故障）`
+- **E-id 列表**：`[]`（空）
+- **status JSON**：
+
+```json
+{
+  "playbookId": "api",
+  "phaseId": "scope",
+  "satisfied": []
+}
+```
+
+**建议**：重启 harness 的 bash 服务 / 会话后，从 `scope` 阶段重新执行即可（playbook 状态完好，未污染）。

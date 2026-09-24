@@ -1,0 +1,9 @@
+GET http://127.0.0.1:18081/  -> HTTP/1.0 200 OK (BaseHTTP/0.6 Python/3.13.8)
+{"service": "weblab-api", "endpoints": ["/login", "/notes?id=", "/admin/config", "/files?name="],
+ "hint": "token=base64({json uid}) ; notes?id= may not check ownership"}
+
+GET /admin/config (无凭据) -> HTTP/1.0 403 Forbidden {"error": "admin only"}
+GET /notes?id=1 -> {"id": "1", "note": "alice-note", "viewer": null}
+GET /files?name=index -> 404 泄露服务端绝对路径
+C:\Users\Administrator\Documents\GitHub\helm-pi\labs\weblab-api\index
+=> token 格式确认：base64(json {uid,...})，无签名/无过期（可伪造）

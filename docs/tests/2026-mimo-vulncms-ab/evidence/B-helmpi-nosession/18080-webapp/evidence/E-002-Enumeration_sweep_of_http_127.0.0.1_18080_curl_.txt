@@ -1,0 +1,19 @@
+GET / -> HTTP/1.0 200, Server: BaseHTTP/0.6 Python/3.13.8, body (150B):
+  <h1>VulnCMS</h1> links: /login, /dashboard
+
+Path sweep (code/type/size):
+  /login        200 text/html 308   <- distinct page
+  /dashboard    200 text/html  33   <- distinct page
+  /admin /robots.txt /signup /register /logout /api /static
+                200 text/html 150   <- identical to / (no 404 handling; catch-all fallback)
+
+GET /login (200, 308B):
+  <h1>VulnCMS Login</h1>
+  <form method="POST" action="/login">
+    <input name="user"> / <input name="pass" type="password">
+  Hint: classic SQLi on user field. admin/admin123 if you prefer.
+
+GET /dashboard (200, 33B): <h1>Dashboard</h1><p>Welcome.</p>
+
+Scope: 127.0.0.1:18080 only; no other hosts/ports touched.
+Date: 2026-09-23 (server Date header).

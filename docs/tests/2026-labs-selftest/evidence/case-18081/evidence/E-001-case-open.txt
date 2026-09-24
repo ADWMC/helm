@@ -1,0 +1,2 @@
+goal: Assess http://127.0.0.1:18081 (weblab-api) for IDOR, weak/forgable token, and path traversal; deliver evidence-backed findings with scope proof.
+samples: http://127.0.0.1:18081

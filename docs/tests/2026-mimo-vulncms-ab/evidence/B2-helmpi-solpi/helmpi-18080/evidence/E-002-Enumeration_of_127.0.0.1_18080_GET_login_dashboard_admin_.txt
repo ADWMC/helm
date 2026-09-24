@@ -1,0 +1,5 @@
+GET / -> HTTP 200, Server: BaseHTTP/0.6 Python/3.13.8, body: VulnCMS index with links /login and /dashboard.
+GET /login -> HTTP 200, form: method=POST action="/login", fields name="user", name="pass". Page hint text: "Hint: classic SQLi on user field. admin/admin123 if you prefer."
+GET /dashboard -> HTTP 200, "<h1>Dashboard</h1><p>Welcome.</p>" (no auth gate observed).
+GET /admin -> HTTP 200 (returns 200 to unauthenticated request; content not inspected further).
+Scope: only 127.0.0.1:18080 was contacted.

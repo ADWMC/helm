@@ -1,0 +1,43 @@
+{
+  "arm": "A-full",
+  "attempt": 2,
+  "status": "pass",
+  "exit_code": 0,
+  "timeout": false,
+  "wall_ms": 81996,
+  "max_time_ms": 240000,
+  "flags": [
+    "FLAG{idor_user2}",
+    "FLAG{api_chain_ok}"
+  ],
+  "flag": "FLAG{idor_user2}",
+  "eids": [
+    "E-002",
+    "E-003",
+    "E-004",
+    "E-005"
+  ],
+  "eid_count": 4,
+  "steps_to_flag": 5,
+  "valid_tool_results": 13,
+  "tool_results": 13,
+  "tool_histogram": {
+    "helmpi_validate_scope": 1,
+    "begin_case": 1,
+    "bash": 4,
+    "save_evidence": 4,
+    "record_finding": 3
+  },
+  "first_response_ms": 5022,
+  "input": 6783,
+  "output": 3081,
+  "cacheRead": 168000,
+  "cacheWrite": 0,
+  "cache_creation": 0,
+  "reasoning": 290,
+  "grand_total_with_cache": 178154,
+  "session_file": "C:\\Users\\Administrator\\.pi\\agent\\sessions\\--C--Users-Administrator-Documents-GitHub-helm-pi-docs-tests-2026-ab-bpath-slim-runs-A-full-attempt_2--\\2026-09-23T16-34-15-155Z_01a0cf1e-27f2-738f-b8f1-e75310ae5e14.jsonl",
+  "model": "xiaomi/mimo-v2.6-flash",
+  "prompt_hash": "5e86b992de6e1348",
+  "self_report_only": false
+}

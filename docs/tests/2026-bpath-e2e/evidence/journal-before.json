@@ -1,0 +1,14 @@
+[
+  {
+    "revision": 1,
+    "kind": "scope_denied",
+    "payloadJson": "{\"source\":\"validate_scope\",\"target\":\"http://127.0.0.1:9999\",\"matchedBy\":\"none\",\"reason\":\"target_not_allowed:http://127.0.0.1:9999\",\"at\":1790180313411}",
+    "at": 1790180313412
+  },
+  {
+    "revision": 2,
+    "kind": "scope_denied",
+    "payloadJson": "{\"source\":\"validate_scope\",\"target\":\"https://example.com\",\"matchedBy\":\"fail_closed\",\"reason\":\"external_not_allowed:example.com\",\"at\":1790180313415}",
+    "at": 1790180313415
+  }
+]

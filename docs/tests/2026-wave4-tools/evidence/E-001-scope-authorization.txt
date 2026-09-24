@@ -1,0 +1,1 @@
+helmpi_validate_scope target=http://127.0.0.1:18081 -> allow=true, matchedBy=exact:http://127.0.0.1:18081, reason=allowed_by:exact:http://127.0.0.1:18081. Playbook 'api' started at phase 'scope'. Authorization limited strictly to 127.0.0.1:18081; no other hosts permitted.

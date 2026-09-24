@@ -1,0 +1,4 @@
+GET http://127.0.0.1:18080/ -> HTTP/1.0 200, Server: BaseHTTP/0.6 Python/3.13.8, Content-Length: 150
+Body: <h1>VulnCMS</h1> links: href="/login", href="/dashboard"
+Path probe (status / size): /login 200/308, /dashboard 200/33, /admin 200/150, /index.html 200/150, /admin/login 200/0, /signup 200/150, /api 200/150, /users 200/150, /auth 200/150
+=> distinct responses only for /login (308B) and /dashboard (33B); other paths fall back to the 150B root page (server returns 200 for unknown paths — no 404 differentiation).

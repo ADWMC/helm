@@ -1,0 +1,29 @@
+File read locally: labs/weblab-api/server.py (same bytes the lab served via /files?name=server.py).
+
+USERS = {"1": {"role": "user", "name": "alice"}, "2": {"role": "admin", "name": "bob"}}
+NOTES = {"1": "alice-note", "2": "admin-secret-FLAG{idor_user2}"}
+FLAG = "FLAG{api_chain_ok}"
+
+1) Token minting — unsigned, uid attacker-influenced:
+   uid = "2" if user == "admin" else "1"
+   tok = b64json({"uid": uid, "user": user})
+
+2) Token parsing — decode only, no signature/secret/expiry:
+   uid = json.loads(base64.b64decode(tok)).get("uid")
+   return str(uid) if uid else None
+
+3) IDOR — comment admits it; no uid-vs-note-owner comparison:
+   # IDOR: does not check uid matches note id
+   note = NOTES.get(nid)
+   self._send(200, json.dumps({"id": nid, "note": note, "viewer": uid}))
+
+4) Admin gate — trusts forged uid:
+   if uid != "2": 403 else 200 FLAG
+
+5) Path traversal — no containment:
+   name = unquote((q.get("name") or ["readme.txt"])[0])
+   # path traversal
+   path = os.path.join(os.path.dirname(__file__), name)
+   open(path, "r") ; errors returned verbatim -> absolute path disclosure
+
+Binding: HTTPServer(("127.0.0.1", 18081), H) — loopback only, as required.

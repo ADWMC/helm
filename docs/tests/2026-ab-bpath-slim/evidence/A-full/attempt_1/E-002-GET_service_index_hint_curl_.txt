@@ -1,0 +1,5 @@
+Request: GET http://127.0.0.1:18081/
+Response: HTTP/1.0 200 OK, Content-Type: application/json
+{"service": "weblab-api", "endpoints": ["/login", "/notes?id=", "/admin/config", "/files?name="], "hint": "token=base64({json uid}) ; notes?id= may not check ownership"}
+Server: BaseHTTP/0.6 Python/3.13.8
+Note: token scheme disclosed as base64(json {uid}); /notes?id= flagged as missing ownership check.

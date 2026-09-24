@@ -1,0 +1,4 @@
+http://127.0.0.1:18081 => {"allow":true,"matchedBy":"exact:http://127.0.0.1:18081","reason":"allowed_by:exact:http://127.0.0.1:18081"}
+http://127.0.0.1:9999 => {"allow":false,"matchedBy":"none","reason":"target_not_allowed:http://127.0.0.1:9999"}
+https://example.com => {"allow":false,"matchedBy":"fail_closed","reason":"external_not_allowed:example.com"}
+【DONE】

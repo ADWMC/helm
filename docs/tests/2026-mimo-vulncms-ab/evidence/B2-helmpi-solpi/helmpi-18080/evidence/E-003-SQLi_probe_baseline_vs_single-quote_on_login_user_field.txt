@@ -1,0 +1,3 @@
+Baseline POST /login user=admin pass=wrongpass -> HTTP 401: <h1>Login failed</h1><p>Invalid credentials</p>
+Probe POST /login user=admin' (trailing single quote) pass=wrongpass -> HTTP 200: <h1>Logged in</h1><p>Welcome admin'</p><p>Flag: FLAG{helmpi_local_lab_ok}</p>
+Delta: injecting one quote flipped 401 -> 200 and echoed the raw payload in the greeting, indicating unsanitized string interpolation into the auth query (classic tautology/comment-terminated SQLi) with reflected input (XSS-adjacent echo). One benign probe only; no further payloads sent.

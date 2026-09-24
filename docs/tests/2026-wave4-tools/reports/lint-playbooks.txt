@@ -1,0 +1,5 @@
+ok api.yaml: phases=6 attack=T1190,T1078
+ok ctf.yaml: phases=5 attack=-
+ok reverse.yaml: phases=7 attack=-
+ok web-pentest.yaml: phases=8 attack=T1190,T1078
+lint-playbooks: 4/4 ok · attack ids=4

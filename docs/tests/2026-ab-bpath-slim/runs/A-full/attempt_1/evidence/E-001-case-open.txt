@@ -1,0 +1,2 @@
+goal: 在本地授权靶场 http://127.0.0.1:18081 上完成 IDOR / admin token 链攻击，拿到 FLAG 原文；关键证据落盘到 evidence/。
+samples: http://127.0.0.1:18081

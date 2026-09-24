@@ -1,0 +1,6 @@
+docs\tests\2026-dispatch-smoke\README.md
+docs\tests\2026-dispatch-smoke\config-snapshot\auth.redacted.json
+docs\tests\2026-dispatch-smoke\config-snapshot\pi-packages.txt
+docs\tests\2026-dispatch-smoke\config-snapshot\pi-version.txt
+docs\tests\2026-dispatch-smoke\logs\smoke-1-stderr.txt
+docs\tests\2026-dispatch-smoke\logs\smoke-1-stdout.txt

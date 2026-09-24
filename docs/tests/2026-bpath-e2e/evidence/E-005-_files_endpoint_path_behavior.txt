@@ -1,0 +1,7 @@
+GET /files?name=flag     -> {"error": "[Errno 2] No such file or directory: 'C:\\...\\helm-pi\\labs\\weblab-api\\flag'"}
+GET /files?name=flag.txt -> {"error": "[Errno 2] No such ... 'weblab-api\\flag.txt'"}
+GET /files?name=../flag  -> {"error": "[Errno 2] No such ... 'weblab-api\\../flag'"}
+GET /files?name=/        -> {"error": "[Errno 13] Permission denied: 'C:/'"}
+GET /files?name=.        -> {"error": "[Errno 13] Permission denied: '...\\weblab-api\\.'"}
+
+解读：/files 存在路径拼接（潜在目录遍历），但本靶场内无 flag 文件，FLAG 实际由 IDOR 与 admin token 链暴露；未访问 127.0.0.1:18081 以外地址。

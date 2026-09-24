@@ -1,0 +1,48 @@
+执行完毕，全阶段推进至 report 并满足 `final_report`。
+
+## FLAG 原文
+
+| FLAG | 来源 |
+|---|---|
+| `FLAG{idor_user2}` | `GET /notes?id=2`（无任何认证的 IDOR） |
+| `FLAG{api_chain_ok}` | `GET /admin/config` + `Authorization: Bearer eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=`（亦可用 `?token=`） |
+
+## 利用链
+
+1. `GET /health` → 端点清单 + 提示 `token=base64({json uid})`
+2. `GET /notes?id=2` → 匿名读取他人笔记，泄露 `FLAG{idor_user2}`
+3. `GET /login?user=admin` → 零凭据签发 admin token（uid=2，**无签名 base64**）
+4. 携带该 token 访问 `/admin/config` → `{"flag":"FLAG{api_chain_ok}","debug":true}`
+
+## E-id 列表
+
+- **E-001** scope 授权（exact match 127.0.0.1:18081）
+- **E-002** recon 端点清单（/health 服务指纹）
+- **E-003** recon 详细探测（IDOR 初现、路径泄露）
+- **E-004** authz：IDOR + admin token 获取/验证
+- **E-005** authz matrix + token trust 分析
+- **E-006** chain proof（两 FLAG + 复现命令 + 影响）
+
+已 `record_finding` 引用 E-001~E-006。
+
+## status JSON
+
+```json
+{
+  "playbookId": "api",
+  "phaseId": "report",
+  "satisfied": [
+    "scope_confirmation",
+    "authorized_endpoints",
+    "endpoint_inventory",
+    "auth_surface",
+    "authz_matrix",
+    "token_trust",
+    "chain_proof",
+    "impact_statement",
+    "final_report"
+  ]
+}
+```
+
+全程仅访问 `http://127.0.0.1:18081`，未触碰任何其他地址。

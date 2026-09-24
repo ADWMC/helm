@@ -1,0 +1,9 @@
+{
+  "arm": "A-full",
+  "mode": "full",
+  "model": "xiaomi/mimo-v2.6-flash",
+  "prompt_hash": "5e86b992de6e1348",
+  "max_time_ms": 240000,
+  "target": "http://127.0.0.1:18081",
+  "attempt": 3
+}
