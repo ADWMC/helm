@@ -1,5 +1,5 @@
-import type { ServiceStateEncoder } from "@earendil-works/chord";
-import type { ClientMessageDecoder, RpcTarget } from "@earendil-works/pi-protocol";
+import type { ServiceStateEncoder } from "@adwmc/helm-chord";
+import type { ClientMessageDecoder, RpcTarget } from "@adwmc/helm-protocol";
 
 import type { MaybePromise, RoutedServerServiceAttachment } from "./types.ts";
 

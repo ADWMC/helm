@@ -1,5 +1,5 @@
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
-import { registerStorageConformance } from "@earendil-works/pi-durable/testing";
+import { BACKGROUND_CONTEXT } from "@adwmc/helm-chord/context";
+import { registerStorageConformance } from "@adwmc/helm-durable/testing";
 import { describe, expect, it } from "vitest";
 import { MemoryStorage } from "../src/storage/memory.ts";
 import { ROOT_CONVERSATION_ID } from "../src/types.ts";

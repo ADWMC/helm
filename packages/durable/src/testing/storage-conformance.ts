@@ -1,6 +1,6 @@
-import type { JsonValue } from "@earendil-works/chord";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
-import type { Op } from "@earendil-works/chord/delta";
+import type { JsonValue } from "@adwmc/helm-chord";
+import { BACKGROUND_CONTEXT } from "@adwmc/helm-chord/context";
+import type { Op } from "@adwmc/helm-chord/delta";
 import {
 	type DocumentCreate,
 	type EntryRecord,

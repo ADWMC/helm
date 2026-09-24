@@ -6,8 +6,8 @@ import type {
 	Provider,
 	ProviderStreamOptions,
 	RefreshModelsContext,
-} from "@earendil-works/pi-ai";
-import { stream, streamSimple } from "@earendil-works/pi-ai/compat";
+} from "@adwmc/helm-ai";
+import { stream, streamSimple } from "@adwmc/helm-ai/compat";
 import {
 	LlamaClient,
 	type LlamaModelInfo,

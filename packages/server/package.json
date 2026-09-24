@@ -1,5 +1,5 @@
 {
-	"name": "@earendil-works/pi-server",
+	"name": "@adwmc/helm-server",
 	"version": "0.87.1",
 	"description": "experimental server package for pi",
 	"type": "module",
@@ -40,16 +40,16 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/earendil-works/pi.git",
+		"url": "git+https://github.com/ADWMC/helm.git",
 		"directory": "packages/server"
 	},
 	"engines": {
 		"node": ">=22.19.0"
 	},
 	"dependencies": {
-		"@earendil-works/chord": "^0.87.1",
-		"@earendil-works/pi-agent-core": "^0.87.1",
-		"@earendil-works/pi-protocol": "^0.87.1"
+		"@adwmc/helm-chord": "^0.87.1",
+		"@adwmc/helm-agent-core": "^0.87.1",
+		"@adwmc/helm-protocol": "^0.87.1"
 	},
 	"devDependencies": {
 		"shx": "0.4.0",

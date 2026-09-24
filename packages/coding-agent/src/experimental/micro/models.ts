@@ -2,14 +2,14 @@ import type {
 	Models as PicoModels,
 	RequestOptions,
 	SystemMessage,
-} from "@earendil-works/pi-agent-core/experimental/pico3";
+} from "@adwmc/helm-agent-core/experimental/pico3";
 import type {
 	Context as AiContext,
 	AssistantMessageEvent,
 	ConstrainedSamplingConfig,
 	Message,
 	Tool,
-} from "@earendil-works/pi-ai";
+} from "@adwmc/helm-ai";
 import type { TSchema } from "typebox";
 import type { ModelRuntime } from "../../core/model-runtime.ts";
 import type { MicroModelsView, MicroProviderAccount } from "./api.ts";

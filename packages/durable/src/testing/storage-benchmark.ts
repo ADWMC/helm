@@ -1,5 +1,5 @@
-import type { JsonValue } from "@earendil-works/chord";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
+import type { JsonValue } from "@adwmc/helm-chord";
+import { BACKGROUND_CONTEXT } from "@adwmc/helm-chord/context";
 import type { DocumentCreate, Id, Seq, Storage, StorageWrite, TaskRecord } from "../types.ts";
 import { ROOT_CONVERSATION_ID } from "../types.ts";
 

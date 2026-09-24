@@ -1,4 +1,4 @@
-import type { Context, JsonValue } from "@earendil-works/chord";
+import type { Context, JsonValue } from "@adwmc/helm-chord";
 import type { FileError, FileSystem } from "../../env/index.ts";
 import type {
 	Cursor,

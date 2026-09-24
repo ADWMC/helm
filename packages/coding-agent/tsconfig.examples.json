@@ -3,10 +3,10 @@
 	"compilerOptions": {
 		"noEmit": true,
 		"paths": {
-			"@earendil-works/pi-coding-agent": ["./src/index.ts"],
-			"@earendil-works/pi-coding-agent/hooks": ["./src/core/hooks/index.ts"],
-			"@earendil-works/pi-tui": ["../tui/src/index.ts"],
-			"@earendil-works/pi-ai": ["../ai/src/index.ts"],
+			"@adwmc/helm-coding-agent": ["./src/index.ts"],
+			"@adwmc/helm-coding-agent/hooks": ["./src/core/hooks/index.ts"],
+			"@adwmc/helm-tui": ["../tui/src/index.ts"],
+			"@adwmc/helm-ai": ["../ai/src/index.ts"],
 			"typebox": ["../../node_modules/typebox"]
 		},
 		"skipLibCheck": true

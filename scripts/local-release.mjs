@@ -7,17 +7,17 @@ import { spawnSync } from "node:child_process";
 import { installCodingAgentConsumer, packReleasePackages, smokeTestCodingAgentConsumer } from "./coding-agent-consumer.mjs";
 
 const packages = [
-	{ directory: "packages/chord", name: "@earendil-works/chord" },
-	{ directory: "packages/telemetry", name: "@earendil-works/pi-telemetry" },
-	{ directory: "packages/ai", name: "@earendil-works/pi-ai" },
-	{ directory: "packages/durable", name: "@earendil-works/pi-durable" },
-	{ directory: "packages/tui", name: "@earendil-works/pi-tui" },
-	{ directory: "packages/agent", name: "@earendil-works/pi-agent-core" },
-	{ directory: "packages/protocol", name: "@earendil-works/pi-protocol" },
-	{ directory: "packages/client", name: "@earendil-works/pi-client" },
-	{ directory: "packages/session-backends/sqlite-node", name: "@earendil-works/pi-session-backend-sqlite-node" },
-	{ directory: "packages/server", name: "@earendil-works/pi-server" },
-	{ directory: "packages/coding-agent", name: "@earendil-works/pi-coding-agent" },
+	{ directory: "packages/chord", name: "@adwmc/helm-chord" },
+	{ directory: "packages/telemetry", name: "@adwmc/helm-telemetry" },
+	{ directory: "packages/ai", name: "@adwmc/helm-ai" },
+	{ directory: "packages/durable", name: "@adwmc/helm-durable" },
+	{ directory: "packages/tui", name: "@adwmc/helm-tui" },
+	{ directory: "packages/agent", name: "@adwmc/helm-agent-core" },
+	{ directory: "packages/protocol", name: "@adwmc/helm-protocol" },
+	{ directory: "packages/client", name: "@adwmc/helm-client" },
+	{ directory: "packages/session-backends/sqlite-node", name: "@adwmc/helm-session-backend-sqlite-node" },
+	{ directory: "packages/server", name: "@adwmc/helm-server" },
+	{ directory: "packages/coding-agent", name: "@adwmc/helm-coding-agent" },
 ];
 
 function printUsage() {
@@ -186,7 +186,7 @@ const options = parseArgs();
 const repoRoot = process.cwd();
 const rootPackageJson = readPackageJson(repoRoot);
 
-if (rootPackageJson.name !== "pi-monorepo") {
+if (rootPackageJson.name !== "helm-monorepo") {
 	throw new Error("Run this script from the repository root");
 }
 

@@ -1,4 +1,4 @@
-import type { Context } from "@earendil-works/chord";
+import type { Context } from "@adwmc/helm-chord";
 import type {
 	AnyToolDeclaration,
 	ContextEdit,

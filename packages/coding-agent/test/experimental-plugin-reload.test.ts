@@ -1,5 +1,5 @@
-import { defineFacet, type FacetLoader } from "@earendil-works/chord";
-import { type AgentLane, BACKGROUND_CONTEXT, type LaneSnapshot } from "@earendil-works/pi-agent-core";
+import { defineFacet, type FacetLoader } from "@adwmc/helm-chord";
+import { type AgentLane, BACKGROUND_CONTEXT, type LaneSnapshot } from "@adwmc/helm-agent-core";
 import { describe, expect, test, vi } from "vitest";
 import { SessionPlugins } from "../src/experimental/services/plugins.ts";
 import { createSessionWorkerServices } from "../src/experimental/services/worker.ts";

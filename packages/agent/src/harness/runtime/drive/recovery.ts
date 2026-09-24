@@ -1,4 +1,4 @@
-import { type AssistantMessage, reduceAssistantMessageFrames } from "@earendil-works/pi-ai";
+import { type AssistantMessage, reduceAssistantMessageFrames } from "@adwmc/helm-ai";
 import type {
 	AssistantEffectPendingOperation,
 	DeferredEffectPendingOperation,

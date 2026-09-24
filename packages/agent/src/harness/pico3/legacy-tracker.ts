@@ -5,7 +5,7 @@ import {
 	type Op,
 	type Prepared,
 	track as trackChord,
-} from "@earendil-works/chord/delta";
+} from "@adwmc/helm-chord/delta";
 
 /** Temporary compatibility surface for Pico3's flush-based document handling. */
 export interface Tracker<T extends object> {

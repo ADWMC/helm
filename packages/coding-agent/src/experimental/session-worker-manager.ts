@@ -8,14 +8,14 @@ import {
 	parseServiceProviderUpdate,
 	type ServiceCall,
 	type ServiceProviderUpdate,
-} from "@earendil-works/chord";
+} from "@adwmc/helm-chord";
 import {
 	BACKGROUND_CONTEXT,
 	type Context,
 	type JsonlSessionMetadata,
 	TODO_CONTEXT,
-} from "@earendil-works/pi-agent-core";
-import { type RoutedSessionAttachment, type RoutedSessionHandle, ServerError } from "@earendil-works/pi-server";
+} from "@adwmc/helm-agent-core";
+import { type RoutedSessionAttachment, type RoutedSessionHandle, ServerError } from "@adwmc/helm-server";
 import { Check } from "typebox/value";
 import type { CoordinatorConnection, CoordinatorConnectionEvent } from "./coordinator.ts";
 import { spawnInternalProcess } from "./process.ts";

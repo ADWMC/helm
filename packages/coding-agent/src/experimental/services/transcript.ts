@@ -1,5 +1,5 @@
-import { defineService, type ReplicatedState } from "@earendil-works/chord";
-import type { LaneTranscriptSnapshot, LaneWatchEvent } from "@earendil-works/pi-agent-core";
+import { defineService, type ReplicatedState } from "@adwmc/helm-chord";
+import type { LaneTranscriptSnapshot, LaneWatchEvent } from "@adwmc/helm-agent-core";
 
 export interface TranscriptState {
 	snapshot: LaneTranscriptSnapshot | null;

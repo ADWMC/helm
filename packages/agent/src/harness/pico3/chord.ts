@@ -4,8 +4,8 @@ import {
 	defineService,
 	type MutableReplicatedState,
 	type ReplicatedState,
-} from "@earendil-works/chord";
-import type { Op, Path, Seg } from "@earendil-works/chord/delta";
+} from "@adwmc/helm-chord";
+import type { Op, Path, Seg } from "@adwmc/helm-chord/delta";
 import type { ConversationHandle, Harness } from "./harness.ts";
 import type {
 	ConversationSpec,

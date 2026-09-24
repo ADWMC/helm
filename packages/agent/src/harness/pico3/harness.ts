@@ -1,5 +1,5 @@
-import type { Context } from "@earendil-works/chord";
-import { withAbortSignal } from "@earendil-works/chord/context";
+import type { Context } from "@adwmc/helm-chord";
+import { withAbortSignal } from "@adwmc/helm-chord/context";
 import type { TSchema } from "typebox";
 import { createHookRunners, type HookRegistration } from "./hooks.ts";
 import { chooseThrough, collapse } from "./kinds/collapse.ts";

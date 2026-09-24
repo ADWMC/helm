@@ -1,5 +1,5 @@
-import type { SessionStats, UsageRow } from "@earendil-works/pi-agent-core";
-import type { Usage } from "@earendil-works/pi-ai";
+import type { SessionStats, UsageRow } from "@adwmc/helm-agent-core";
+import type { Usage } from "@adwmc/helm-ai";
 import { sql } from "../sql.ts";
 import type { SqliteDatabase } from "../types.ts";
 import { readSessionRow } from "./session-row.ts";

@@ -1,5 +1,5 @@
-import type { Context, JsonValue } from "@earendil-works/chord";
-import { applyImmutableBatches, type Op } from "@earendil-works/chord/delta";
+import type { Context, JsonValue } from "@adwmc/helm-chord";
+import { applyImmutableBatches, type Op } from "@adwmc/helm-chord/delta";
 import type {
 	ConversationRecord,
 	Cursor,

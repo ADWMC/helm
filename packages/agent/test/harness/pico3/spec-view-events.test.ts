@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { isDeepStrictEqual } from "node:util";
-import type { Context } from "@earendil-works/chord";
-import { apply } from "@earendil-works/chord/delta";
-import type { AssistantMessage, AssistantMessageEvent } from "@earendil-works/pi-ai";
+import type { Context } from "@adwmc/helm-chord";
+import { apply } from "@adwmc/helm-chord/delta";
+import type { AssistantMessage, AssistantMessageEvent } from "@adwmc/helm-ai";
 import { onTestFinished, test } from "vitest";
 import type { ConversationHandle } from "../../../src/harness/pico3/harness.ts";
 import type { ConversationView, Envelope, Models, ViewEvent } from "../../../src/harness/pico3/types.ts";
