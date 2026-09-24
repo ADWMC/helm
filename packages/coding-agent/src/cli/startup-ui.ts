@@ -30,8 +30,8 @@ import {
 } from "../modes/interactive/theme/theme.ts";
 
 const OFFICIAL_PACKAGE_NAME = "@adwmc/helm-coding-agent";
-const OFFICIAL_APP_NAME = "pi";
-const OFFICIAL_CONFIG_DIR_NAME = ".pi";
+const OFFICIAL_APP_NAME = "helm";
+const OFFICIAL_CONFIG_DIR_NAME = ".helm";
 
 interface DistributionMetadata {
 	packageName: string;

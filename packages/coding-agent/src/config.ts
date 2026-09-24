@@ -499,14 +499,15 @@ try {
 
 const piConfigName: string | undefined = pkg.piConfig?.name;
 export const PACKAGE_NAME: string = pkg.name || "@adwmc/helm-coding-agent";
-export const APP_NAME: string = piConfigName || "pi";
+export const APP_NAME: string = piConfigName || "helm";
 export const APP_TITLE: string = piConfigName ? APP_NAME : "π";
 export const CONFIG_DIR_NAME: string = pkg.piConfig?.configDir || ".helm";
 export const VERSION: string = pkg.version || "0.0.0";
 
-// e.g., PI_CODING_AGENT_DIR or TAU_CODING_AGENT_DIR
-export const ENV_AGENT_DIR = `${APP_NAME.toUpperCase()}_CODING_AGENT_DIR`;
-export const ENV_SESSION_DIR = `${APP_NAME.toUpperCase()}_CODING_AGENT_SESSION_DIR`;
+// Env var names keep the legacy PI_ prefix for compatibility with existing
+// user environments; e.g., PI_CODING_AGENT_DIR or TAU_CODING_AGENT_DIR.
+export const ENV_AGENT_DIR = "PI_CODING_AGENT_DIR";
+export const ENV_SESSION_DIR = "PI_CODING_AGENT_SESSION_DIR";
 
 export function expandTildePath(path: string): string {
 	return normalizePath(path);
