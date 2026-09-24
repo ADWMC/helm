@@ -741,6 +741,25 @@ helm/                                  # ADWMC/helm, 基于 earendil-works/pi
 - **终验：`CI=0 BUILD=0 CHECK=0 TEST=0 FAILING=[]`，HEAD=fb200ef61 双侧一致，11 workspace 全 passed（79/155/18/3/288/12/6/3/6/2/6，含上游新增测试），ECONNREFUSED=0。**
 
 **✅ WAVE 0 收官（WG0.1–WG0.4 + post-rebase 回归全过）**。提交链（fork main，基于 upstream d5629e204）：`77ac1b04b` rename → `ad41d5d6b` consumer 对齐 → `ecd4fe6d6` 显示串+测试 → `6e03cd2be` 4 测试期望 → `f61cdad6b` LICENSE → `fb200ef61` rebase 后对齐。远端 `origin/main` = `014f6ff9`（rebase 前旧链；rebase 后新链待用户明示后 force-push 对齐）。下一步：**Wave 1 内核搬家**（任务书 `docs/tasks/W1-taskbook.md`）。
+---
+
+**✅ WAVE 1 收官（WG1.1–WG1.7 全绿,2026-09,任务书 W1-taskbook T01–T08 完成）**
+
+**波末 rebase 演练（§3.6.4,真冲突三役）**：upstream `d5629e204→b2bd111f2`（5 新提交）;26/26 回放。①rename 提交撞 durable 大改（UU×2）——**踩 rebase mine/theirs 反向坑**,二次取 `upstream/main` 正本+重打 sed 纠正;②上游新增文件逃过改名 changeset（W0 同类）——全树 re-sed 40→0（4 处遗留布局夹具有意保留,测试绿）;③通配 sed 误伤——`@adwmc/helm-pi-*` 前缀错（W0 映射=去 pi-）7 处纠为 `helm-*`、外部 `gondolin` 还原 npm 注册域 12 处。**教训入册：品牌 sed 必须显式包名白名单,禁通配。**
+
+**WG1.1 测试迁移+双基线**：终头 `59e1ed58d`（镜像 ext4+ci,round10 全配方）四码 **CI/BUILD/CHECK/TEST=0/0/0/0**,零失败文件零 workspace 错;套件文件 **578→589（+11:kernel solpi vitest +5、coding +2、durable 上游新 +4）**,kernel node:test 98 测试另全绿——**测试只增不减 ✓ 严格单调**。
+**WG1.2 内核活体**：builtin-on-empty-paths 测试（`extensions==1`+`validate_scope` 首位）+ `helm validate-scope` deny→exit 3（fail-closed,CLI 7/7）。
+**WG1.3 原仓处置**：helm-pi `docs/` 随迁（338 文件,W1 期提交）→ 归档 banner 提交 `a5dc40b` **push（fa7c23c..a5dc40b,exit0）+ `gh repo archive ADWMC/helm-pi` exit0 + `isArchived=true`**。
+**WG1.4 SoL-Pi**：API 核验先于合入（`docs/solpi-compat-0.85.1-to-0.87.1.md`:11/11 事件、10/10 符号、5/5 子路径、3/3 ctx）;vendor 23 文件+SPDX;移植套 **53/53**;默认开断言+逐项 opt-out×4+双载守卫（guard.jsonl）+COMPAT.md 改写。
+**WG1.5 配置分离**：settings.json 产品侧读写=0;`PI_CODING_AGENT*` 残留 **0**（20 文件,`HELM_*` 闭环）;schema 未知键拒绝负向组（config+spec 严格校验）。
+**WG1.6 tool-memory**：`.helm/tool-memory.db` SQLite;probe→失败=stale→召回不注入（负向实测）;召回预算条目边界截断;默认开;legacy JSONL 一次迁移;doctor 真探测（9 工具种子）。
+**WG1.7 i18n**：en↔zh-CN key/占位 parity、缺 key 逐键回退、机检面冻结英文源扫描（7 文件无 i18n import/无 CJK）、CJK 宽度断字不断串、locale 链 precedence——5 断言全绿;CLI 五串实接 `t()`。
+
+**环境保卫战（记录,全环境级上游零改动）**：WSL 服务崩×3（0x8007274c/E_UNEXPECTED,`wsl --shutdown` 干净重启）、外部会话杀×2（`Session terminated`,疑外部 timer 周期,不碰观察）、test 段瞬时 OOM×1、flaky `agent-session-concurrent`（基线同类）、**clipboard delta 假挂=碎片复刻缺整配方**（XDG/wslpath/fakes/白名单一体不可拆——round10 脚本=唯一可信执行器）、`/root/wsl-fakes.sh` per-boot 永久化（外部重启后手动补 1 次）、`**/.helm/` runtime 产物 untrack。
+**提交链（post-rebase,本地 23+2）**：`8ecff5811`(T01)→`fefb33825`(T02)→`fb9e3e1a8`/`60dc7afd5`/`66cddecc0`(T02 尾)→`695317613`(T03+docs 随迁)→`947fb1f93`(export 修)→`baa0d41a6`/`5a72133e2`(T04)→`7fe7e2a05`(格式)→`c8f9061c1`/`0f42edb53`(T05)→`7fd886dc2`(T06)→`28de8fe14`(卫生)→`e9c857227`(T07)→`7f541393c`(看板)→`316885ff9`/`db56ad3a8`/`59e1ed58d`(rebase 尾修);fork origin 未推（待用户明示,force 需说明 rebase 重写）。
+**L0-实现校正 3 处留痕**：CLI"三子命令保留"失实（七命令=全新注册面）;§3.6.5 W2 直改数/CLI 归波;沙箱 A/B 预设（W3 报,T03 期已修）。
+
+**下一步：Wave 2 模型防御层接线**（任务书 `docs/tasks/W2-taskbook.md`,WG2.1–2.3）。
 
 **WG0.1 首轮失败根因（已证，两处皆上游 Windows 盲区）**：
 1. `EALLOWSCRIPTS`：`bash.exe`=WSL2，测试实为 WSL 外壳 + Windows node/npm 混跑；test.sh 隔离的 `/tmp/...` 配置路径对 Windows npm 无效 → 回落到本机 npmrc（`C:\Users\Administrator\.npmrc` 的 `allow-scripts=` 行 + `AppData\Roaming\npm\etc\npmrc` 的 `allowScripts=` DSH 名单，复现 `npm config get allow-scripts` = DSH 列表 PROBE_EXIT=0）→ npm 11.19 在项目级安装中拒置该配置。
