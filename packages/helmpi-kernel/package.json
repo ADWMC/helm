@@ -4,6 +4,7 @@
   },
   "type": "module",
 	"exports": {
+		"./package.json": "./package.json",
 		".": "./src/index.ts",
 		"./scope": "./src/domain/scope.ts",
 		"./export": "./src/export.ts",
