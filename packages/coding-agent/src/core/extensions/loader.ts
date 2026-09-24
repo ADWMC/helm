@@ -6,16 +6,6 @@
 import * as fs from "node:fs";
 import { createRequire } from "node:module";
 
-function builtinKernelEntry(): string {
-	return fs.realpathSync(
-		path.join(
-			path.dirname(createRequire(import.meta.url).resolve("@adwmc/helm-kernel/package.json")),
-			"src",
-			"index.ts",
-		),
-	);
-}
-
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Provider } from "@adwmc/helm-ai";
@@ -611,12 +601,6 @@ async function loadExtensionsInternal(
 	runtime?: ExtensionRuntime,
 	useCache = false,
 ): Promise<LoadExtensionsResult> {
-	// W1-T02 correction: runtime uses loadExtensionsCached -> here directly
-	// (discoverAndLoadExtensions is NOT on the runtime path — tests calling
-	// discover directly gave a false green). Builtin kernel is mandatory for
-	// EVERY load path: prepend unless already present or explicitly already first.
-	const builtin = builtinKernelEntry();
-	const all = paths.includes(builtin) ? paths : [builtin, ...paths];
 	const extensions: Extension[] = [];
 	const errors: Array<{ path: string; error: string }> = [];
 	const warnings: Array<{ path: string; warning: string }> = [];
@@ -625,7 +609,7 @@ async function loadExtensionsInternal(
 	const resolvedEventBus = eventBus ?? createEventBus();
 	const resolvedRuntime = runtime ?? createExtensionRuntime();
 
-	for (const extPath of all) {
+	for (const extPath of paths) {
 		const { extension, error } = await loadExtension(
 			extPath,
 			resolvedCwd,
@@ -821,15 +805,6 @@ export async function discoverAndLoadExtensions(
 		addPaths([resolved]);
 	}
 
-	function _builtinKernelEntry(): string {
-		return fs.realpathSync(
-			path.join(
-				path.dirname(createRequire(import.meta.url).resolve("@adwmc/helm-kernel/package.json")),
-				"src",
-				"index.ts",
-			),
-		);
-	}
 	/** W1-T04 双载守卫: external SoL-Pi installs are dropped (builtin ships it) + journal line. */
 	function isExternalSolPi(p: string): boolean {
 		if (p.includes("helmpi-kernel")) return false;
@@ -873,4 +848,20 @@ export async function discoverAndLoadExtensions(
 	}
 
 	return loadExtensions(dropExternalSolPi(allPaths, resolvedCwd), resolvedCwd, eventBus);
+}
+
+function builtinKernelEntry(): string {
+	return fs.realpathSync(
+		path.join(
+			path.dirname(createRequire(import.meta.url).resolve("@adwmc/helm-kernel/package.json")),
+			"src",
+			"index.ts",
+		),
+	);
+}
+
+/** Product startup: prepend the mandatory builtin kernel to configured paths. */
+export function withBuiltinKernel(paths: readonly string[]): string[] {
+	const builtin = builtinKernelEntry();
+	return paths.includes(builtin) ? [...paths] : [builtin, ...paths];
 }
