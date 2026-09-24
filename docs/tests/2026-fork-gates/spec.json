@@ -1,0 +1,7 @@
+{
+	"goal": "authorized lab gate run — weblab-api 18081",
+	"allowedTargets": ["http://127.0.0.1:18081"],
+	"outOfScope": ["https://example.com"],
+	"highRisk": "deny",
+	"maxTokens": 30000
+}
