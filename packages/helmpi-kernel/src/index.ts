@@ -10,6 +10,7 @@ import type { ExtensionAPI, ExtensionContext } from "@adwmc/helm-coding-agent";
 import { Type } from "typebox";
 
 import { matchActivation } from "./activation.ts";
+import { createEfficiencyExtension } from "./efficiency/index.ts";
 import { AdvisoryLedger } from "./breach/advisory.ts";
 import { normalizeInput } from "./breach/input-normalizer.ts";
 import { classifyStance, isRefusal } from "./breach/refusal.ts";
@@ -113,6 +114,8 @@ function text(s: string): TextResult {
 }
 
 export default function helmPiExtension(pi: ExtensionAPI): void {
+	// W1-T04: built-in SoL-Pi efficiency suite (default ON, §0 决策).
+	createEfficiencyExtension()(pi);
 	const config = loadConfig();
 	const wash = (s: string) => washText(s);
 	let mode: AnalysisMode = readAnalysisMode(config);

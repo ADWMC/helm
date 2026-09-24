@@ -804,5 +804,48 @@ export async function discoverAndLoadExtensions(
 		addPaths([resolved]);
 	}
 
-	return loadExtensions(allPaths, resolvedCwd, eventBus);
+
+/** W1-T04 双载守卫: external SoL-Pi installs are dropped (builtin ships it) + journal line. */
+function isExternalSolPi(p: string): boolean {
+	if (p.includes("helmpi-kernel")) return false;
+	const norm = p.replaceAll("\\", "/");
+	if (!/(^|\/)sol-pi(\/|\.|$)/.test(norm)) return false;
+	try {
+		const pj = path.join(p, "package.json");
+		if (fs.existsSync(pj)) {
+			const name = JSON.parse(fs.readFileSync(pj, "utf8"))?.name;
+			return name === "sol-pi";
+		}
+	} catch {
+		/* fall through to path-marker verdict */
+	}
+	return true;
+}
+
+function dropExternalSolPi(paths: string[], cwd: string): string[] {
+	const kept: string[] = [];
+	const dropped: string[] = [];
+	for (const p of paths) {
+		if (isExternalSolPi(p)) dropped.push(p);
+		else kept.push(p);
+	}
+	if (dropped.length > 0) {
+		const dir = path.join(cwd, CONFIG_DIR_NAME);
+		try {
+			fs.mkdirSync(dir, { recursive: true });
+			for (const p of dropped) {
+				fs.appendFileSync(
+					path.join(dir, "guard.jsonl"),
+					`${JSON.stringify({ ts: new Date().toISOString(), guard: "solpi-double-load", action: "dropped-external", path: p, kept: "builtin" })}\n`,
+					"utf8",
+				);
+			}
+		} catch {
+			/* journal best-effort; dropping still stands */
+		}
+	}
+	return kept;
+}
+
+	return loadExtensions(dropExternalSolPi(allPaths, resolvedCwd), resolvedCwd, eventBus);
 }

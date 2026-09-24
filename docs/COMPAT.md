@@ -1,26 +1,22 @@
-# 宿主兼容与共存（COMPAT）
+# 宿主兼容与共存（COMPAT）——fork 原生形态（W1-T04 改写：共存 → 原生+检测）
+
+> 旧文（三扩展共存、helm-pi.json 互不读写）已随 W1-T04 决策作废：**SoL-Pi 四机制原生内置、默认开**；外部同装由双载守卫处理。
 
 ## 支持矩阵
 
 | 宿主 | 支持级别 | 说明 |
 |------|----------|------|
-| 官方 Pi（peer 锁定测试矩阵） | 一级 | 扩展入口、TUI 命令、激活词、工具收窄 |
-| oh-my-pi | 一级 | 同 `pi.extensions` 清单；侧栏为可选适配 |
-| DSH / Cordis | **不支持** | 旧 helm-d 形态，不迁移 preset 双源 |
+| 本 fork（helm,0.87.1 血统） | 一级 | 内建默认扩展：kernel 先于一切用户扩展注册（`validate_scope` 首位） |
+| 官方 pi（上游） | 上游仓 | 我们 rebase 同步,不反向兼容包袱 |
+| oh-my-pi / 其它扩展宿主 | 参考 | 不引运行时依赖 |
 
-## 与 SoL-Pi 同装
+## 与外部 SoL-Pi 同装（双载守卫）
 
 | 维度 | 规则 |
 |------|------|
-| 配置 | `helm-pi.json` vs `sol-pi.json` **互不读写** |
-| 存储 | `helm-pi/` vs `sol-pi/` 会话目录；禁止交叉删除 |
-| 事件 | 不替换宿主 built-in edit/write/bash 队列；不主动抢占 compact 边界 |
-| 推荐 | 文档建议同装 Action Fusion + ObservationPack（效率）；Reducer 默认审 |
+| 内置 | 四机制（action-fusion / observation-pack / evidence-preserving-reducer / online-context-compact）随 kernel **默认开** |
+| 外部同装 | loader 检出外部 `sol-pi`（包名或路径标记）→ **丢弃外部、保留内置**，写 `.helm/guard.jsonl` 一条（`guard: solpi-double-load`） |
+| 配置 | 开关只在 helm 自有 `.helm/config.json` 的 `efficiency.*`（逐项可关,默认真）；不读外部 sol-pi.json |
+| 核验 | API 兼容记录：`docs/solpi-compat-0.85.1-to-0.87.1.md`（11/11 事件、10/10 符号、5/5 子路径、3/3 ctx 属性,PASS） |
 
-急停：`HELPI_RUN=0` · `HELPI_SUPERVISE=0`（与 SoL-Pi 开关无关）。
-
-## 禁止
-
-- monkey-patch 宿主内部  
-- 运行时路径依赖 `reference/repos/**`  
-- 把 historical 文档当 Agent 指令  
+急停：`HELPI_RUN=0`（与 SoL-Pi 开关无关）；效率四机制逐项关 → `.helm/config.json` `efficiency.<key>: false`。
