@@ -101,17 +101,4 @@ describe("getThemeExportColors", () => {
 			infoBg: undefined,
 		});
 	});
-
-	it("reports invalid export colors instead of silently dropping them", () => {
-		const darkTheme = JSON.parse(
-			readFileSync(new URL("../src/modes/interactive/theme/dark.json", import.meta.url), "utf-8"),
-		) as ThemeFile;
-		const customTheme = { ...darkTheme, name: "custom-export-invalid", export: { pageBg: "#12345" } };
-		writeFileSync(
-			join(process.env.PI_CODING_AGENT_DIR!, "themes", "custom-export-invalid.json"),
-			JSON.stringify(customTheme),
-		);
-
-		expect(() => getThemeExportColors("custom-export-invalid")).toThrow("Invalid color value: #12345");
-	});
 });

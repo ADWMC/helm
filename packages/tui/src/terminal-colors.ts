@@ -43,10 +43,6 @@ export function parseOscColorResponse(data: string): { slot: OscColorSlot; rgb: 
 	return { slot: match[1] === "10" ? 10 : 11, rgb: parseOscColorValue(match[2]) };
 }
 
-export function isOsc11BackgroundColorResponse(data: string): boolean {
-	return parseOscColorResponse(data)?.slot === 11;
-}
-
 export function parseOsc11BackgroundColor(data: string): RgbColor | undefined {
 	const response = parseOscColorResponse(data);
 	return response?.slot === 11 ? response.rgb : undefined;

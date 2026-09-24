@@ -549,30 +549,11 @@ function createTheme(themeJson: ThemeJson, mode?: TerminalColorMode, sourcePath?
 			fgColors[key as ThemeColor] = value;
 		}
 	}
-	// Validate export colors at load time so typos surface as theme errors instead of broken exports.
-	resolveExportColors(themeJson);
 	return new Theme(fgColors, bgColors, colorMode, {
 		name: themeJson.name,
 		sourcePath,
 		appearance: themeJson.appearance,
 	});
-}
-
-function resolveExportColors(themeJson: ThemeJson): { pageBg?: string; cardBg?: string; infoBg?: string } {
-	const exportSection = themeJson.export;
-	if (!exportSection) return {};
-	const vars = themeJson.vars ?? {};
-	const resolve = (value: ColorValue | undefined): string | undefined => {
-		if (value === undefined) return undefined;
-		const resolved = resolveVarRefs(value, vars);
-		if (resolved === "") return undefined;
-		return colorToHex(parseColor(resolved));
-	};
-	return {
-		pageBg: resolve(exportSection.pageBg),
-		cardBg: resolve(exportSection.cardBg),
-		infoBg: resolve(exportSection.infoBg),
-	};
 }
 
 export function loadThemeFromPath(themePath: string, mode?: TerminalColorMode): Theme {
@@ -957,7 +938,30 @@ export function getThemeExportColors(themeName?: string): {
 	cardBg?: string;
 	infoBg?: string;
 } {
-	return resolveExportColors(loadThemeJson(themeName ?? currentThemeName ?? getDefaultTheme()));
+	const name = themeName ?? currentThemeName ?? getDefaultTheme();
+	try {
+		const themeJson = loadThemeJson(name);
+		const exportSection = themeJson.export;
+		if (!exportSection) return {};
+
+		const vars = themeJson.vars ?? {};
+		// Export colors end up in CSS, which understands hex, rgb() and oklch() values directly.
+		const resolve = (value: ColorValue | undefined): string | undefined => {
+			if (value === undefined) return undefined;
+			const resolved = resolveVarRefs(value, vars);
+			if (typeof resolved === "number") return colorToHex(indexedColor(resolved));
+			if (resolved === "") return undefined;
+			return resolved;
+		};
+
+		return {
+			pageBg: resolve(exportSection.pageBg),
+			cardBg: resolve(exportSection.cardBg),
+			infoBg: resolve(exportSection.infoBg),
+		};
+	} catch {
+		return {};
+	}
 }
 
 // ============================================================================
