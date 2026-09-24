@@ -1,5 +1,4 @@
 import { randomUUID } from "node:crypto";
-import { BACKGROUND_CONTEXT } from "@adwmc/helm-chord/context";
 import {
 	applyEnvelope,
 	type ConversationView,
@@ -23,6 +22,7 @@ import {
 	type ModelThinkingLevel,
 	type Usage,
 } from "@adwmc/helm-ai";
+import { BACKGROUND_CONTEXT } from "@adwmc/helm-chord/context";
 import { findInitialModel } from "../../core/model-resolver.ts";
 import { ModelRuntime } from "../../core/model-runtime.ts";
 import { SettingsManager } from "../../core/settings-manager.ts";

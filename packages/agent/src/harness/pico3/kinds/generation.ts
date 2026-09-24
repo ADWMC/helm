@@ -1,4 +1,3 @@
-import type { Context } from "@adwmc/helm-chord";
 import type {
 	AssistantMessage,
 	AssistantMessageEvent,
@@ -8,6 +7,7 @@ import type {
 } from "@adwmc/helm-ai";
 import { AssistantMessageFrameEncoder, isRetryableAssistantError } from "@adwmc/helm-ai";
 import { estimateContextTokens } from "@adwmc/helm-ai/utils/estimate";
+import type { Context } from "@adwmc/helm-chord";
 import { planManagedEntry, prepareDraft, type SystemInstructionsHooks, sameSnapshot, takeSnapshot } from "../system.ts";
 import {
 	type Closure,

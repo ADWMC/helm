@@ -1,5 +1,5 @@
-import { defineFacet, type Facet, type JsonValue } from "@adwmc/helm-chord";
 import type { ThinkingLevel } from "@adwmc/helm-agent-core";
+import { defineFacet, type Facet, type JsonValue } from "@adwmc/helm-chord";
 import { AgentController } from "./agent-controller.ts";
 import { type ModelSummary, Models, type Models as ModelsService } from "./models.ts";
 import { PresentationPlugins, SessionPlugins } from "./plugins.ts";

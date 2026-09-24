@@ -1,3 +1,4 @@
+import type { AgentHarness, AgentLane } from "@adwmc/helm-agent-core";
 import {
 	type Context,
 	createFacetHost,
@@ -11,7 +12,6 @@ import {
 	type ServiceCall,
 	type ServiceProviderUpdate,
 } from "@adwmc/helm-chord";
-import type { AgentHarness, AgentLane } from "@adwmc/helm-agent-core";
 import type { ModelRuntime } from "../../core/model-runtime.ts";
 import type { SettingsManager } from "../../core/settings-manager.ts";
 import { AgentController } from "./agent-controller.ts";

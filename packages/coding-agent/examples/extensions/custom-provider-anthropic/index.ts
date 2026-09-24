@@ -21,8 +21,6 @@
  * Then use /model to select custom-anthropic/claude-sonnet-4-5
  */
 
-import Anthropic from "@anthropic-ai/sdk";
-import type { ContentBlockParam, MessageCreateParamsStreaming } from "@anthropic-ai/sdk/resources/messages.js";
 import {
 	type Api,
 	type AssistantMessage,
@@ -47,6 +45,8 @@ import {
 	type TranscriptContext,
 } from "@adwmc/helm-ai";
 import type { ExtensionAPI } from "@adwmc/helm-coding-agent";
+import Anthropic from "@anthropic-ai/sdk";
+import type { ContentBlockParam, MessageCreateParamsStreaming } from "@anthropic-ai/sdk/resources/messages.js";
 
 // =============================================================================
 // OAuth implementation adapted for the legacy extension compatibility interface.

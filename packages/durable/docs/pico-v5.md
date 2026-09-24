@@ -9,8 +9,8 @@ import type {
   Draft,
   JsonValue,
   ReplicatedState,
-} from "@earendil-works/chord";
-import type { Op } from "@earendil-works/chord/delta";
+} from "@adwmc/helm-chord";
+import type { Op } from "@adwmc/helm-chord/delta";
 import type {
   Message,
   Models,
@@ -20,7 +20,7 @@ import type {
   ToolReference,
   ToolResultMessage,
   UserMessage,
-} from "@earendil-works/pi-ai";
+} from "@adwmc/helm-ai";
 
 type JsonObject = { [key: string]: JsonValue };
 type TaskOutcomeError = { message: string; detail?: JsonValue };

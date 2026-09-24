@@ -41,9 +41,9 @@ import {
   replicatedState,
   type Context, type Facet, type JsonValue, type RemoteServiceTransport,
   type ReplicatedState,
-} from "@earendil-works/chord";
-import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
-import { applyImmutable } from "@earendil-works/chord/delta";
+} from "@adwmc/helm-chord";
+import { BACKGROUND_CONTEXT } from "@adwmc/helm-chord/context";
+import { applyImmutable } from "@adwmc/helm-chord/delta";
 
 // The Pico specification calls this object-root constraint JsonObject.
 type JsonObject = { [key: string]: JsonValue };

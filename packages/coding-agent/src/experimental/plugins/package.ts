@@ -2,11 +2,7 @@ import { createHash } from "node:crypto";
 import { readFile, rm, writeFile } from "node:fs/promises";
 import { basename, dirname, join, resolve } from "node:path";
 import { bundleFacetPackage } from "@adwmc/helm-chord/bundler";
-import {
-	FACET_BUNDLE_MANIFEST_FILE,
-	type FacetBundleArtifact,
-	readFacetBundleArtifact,
-} from "@adwmc/helm-chord/node";
+import { FACET_BUNDLE_MANIFEST_FILE, type FacetBundleArtifact, readFacetBundleArtifact } from "@adwmc/helm-chord/node";
 import type { ServerId } from "@adwmc/helm-protocol";
 
 const PLUGIN_PACKAGE_PROFILE_VERSION = 1;

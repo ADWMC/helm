@@ -1,5 +1,3 @@
-import { type Context, defineFacet, type Facet, type MutableReplicatedState } from "@adwmc/helm-chord";
-import { BACKGROUND_CONTEXT } from "@adwmc/helm-chord/context";
 import {
 	type AgentLane,
 	type HarnessEvent,
@@ -9,6 +7,8 @@ import {
 	reduceLaneSnapshot,
 	type WatchHandle,
 } from "@adwmc/helm-agent-core";
+import { type Context, defineFacet, type Facet, type MutableReplicatedState } from "@adwmc/helm-chord";
+import { BACKGROUND_CONTEXT } from "@adwmc/helm-chord/context";
 import { Transcript, type Transcript as TranscriptService, type TranscriptState } from "./transcript.ts";
 
 interface TranscriptRuntime {

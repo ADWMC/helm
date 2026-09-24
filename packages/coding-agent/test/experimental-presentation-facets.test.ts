@@ -59,7 +59,7 @@ describe("server-selected presentation facets", () => {
 		await writeFile(
 			join(packagePath, "package.json"),
 			`${JSON.stringify({
-				name: "@earendil-works/test-plugin",
+				name: "@adwmc/test-plugin",
 				version: "1.0.0",
 				peerDependencies: {
 					"@adwmc/helm-chord": "^0.84.4",
@@ -79,7 +79,7 @@ describe("server-selected presentation facets", () => {
 		expect(plugin.manifestPath).toMatch(
 			new RegExp(`/plugin-builds/${serverId}/pi-example-plugin-[a-f0-9]{12}/chord-facets\\.json$`, "u"),
 		);
-		expect(first[0]?.plugin).toEqual({ id: "@earendil-works/test-plugin", version: "1.0.0" });
+		expect(first[0]?.plugin).toEqual({ id: "@adwmc/test-plugin", version: "1.0.0" });
 		const firstLoaded = await createPresentationFacetLoaders(createPresentationFacetData(first))[0]!.load();
 		expect(firstLoaded.facets.map(({ id }) => id)).toEqual(["built-a"]);
 		await firstLoaded.dispose();
@@ -100,7 +100,7 @@ describe("server-selected presentation facets", () => {
 			writeFile(
 				join(secondPackagePath, "package.json"),
 				`${JSON.stringify({
-					name: "@earendil-works/second-test-plugin",
+					name: "@adwmc/second-test-plugin",
 					version: "1.0.0",
 					peerDependencies: { "@adwmc/helm-chord": "^0.84.4" },
 				})}\n`,

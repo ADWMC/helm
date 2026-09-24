@@ -390,7 +390,7 @@ describe("experimental durable server composition", () => {
 			writeFile(
 				join(secondPackagePath, "package.json"),
 				`${JSON.stringify({
-					name: "@earendil-works/second-session-plugin",
+					name: "@adwmc/second-session-plugin",
 					version: "1.0.0",
 					peerDependencies: { "@adwmc/helm-chord": "^0.84.4" },
 				})}\n`,

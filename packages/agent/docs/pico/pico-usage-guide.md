@@ -110,8 +110,8 @@ code, a private typed invocation identity. It is not model context. No casts or 
 are needed. Pure accessors, synchronous registrations and methods inside a transaction take no Call.
 
 ```typescript
-import type { Call } from '@earendil-works/pi-agent';
-import { BACKGROUND_CONTEXT, withCancel } from '@earendil-works/chord/context';
+import type { Call } from '@adwmc/helm-agent';
+import { BACKGROUND_CONTEXT, withCancel } from '@adwmc/helm-chord/context';
 
 const call: Call = BACKGROUND_CONTEXT; // host call, without cancellation
 const { context: waitingCall, cancel } = withCancel(call);
@@ -135,17 +135,17 @@ something a facade or type can prevent.
 ## Installation
 
 ```bash
-npm install @earendil-works/pi-agent
+npm install @adwmc/helm-agent
 ```
 
 ## Quick Start
 
 ```typescript
-import { Harness, JsonlStorage, systemSections, type Call } from '@earendil-works/pi-agent';
-import { BACKGROUND_CONTEXT } from '@earendil-works/chord/context';
-import { readTool, writeTool, bashTool } from '@earendil-works/pi-agent/tools';
-import { generationKind } from '@earendil-works/pi-agent/kinds';
-import { builtinModels } from '@earendil-works/pi-ai/providers/all';
+import { Harness, JsonlStorage, systemSections, type Call } from '@adwmc/helm-agent';
+import { BACKGROUND_CONTEXT } from '@adwmc/helm-chord/context';
+import { readTool, writeTool, bashTool } from '@adwmc/helm-agent/tools';
+import { generationKind } from '@adwmc/helm-agent/kinds';
+import { builtinModels } from '@adwmc/helm-ai/providers/all';
 
 const call: Call = BACKGROUND_CONTEXT;
 
@@ -1182,7 +1182,7 @@ to the UI as it happens, is bounded once in one place, and settles into a `ToolO
 the transcript, the model and every renderer share. Failure is a throw; the harness sets `isError`.
 
 ```typescript
-import { Type, type Tool } from '@earendil-works/pi-agent';
+import { Type, type Tool } from '@adwmc/helm-agent';
 
 export const countLinesTool: Tool<{ i: string; path: string; pattern?: string }, { lines: number; matching: number }> = {
   name: 'count_lines',

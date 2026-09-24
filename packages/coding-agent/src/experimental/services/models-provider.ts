@@ -1,7 +1,7 @@
-import { type Context, defineFacet, type Facet, type MutableReplicatedState } from "@adwmc/helm-chord";
-import { BACKGROUND_CONTEXT } from "@adwmc/helm-chord/context";
 import type { AgentLane, ThinkingLevel } from "@adwmc/helm-agent-core";
 import { getSupportedThinkingLevels } from "@adwmc/helm-ai";
+import { type Context, defineFacet, type Facet, type MutableReplicatedState } from "@adwmc/helm-chord";
+import { BACKGROUND_CONTEXT } from "@adwmc/helm-chord/context";
 import type { ModelRuntime } from "../../core/model-runtime.ts";
 import type { SettingsManager } from "../../core/settings-manager.ts";
 import { Models, type Models as ModelsService, type ModelsState } from "./models.ts";

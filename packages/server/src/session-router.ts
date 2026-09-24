@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import type { JsonValue, ServiceCall, ServiceProviderUpdate } from "@adwmc/helm-chord";
 import { BACKGROUND_CONTEXT, type Context, type SessionMetadata } from "@adwmc/helm-agent-core";
+import type { JsonValue, ServiceCall, ServiceProviderUpdate } from "@adwmc/helm-chord";
 import type { RpcTarget, SessionTarget } from "@adwmc/helm-protocol";
 import { ServerDrainingError, SessionNotAttachedError } from "./errors.ts";
 import type { RoutedSessionAttachment, RoutedSessionHandle, ServerHost } from "./types.ts";

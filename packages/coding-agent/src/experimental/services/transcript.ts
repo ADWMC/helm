@@ -1,5 +1,5 @@
-import { defineService, type ReplicatedState } from "@adwmc/helm-chord";
 import type { LaneTranscriptSnapshot, LaneWatchEvent } from "@adwmc/helm-agent-core";
+import { defineService, type ReplicatedState } from "@adwmc/helm-chord";
 
 export interface TranscriptState {
 	snapshot: LaneTranscriptSnapshot | null;

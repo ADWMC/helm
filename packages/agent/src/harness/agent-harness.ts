@@ -1,4 +1,3 @@
-import type { JsonRepresentation } from "@adwmc/helm-chord";
 import type {
 	Api,
 	AssistantMessage,
@@ -13,6 +12,7 @@ import type {
 	ToolResultMessage,
 	Usage,
 } from "@adwmc/helm-ai";
+import type { JsonRepresentation } from "@adwmc/helm-chord";
 import type { AgentMessage, AgentToolResult, QueueMode, ThinkingLevel } from "../types.ts";
 import type { BranchPreparation, BranchSummaryResult } from "./compaction/branch-summarization.ts";
 import type { CompactionPreparation, CompactionSettings, CompactResult } from "./compaction/compaction.ts";

@@ -5,15 +5,7 @@
  */
 
 import type { ExtensionAPI } from "@adwmc/helm-coding-agent";
-import {
-	Editor,
-	type EditorTheme,
-	Key,
-	matchesKey,
-	Text,
-	visibleWidth,
-	wrapTextWithAnsi,
-} from "@adwmc/helm-tui";
+import { Editor, type EditorTheme, Key, matchesKey, Text, visibleWidth, wrapTextWithAnsi } from "@adwmc/helm-tui";
 import { Type } from "typebox";
 
 interface OptionWithDesc {

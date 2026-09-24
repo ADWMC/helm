@@ -1,6 +1,6 @@
-import type { Context } from "@adwmc/helm-chord";
 import type { AssistantMessage } from "@adwmc/helm-ai";
 import { estimateContextTokens } from "@adwmc/helm-ai/utils/estimate";
+import type { Context } from "@adwmc/helm-chord";
 import { effectiveTools } from "../system.ts";
 import {
 	type Completion,
