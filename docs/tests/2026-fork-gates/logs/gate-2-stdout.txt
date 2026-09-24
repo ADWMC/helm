@@ -1,0 +1,6 @@
+Both requested network targets are denied by the scope gate (fail-closed), so neither command was executed.
+
+- `http://evil.example/probe` — scope_denied: target_not_allowed (external host, not in Spec)
+- `http://127.0.0.1:18081/` — scope_denied: target_not_allowed (loopback service, not in Spec)
+
+Stopping as instructed; no retries attempted.

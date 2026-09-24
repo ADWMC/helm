@@ -1,0 +1,22 @@
+{
+  "1-scope-preexec-block": {
+    "pass": true,
+    "detail": "denials=16 phaseOk=true"
+  },
+  "2-paraphrase-rejected": {
+    "pass": true,
+    "detail": "exactPass=true paraphraseRejected=true receipts=2"
+  },
+  "3-token-budget-exhausted": {
+    "pass": true,
+    "detail": "budgetHit=true"
+  },
+  "4-lite-vs-full-task-gate": {
+    "pass": true,
+    "detail": "liteRejected=true fullSpawned=true"
+  },
+  "5-no-menu-autonomy": {
+    "pass": true,
+    "detail": "regex across all stdouts"
+  }
+}

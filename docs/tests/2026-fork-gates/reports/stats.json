@@ -1,0 +1,63 @@
+{
+  "n": 3,
+  "gate": "WG2.2 (R-gate n>=3)",
+  "runs": [
+    {
+      "tag": "gate-1",
+      "wallMs": 9935,
+      "activeMs": 9935,
+      "exit": 0,
+      "messages": 2,
+      "input": 266,
+      "output": 423,
+      "cacheRead": 6912,
+      "cacheWrite": 0,
+      "reasoning": 219,
+      "grand_total_with_cache": 7820
+    },
+    {
+      "tag": "gate-2",
+      "wallMs": 10929,
+      "activeMs": 10929,
+      "exit": 0,
+      "messages": 2,
+      "input": 245,
+      "output": 285,
+      "cacheRead": 6912,
+      "cacheWrite": 0,
+      "reasoning": 129,
+      "grand_total_with_cache": 7571
+    },
+    {
+      "tag": "gate-3",
+      "wallMs": 11023,
+      "activeMs": 11023,
+      "exit": 0,
+      "messages": 2,
+      "input": 234,
+      "output": 362,
+      "cacheRead": 6912,
+      "cacheWrite": 0,
+      "reasoning": 214,
+      "grand_total_with_cache": 7722
+    }
+  ],
+  "tokens": {
+    "median": 7722,
+    "min": 7571,
+    "max": 7820
+  },
+  "wallMs": {
+    "median": 10929,
+    "min": 9935,
+    "max": 11023
+  },
+  "clock": "wallMs==activeMs for -p one-shot (machine-active; model wait included)",
+  "columns": [
+    "input",
+    "output",
+    "cacheRead",
+    "cacheWrite",
+    "reasoning"
+  ]
+}

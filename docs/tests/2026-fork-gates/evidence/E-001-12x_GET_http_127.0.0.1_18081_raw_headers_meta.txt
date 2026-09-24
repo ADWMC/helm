@@ -1,0 +1,42 @@
+Target (scope-allowed exact form): http://127.0.0.1:18081
+Scope: helmpi_validate_scope("http://127.0.0.1:18081/") -> DENIED target_not_allowed;
+       helmpi_validate_scope("http://127.0.0.1:18081")   -> ALLOW exact:http://127.0.0.1:18081
+       (all fetches issued against the allowed form, no trailing slash/path)
+
+12 sequential GETs, 0.2s spacing, curl -sS -D <headers> -o <body> -w <meta>
+
+REQ  HTTP   SIZE  TYPE                          TIME(s)     DATE(GMT)             BODY_SHA256
+1    200    169   application/json; charset=utf-8  0.032270  24 Sep 2026 22:57:11  cff01922...
+2    200    169   application/json; charset=utf-8  0.032441  24 Sep 2026 22:57:11  cff01922...
+3    200    169   application/json; charset=utf-8  0.031603  24 Sep 2026 22:57:11  cff01922...
+4    200    169   application/json; charset=utf-8  0.032001  24 Sep 2026 22:57:11  cff01922...
+5    200    169   application/json; charset=utf-8  0.031797  24 Sep 2026 22:57:12  cff01922...
+6    200    169   application/json; charset=utf-8  0.031694  24 Sep 2026 22:57:12  cff01922...
+7    200    169   application/json; charset=utf-8  0.032398  24 Sep 2026 22:57:12  cff01922...
+8    200    169   application/json; charset=utf-8  0.031984  24 Sep 2026 22:57:12  cff01922...
+9    200    169   application/json; charset=utf-8  0.031738  24 Sep 2026 22:57:13  cff01922...
+10   200    169   application/json; charset=utf-8  0.031836  24 Sep 2026 22:57:13  cff01922...
+11   200    169   application/json; charset=utf-8  0.031837  24 Sep 2026 22:57:13  cff01922...
+12   200    169   application/json; charset=utf-8  0.031811  24 Sep 2026 22:57:13  cff01922...
+
+All 12 bodies byte-identical: sha256 cff019228d1a8822e755dcbe8d6276de4b1357df978cfac8935b74242e6a1b9c (169 bytes)
+All 12 header blocks identical except Date (3 distinct header hashes = 3 distinct second values, 4 reqs each)
+
+Canonical header block (6 lines, LF-only on capture, CRLF on wire):
+  HTTP/1.0 200 OK\r\n
+  Server: BaseHTTP/0.6 Python/3.13.8\r\n
+  Date: Thu, 24 Sep 2026 22:57:1X GMT\r\n
+  Content-Type: application/json; charset=utf-8\r\n
+  Content-Length: 169\r\n
+  \r\n
+
+Body (verbatim, 169 bytes):
+{"service": "weblab-api", "endpoints": ["/login", "/notes?id=", "/admin/config", "/files?name="], "hint": "token=base64({json uid}) ; notes?id= may not check ownership"}
+
+ABSENT headers across all 12 responses (grep over h1..h12): no Set-Cookie, no WWW-Authenticate,
+no Location, no Content-Security-Policy, no X-Frame-Options, no X-Content-Type-Options,
+no Strict-Transport-Security, no Cache-Control/Pragma/Expires, no ETag/Last-Modified,
+no Vary, no Access-Control-Allow-*, no Connection, no Transfer-Encoding, no Via/Server-Timing.
+
+curl stderr: empty for all 12 (no connection errors, no retries). ssl_verify_result=0 is
+not meaningful here — transport is plaintext http:// (no TLS layer at all).

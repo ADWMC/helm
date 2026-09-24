@@ -1,0 +1,10 @@
+No such tool exists in this environment, so there is no result JSON to report.
+
+**Raw result:** none — the request could not be executed.
+
+Details:
+- My available tools are: `read`, `bash`, `update_plan`, `helmpi_*` (status/scope/mode/phase/route/case/evidence/finding/reference), `tool_memory`, `begin_case`, `case_status`, `normalize_input`, `skill_index`, `obs_recall`.
+- There is no `task` (or worker-spawn) tool among them; a memory search for "task tool spawn worker" returned `[]`, and `helmpi_status` confirms the active toolset is helm-pi with `scope.enforce: true`.
+- Fabricating a JSON payload would violate evidence discipline, so I'm reporting the absence instead.
+
+If you want a worker-like execution, the closest bounded alternatives are running a command via `bash` or opening a case workspace via `begin_case` — say which and I'll do it.

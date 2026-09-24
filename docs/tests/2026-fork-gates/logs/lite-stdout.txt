@@ -1,0 +1,3 @@
+No such result to report: there is no `task` tool (or any worker/spawn tool) in this environment's toolset — I verified via tool memory (0 entries, no matching tool) and helm-pi status. Available tools are file/bash operations, helm-pi case/evidence tools, and planning/memory helpers; none spawn a worker.
+
+I won't fabricate a raw JSON result. If a worker-spawning tool exists elsewhere in your setup, it isn't exposed to this session — point me at it and I'll run the 'ping' prompt through it.
