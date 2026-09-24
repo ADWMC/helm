@@ -7,7 +7,7 @@ import { discoverAndLoadExtensions } from "../src/core/extensions/loader.ts";
 // Fork note (§6 builtin kernel): discoverAndLoadExtensions always prepends the
 // builtin helm kernel entry, so raw results include it. Fixture assertions below
 // describe discovered user extensions only — filter the builtin out by design.
-const fixtureExts = (result: { extensions: readonly { path: string }[] }) =>
+const fixtureExts = <T extends { path: string }>(result: { extensions: readonly T[] }): T[] =>
 	result.extensions.filter((e) => !e.path.includes("helmpi-kernel"));
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

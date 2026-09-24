@@ -18,7 +18,7 @@ import {
 // Fork note (§6 builtin kernel): discoverAndLoadExtensions always prepends the
 // builtin helm kernel entry; runner-construction and count assertions below
 // describe fixture extensions only.
-const fixtureExts = (result: { extensions: readonly { path: string }[] }) =>
+const fixtureExts = <T extends { path: string }>(result: { extensions: readonly T[] }): T[] =>
 	result.extensions.filter((e) => !e.path.includes("helmpi-kernel"));
 import { ExtensionRunner, emitProjectTrustEvent } from "../src/core/extensions/runner.ts";
 import type {
