@@ -5,6 +5,17 @@
 
 import * as fs from "node:fs";
 import { createRequire } from "node:module";
+
+function builtinKernelEntry(): string {
+	return fs.realpathSync(
+		path.join(
+			path.dirname(createRequire(import.meta.url).resolve("@adwmc/helm-kernel/package.json")),
+			"src",
+			"index.ts",
+		),
+	);
+}
+
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Provider } from "@adwmc/helm-ai";
@@ -600,6 +611,12 @@ async function loadExtensionsInternal(
 	runtime?: ExtensionRuntime,
 	useCache = false,
 ): Promise<LoadExtensionsResult> {
+	// W1-T02 correction: runtime uses loadExtensionsCached -> here directly
+	// (discoverAndLoadExtensions is NOT on the runtime path — tests calling
+	// discover directly gave a false green). Builtin kernel is mandatory for
+	// EVERY load path: prepend unless already present or explicitly already first.
+	const builtin = builtinKernelEntry();
+	const all = paths.includes(builtin) ? paths : [builtin, ...paths];
 	const extensions: Extension[] = [];
 	const errors: Array<{ path: string; error: string }> = [];
 	const warnings: Array<{ path: string; warning: string }> = [];
@@ -608,7 +625,7 @@ async function loadExtensionsInternal(
 	const resolvedEventBus = eventBus ?? createEventBus();
 	const resolvedRuntime = runtime ?? createExtensionRuntime();
 
-	for (const extPath of paths) {
+	for (const extPath of all) {
 		const { extension, error } = await loadExtension(
 			extPath,
 			resolvedCwd,
@@ -804,48 +821,56 @@ export async function discoverAndLoadExtensions(
 		addPaths([resolved]);
 	}
 
-
-/** W1-T04 双载守卫: external SoL-Pi installs are dropped (builtin ships it) + journal line. */
-function isExternalSolPi(p: string): boolean {
-	if (p.includes("helmpi-kernel")) return false;
-	const norm = p.replaceAll("\\", "/");
-	if (!/(^|\/)sol-pi(\/|\.|$)/.test(norm)) return false;
-	try {
-		const pj = path.join(p, "package.json");
-		if (fs.existsSync(pj)) {
-			const name = JSON.parse(fs.readFileSync(pj, "utf8"))?.name;
-			return name === "sol-pi";
-		}
-	} catch {
-		/* fall through to path-marker verdict */
+	function _builtinKernelEntry(): string {
+		return fs.realpathSync(
+			path.join(
+				path.dirname(createRequire(import.meta.url).resolve("@adwmc/helm-kernel/package.json")),
+				"src",
+				"index.ts",
+			),
+		);
 	}
-	return true;
-}
-
-function dropExternalSolPi(paths: string[], cwd: string): string[] {
-	const kept: string[] = [];
-	const dropped: string[] = [];
-	for (const p of paths) {
-		if (isExternalSolPi(p)) dropped.push(p);
-		else kept.push(p);
-	}
-	if (dropped.length > 0) {
-		const dir = path.join(cwd, CONFIG_DIR_NAME);
+	/** W1-T04 双载守卫: external SoL-Pi installs are dropped (builtin ships it) + journal line. */
+	function isExternalSolPi(p: string): boolean {
+		if (p.includes("helmpi-kernel")) return false;
+		const norm = p.replaceAll("\\", "/");
+		if (!/(^|\/)sol-pi(\/|\.|$)/.test(norm)) return false;
 		try {
-			fs.mkdirSync(dir, { recursive: true });
-			for (const p of dropped) {
-				fs.appendFileSync(
-					path.join(dir, "guard.jsonl"),
-					`${JSON.stringify({ ts: new Date().toISOString(), guard: "solpi-double-load", action: "dropped-external", path: p, kept: "builtin" })}\n`,
-					"utf8",
-				);
+			const pj = path.join(p, "package.json");
+			if (fs.existsSync(pj)) {
+				const name = JSON.parse(fs.readFileSync(pj, "utf8"))?.name;
+				return name === "sol-pi";
 			}
 		} catch {
-			/* journal best-effort; dropping still stands */
+			/* fall through to path-marker verdict */
 		}
+		return true;
 	}
-	return kept;
-}
+
+	function dropExternalSolPi(paths: string[], cwd: string): string[] {
+		const kept: string[] = [];
+		const dropped: string[] = [];
+		for (const p of paths) {
+			if (isExternalSolPi(p)) dropped.push(p);
+			else kept.push(p);
+		}
+		if (dropped.length > 0) {
+			const dir = path.join(cwd, CONFIG_DIR_NAME);
+			try {
+				fs.mkdirSync(dir, { recursive: true });
+				for (const p of dropped) {
+					fs.appendFileSync(
+						path.join(dir, "guard.jsonl"),
+						`${JSON.stringify({ ts: new Date().toISOString(), guard: "solpi-double-load", action: "dropped-external", path: p, kept: "builtin" })}\n`,
+						"utf8",
+					);
+				}
+			} catch {
+				/* journal best-effort; dropping still stands */
+			}
+		}
+		return kept;
+	}
 
 	return loadExtensions(dropExternalSolPi(allPaths, resolvedCwd), resolvedCwd, eventBus);
 }
