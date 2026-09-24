@@ -86,9 +86,19 @@ describe("helm product commands", () => {
 		expect(process.exitCode).toBe(1);
 	});
 
-	it("doctor and attack-coverage are honest stubs (exit 0, explicit pending text)", async () => {
+	it("doctor probes the toolchain into .helm/tool-memory.db (W1-T06) and attack-coverage stays honest", async () => {
 		await expect(runHelmCommand(["doctor"], cwd)).resolves.toBe(true);
 		expect(process.exitCode).toBe(0);
+		const dbPath = path.join(cwd, ".helm", "tool-memory.db");
+		expect(fs.existsSync(dbPath)).toBe(true);
+		// same store read-back: node/npm/git must exist (env has them), ≥5 probed
+		const { openToolMemory } = await import("@adwmc/helm-kernel/memory");
+		const store = openToolMemory(dbPath);
+		const all = store.all();
+		expect(all.length).toBeGreaterThanOrEqual(5);
+		expect(all.some((e) => e.name === "node" && e.status === "verified")).toBe(true);
+		expect(all.every((e) => e.probe)).toBe(true);
+		store.close();
 		process.exitCode = 0;
 		await expect(runHelmCommand(["attack-coverage"], cwd)).resolves.toBe(true);
 		expect(process.exitCode).toBe(0);

@@ -17,6 +17,7 @@ import { join, resolve } from "node:path";
 import { validateHelmSpec } from "@adwmc/helm-kernel/config";
 import { exportReport, exportReportJson, reportExitCode } from "@adwmc/helm-kernel/export";
 import { Ledger } from "@adwmc/helm-kernel/ledger";
+import { openToolMemory } from "@adwmc/helm-kernel/memory";
 import { validateScopeQuery } from "@adwmc/helm-kernel/scope";
 
 const HELM_COMMANDS: ReadonlySet<string> = new Set([
@@ -157,10 +158,42 @@ export async function runHelmCommand(args: string[], cwd: string = process.cwd()
 		}
 
 		case "doctor": {
-			// Honest stub until W1-T06 (tool-memory probes) makes this real.
-			console.log(
-				"doctor: environment probes pending W1-T06 (tool-memory init; run helm doctor after kernel memory lands)",
-			);
+			// W1-T06: probe the local toolchain, seed .helm/tool-memory.db with
+			// verified entries (probe + last_verified evidence discipline).
+			const PROBE_SET: Array<{ name: string; probe: string }> = [
+				{ name: "node", probe: "node --version" },
+				{ name: "npm", probe: "npm --version" },
+				{ name: "git", probe: "git --version" },
+				{ name: "rg", probe: "rg --version" },
+				{ name: "fd", probe: "fd --version" },
+				{ name: "python3", probe: "python3 --version" },
+				{ name: "gh", probe: "gh --version" },
+				{ name: "docker", probe: "docker --version" },
+				{ name: "nmap", probe: "nmap --version" },
+			];
+			const store = openToolMemory(join(cwd, ".helm", "tool-memory.db"));
+			let verified = 0;
+			let stale = 0;
+			for (const p of PROBE_SET) {
+				const seeded = store.upsert({
+					scope: "workspace",
+					scopeKey: cwd,
+					kind: "tool",
+					name: p.name,
+					verdict: "unknown",
+					confidence: "high",
+					note: `probe: ${p.probe}`,
+					evidenceRefs: [],
+					source: "agent",
+					probe: p.probe,
+				});
+				const after = store.verify(seeded.id);
+				if (after?.status === "verified") verified++;
+				else stale++;
+				console.log(`${after?.status === "verified" ? "ok  " : "stale"} ${p.name}`);
+			}
+			console.log(`tool-memory: ${verified} verified, ${stale} stale -> ${store.path}`);
+			store.close();
 			process.exitCode = 0;
 			return true;
 		}

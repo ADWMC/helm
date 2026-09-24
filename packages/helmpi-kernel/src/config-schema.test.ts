@@ -40,7 +40,13 @@ test("helm config: unknown defense key rejected + type errors reported", () => {
 });
 
 test("helm spec: scaffold shape passes (spec init output is valid)", () => {
-	const scaffold = { goal: "", allowedTargets: [] as string[], outOfScope: [] as string[], highRisk: "deny", maxTokens: 500_000 };
+	const scaffold = {
+		goal: "",
+		allowedTargets: [] as string[],
+		outOfScope: [] as string[],
+		highRisk: "deny",
+		maxTokens: 500_000,
+	};
 	assert.equal(validateHelmSpec(scaffold).ok, true);
 });
 

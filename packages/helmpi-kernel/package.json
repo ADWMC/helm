@@ -4,6 +4,7 @@
   },
   "type": "module",
 	"exports": {
+		"./memory": "./src/memory/tool-memory.ts",
 		"./config": "./src/config-schema.ts",
 		"./package.json": "./package.json",
 		".": "./src/index.ts",

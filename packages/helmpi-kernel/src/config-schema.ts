@@ -71,7 +71,12 @@ function checkOptionalString(obj: Record<string, unknown>, key: string, path: st
 	}
 }
 
-function checkOptionalBoolean(obj: Record<string, unknown>, key: string, path: string, failures: SchemaFailure[]): void {
+function checkOptionalBoolean(
+	obj: Record<string, unknown>,
+	key: string,
+	path: string,
+	failures: SchemaFailure[],
+): void {
 	if (key in obj && typeof obj[key] !== "boolean") {
 		failures.push({ path: `${path}${key}`, message: "expected boolean" });
 	}
@@ -136,7 +141,11 @@ export function validateHelmSpec(raw: unknown): ValidationResult<Record<string, 
 	if (!("goal" in raw) || typeof raw.goal !== "string") {
 		failures.push({ path: "goal", message: "required string" });
 	}
-	if (!("allowedTargets" in raw) || !Array.isArray(raw.allowedTargets) || raw.allowedTargets.some((t) => typeof t !== "string")) {
+	if (
+		!("allowedTargets" in raw) ||
+		!Array.isArray(raw.allowedTargets) ||
+		raw.allowedTargets.some((t) => typeof t !== "string")
+	) {
 		failures.push({ path: "allowedTargets", message: "required array of strings" });
 	}
 	if ("outOfScope" in raw && (!Array.isArray(raw.outOfScope) || raw.outOfScope.some((t) => typeof t !== "string"))) {

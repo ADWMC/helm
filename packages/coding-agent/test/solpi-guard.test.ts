@@ -41,7 +41,8 @@ describe("solpi double-load guard", () => {
 		return dir;
 	}
 
-	it("drops an external sol-pi install, keeps builtin kernel, journals guard line", async () => { // timeout: cold vite transform under /mnt/c
+	it("drops an external sol-pi install, keeps builtin kernel, journals guard line", async () => {
+		// timeout: cold vite transform under /mnt/c
 		const external = makeExternalSolPi();
 		const r = await discoverAndLoadExtensions([external], cwd, agentDir);
 		expect(r.errors).toEqual([]);

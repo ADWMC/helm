@@ -251,6 +251,9 @@ export default function helmPiExtension(pi: ExtensionAPI): void {
 
 			if (params.action === "search") {
 				const rows = store.search({
+					// Agent lookup sees everything; PROMPT recall still excludes stale
+					// (recallForPrompt filters) — WG1.6 boundary.
+					includeStale: true,
 					...(params.q ? { q: params.q } : {}),
 					...(params.target ? { target: params.target } : {}),
 					...(params.limit ? { limit: params.limit } : {}),

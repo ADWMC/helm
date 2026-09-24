@@ -4,6 +4,7 @@ import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { discoverAndLoadExtensions } from "../src/core/extensions/loader.ts";
+
 // Fork note (§6 builtin kernel): discoverAndLoadExtensions always prepends the
 // builtin helm kernel entry, so raw results include it. Fixture assertions below
 // describe discovered user extensions only — filter the builtin out by design.
@@ -53,7 +54,11 @@ describe("extensions discovery", () => {
 
 		expect(result.errors).toHaveLength(0);
 		expect(fixtureExts(result)).toHaveLength(2);
-		expect(fixtureExts(result).map((e) => path.basename(e.path)).sort()).toEqual(["bar.ts", "foo.ts"]);
+		expect(
+			fixtureExts(result)
+				.map((e) => path.basename(e.path))
+				.sort(),
+		).toEqual(["bar.ts", "foo.ts"]);
 	});
 
 	it("loads the coding-agent entrypoint without rewriting pi-ai provider subpaths", async () => {
@@ -219,9 +224,11 @@ describe("extensions discovery", () => {
 		const result = await discoverAndLoadExtensions([], tempDir, tempDir);
 
 		expect(result.errors).toHaveLength(0);
-		expect(fixtureExts(result).map((extension) => extension.path).sort()).toEqual(
-			[directExtensionPath, slashExtensionPath].sort(),
-		);
+		expect(
+			fixtureExts(result)
+				.map((extension) => extension.path)
+				.sort(),
+		).toEqual([directExtensionPath, slashExtensionPath].sort());
 	});
 
 	it("package.json can declare multiple extensions", async () => {
