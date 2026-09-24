@@ -25,6 +25,7 @@ import { Ledger } from "./ledger.ts";
 import { openToolMemory, ToolMemoryStore } from "./memory/tool-memory.ts";
 import { enterPhase, readPhaseState, satisfyDeliverable, startPlaybook } from "./phase.ts";
 import { parsePlaybookYaml } from "./playbook-yaml.ts";
+import { composeSystemPrompt } from "./prompt-lib.ts";
 import { renderRoute } from "./router.ts";
 import { selectToolSurface } from "./tool-surface.ts";
 import { appendFinding, countEvidence, ensureWorkspace, saveEvidence, validateEvidenceIds } from "./workspace/case.ts";
@@ -132,6 +133,10 @@ function text(s: string): TextResult {
 export default function helmPiExtension(pi: ExtensionAPI): void {
 	// W1-T04: built-in SoL-Pi efficiency suite (default ON, §0 决策).
 	createEfficiencyExtension()(pi);
+
+	// W2-T02: turn-level reminder queue — signals (e.g. G2 denials) surface in the
+	// NEXT system prompt (评分#2 降级形态, not mid-token).
+	const pendingReminders: string[] = [];
 	// ── G2 工具闸（W2-T01）：host-side scope intercept on EVERY tool_call —
 	//    independent of model cooperation (scope 事后 → 事前, §4 G2 row).
 	//    Network targets only (RE hash-scope lands W4); no target → pass.
@@ -149,6 +154,9 @@ export default function helmPiExtension(pi: ExtensionAPI): void {
 		const spec = loadSessionSpec();
 		const d = validateScopeQuery(spec, target);
 		if (d.allow) return;
+		pendingReminders.push(
+			`scope: ${event.toolName} to ${target} was blocked (${d.matchedBy}) — remain inside Spec.allowedTargets and switch to a bounded alternative.`,
+		); // helm_reminders push
 		const led = openPhaseLedger();
 		try {
 			led.journalEvent("scope_denied", {
@@ -574,6 +582,21 @@ export default function helmPiExtension(pi: ExtensionAPI): void {
 
 	// Activation + slang normalize on user prompt
 	pi.on("before_agent_start", async (event, ctx: ExtensionContext) => {
+		// G1 (W2-T02): per-tier forced prompt with S1 + tool-memory recall +
+		// flushed turn-level reminders (one-shot: next start only).
+		const opts = (event as { systemPromptOptions?: { forceSystemPrompt?: string; cwd?: string } })
+			.systemPromptOptions;
+		if (opts) {
+			try {
+				opts.forceSystemPrompt = composeSystemPrompt({
+					tier: mode === "lite" ? "lite" : "full",
+					cwd: opts.cwd ?? process.cwd(),
+					reminders: pendingReminders.splice(0, pendingReminders.length),
+				});
+			} catch {
+				/* composition best-effort: keep host prompt */
+			}
+		}
 		const prompt = event.prompt ?? "";
 		const reply = matchActivation(prompt);
 		if (reply) {
