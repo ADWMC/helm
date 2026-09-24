@@ -39,7 +39,7 @@
 |---|---|---|---|
 | W0 fork 立仓 | （无独立任务书，全程记录在方案 §8.1） | ✅ 完成 | WG0.1–0.4 全绿 |
 | W1 内核搬家+基建 | [W1-taskbook.md](W1-taskbook.md) | ✅ 完成（T01–T08,WG1.1–1.7 全绿,已 rebase 上游+原仓归档,§8.1 有记录） | WG1.1–1.7 全绿 |
-| W2 模型防御层接线 | [W2-taskbook.md](W2-taskbook.md) | 未开始 | WG2.1–2.3 |
+| W2 模型防御层接线 | [W2-taskbook.md](W2-taskbook.md) | ✅ 完成（T01–T08,WG2.1–2.3 全绿,suite allPass 5/5,§8.1 记录） | WG2.1–2.3 全绿 |
 | W3 渗透管线 | [W3-taskbook.md](W3-taskbook.md) | 未开始 | WG3.1–3.5 |
 | W4 逆向域 | [W4-taskbook.md](W4-taskbook.md) | 未开始 | WG4.1–4.3 |
 | W5 评测与收官 | [W5-taskbook.md](W5-taskbook.md) | 未开始 | WG5.1–5.5 |

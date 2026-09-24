@@ -760,6 +760,24 @@ helm/                                  # ADWMC/helm, 基于 earendil-works/pi
 **L0-实现校正 3 处留痕**：CLI"三子命令保留"失实（七命令=全新注册面）;§3.6.5 W2 直改数/CLI 归波;沙箱 A/B 预设（W3 报,T03 期已修）。
 
 **下一步：Wave 2 模型防御层接线**（任务书 `docs/tasks/W2-taskbook.md`,WG2.1–2.3）。
+---
+
+**✅ WAVE 2 收官（WG2.1–WG2.3 全绿,2026-09,任务书 W2-taskbook T01–T08 完成）**
+
+**T01 G2 事前闸**：`pi.on("tool_call")` host 强制（网络目标→block+journal `phase:pre-exec`）;连带对齐 spec 路径（`.helm/spec.json` 优先）+ phase.db→`~/.helm/agent`（§3.6.3）。
+**T02 G1 三段 prompt**：lite/full 基准+`<helm_s1>` helmd 温和子集（破甲层 S1 产品落地）+`<helm_tool_memory>` 召回+`<helm_reminders>` 轮间注入（评分#2 降级形态,一次性 flush,绝不 mid-token）。
+**T03 task 工具**：新 workspace `@adwmc/helm-tools`（四件套 MVP 评分#1:v1 JSON typed yield/有界/kill 回收/源内嵌 bundle-proof）;宿主闭集 6 处+kernel GATED(lite 排除)。
+**T04/T05 G4 组**：live 预算（`token_budget_exhausted(mode:live-session)`+后续 block+terminate）、streak instead 路径、watcher 默认关（评分#3 结构复核,模型复核=拍板①落点）、EVI floor（无留痕省略=失败）、估值三值分类器。
+**T06 G5**：**补齐 ledger 无 receipts 表的致命缺口**（obs 只存 seq!）→ receipts 表+loop 落据+`compileFinish(receipts)` 逐条 exact-slice——复述/截断/缺据三拒（`evidence_not_grounded`）,legacy 路径不破。
+**T07 G6**：零代码回归断言（exit2/0、md=json 双胞、journal 留痕）。
+**T08 真机 suite `2026-fork-gates/`**：**allPass 5/5,RUN_EXIT=0**——真机 G2 拦截 denials=16 phaseOk、真 receipts→真拒改写、live 熔断 journal、lite/full 宿主探针、零菜单;R-gate n=3 tokens median **7722**(7571–7820)、双钟+五列入 `reports/stats.json`;证据 28 文件入库。
+
+**两次重大纠错留痕（测试≠运行时）**：①W1-T02 曾把内建接在 `discoverAndLoadExtensions`——真运行时走 `loadExtensionsCached`（探针 evil curl 真执行才暴露）→ 迭代至**启动层注入终态** `withBuiltinKernel()`（main.ts additionalExtensionPaths）,generic loader 还上游纯净（noTools/fixture/defaultTools 契约全复原）;②宿主默认工具 8→9/9→10=**task 闭集既定分歧**（期望表按 W0 先例更新）。镜像门三役：8 挂→1 flaky→**四码 0/0/0/0**（`98b671dea`）。
+**波末 rebase**：upstream `5fd446ca1`（+2 durable/chord）,rename/chord-README 两役按 ours+sed 解;`tool-memory.db` 挡回放旧疾再犯已除。
+
+**提交链（W2,14 笔,post-rebase 头 `98b671dea`）**：T01 `5a2177150`→T02 `8694d0a06`→T03 `36b1b3b5b`→T04/05 `a3353a932`→T05 尾→T06 `a2eed53fa`→T07 `627374160`→T08 套件+证据 `bff1cfac2`→运行时路径终态 `a09eac3bb`+install-lock `98b671dea`。
+
+**下一步：Wave 3 渗透管线**（任务书 `docs/tasks/W3-taskbook.md`,WG3.1–3.5;破限真机题库=拍板额度 300 万内）。
 
 **WG0.1 首轮失败根因（已证，两处皆上游 Windows 盲区）**：
 1. `EALLOWSCRIPTS`：`bash.exe`=WSL2，测试实为 WSL 外壳 + Windows node/npm 混跑；test.sh 隔离的 `/tmp/...` 配置路径对 Windows npm 无效 → 回落到本机 npmrc（`C:\Users\Administrator\.npmrc` 的 `allow-scripts=` 行 + `AppData\Roaming\npm\etc\npmrc` 的 `allowScripts=` DSH 名单，复现 `npm config get allow-scripts` = DSH 列表 PROBE_EXIT=0）→ npm 11.19 在项目级安装中拒置该配置。
