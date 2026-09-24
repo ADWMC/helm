@@ -22,7 +22,7 @@
   },
   "version": "0.87.1",
   "scripts": {
-    "test": "node --test src/*.test.ts src/memory/*.test.ts"
+    "test": "node --test src/*.test.ts src/memory/*.test.ts && vitest run"
   },
   "devDependencies": {
     "@adwmc/helm-coding-agent": "0.87.1"
