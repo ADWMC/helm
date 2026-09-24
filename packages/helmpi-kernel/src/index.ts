@@ -21,6 +21,7 @@ import { validateScopeQuery } from "./domain/scope.ts";
 import type { Spec } from "./domain/types.ts";
 import { ACTIVATION_WORD } from "./domain/types.ts";
 import { createEfficiencyExtension } from "./efficiency/index.ts";
+import { createG4Monitor, readDefenseConfig } from "./g4-live.ts";
 import { Ledger } from "./ledger.ts";
 import { openToolMemory, ToolMemoryStore } from "./memory/tool-memory.ts";
 import { enterPhase, readPhaseState, satisfyDeliverable, startPlaybook } from "./phase.ts";
@@ -137,10 +138,34 @@ export default function helmPiExtension(pi: ExtensionAPI): void {
 	// W2-T02: turn-level reminder queue — signals (e.g. G2 denials) surface in the
 	// NEXT system prompt (评分#2 降级形态, not mid-token).
 	const pendingReminders: string[] = [];
+
+	// W2-T04/T05: G4 live monitor — I10 token budget (journal + terminate),
+	// same-tool streak (instead path), watcher cadence (default OFF).
+	let lastTurnEntries: unknown[] = [];
+	let lastTurnToolResults: unknown[] = [];
+	const g4 = createG4Monitor({
+		readMaxTokens: () => loadSessionSpec()?.maxTokens ?? null,
+		readDefense: () => readDefenseConfig(),
+		journal: (kind, payload) => {
+			const led = openPhaseLedger();
+			try {
+				led.journalEvent(kind, payload);
+			} finally {
+				led.close();
+			}
+		},
+		pushReminder: (msg) => pendingReminders.push(msg),
+		review: () => ({
+			verdict: lastTurnToolResults.length > 0 ? "pass" : "flag",
+			findings: lastTurnToolResults.length > 0 ? [] : ["no tool evidence in window"],
+		}),
+	});
 	// ── G2 工具闸（W2-T01）：host-side scope intercept on EVERY tool_call —
 	//    independent of model cooperation (scope 事后 → 事前, §4 G2 row).
 	//    Network targets only (RE hash-scope lands W4); no target → pass.
 	pi.on("tool_call", (event: { toolName: string; input?: Record<string, unknown>; command?: unknown }) => {
+		const g4v = g4.preToolCall(String(event.toolName ?? ""));
+		if (g4v) return g4v;
 		const input = (event.input ?? {}) as Record<string, unknown>;
 		const direct = [input.target, input.url, input.uri].find(
 			(v): v is string => typeof v === "string" && v.length > 0,
@@ -581,6 +606,18 @@ export default function helmPiExtension(pi: ExtensionAPI): void {
 	});
 
 	// Activation + slang normalize on user prompt
+	// W2-T04: live budget/watcher evaluation at turn boundary.
+	pi.on("turn_end", async (event: { turnIndex?: number; toolResults?: unknown[] }, ctx: ExtensionContext) => {
+		try {
+			lastTurnEntries = ((
+				ctx as unknown as { sessionManager?: { getEntries?: () => unknown[] } }
+			).sessionManager?.getEntries?.() ?? []) as unknown[];
+		} catch {
+			lastTurnEntries = [];
+		}
+		lastTurnToolResults = (event.toolResults ?? []) as unknown[];
+		g4.onTurnEnd(Number(event.turnIndex ?? 0), lastTurnEntries);
+	});
 	pi.on("before_agent_start", async (event, ctx: ExtensionContext) => {
 		// G1 (W2-T02): per-tier forced prompt with S1 + tool-memory recall +
 		// flushed turn-level reminders (one-shot: next start only).
