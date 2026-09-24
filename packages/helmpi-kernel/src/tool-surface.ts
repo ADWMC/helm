@@ -35,7 +35,9 @@ export interface ToolGate {
 }
 
 /** Mode/env/domain-gated tools (schema reduction target). Empty after HCOT removal; W2 adds task gate. */
-export const GATED_TOOLS: Readonly<Record<string, ToolGate>> = {};
+export const GATED_TOOLS: Readonly<Record<string, ToolGate>> = {
+	// W2-T03: subagent executor — full tiers only (lite self-gate twin in helmpi-tools).`n	task: { modes: ["full", "deep"] },
+};
 
 export interface ToolSurfaceOpts {
 	readonly mode: AnalysisMode;

@@ -53,6 +53,7 @@
 	},
 	"dependencies": {
 			"@adwmc/helm-kernel": "^0.87.1",
+		"@adwmc/helm-tools": "^0.87.1",
 		"@adwmc/helm-chord": "^0.87.1",
 		"@adwmc/helm-agent-core": "^0.87.1",
 		"@adwmc/helm-ai": "^0.87.1",

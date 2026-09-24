@@ -1,0 +1,24 @@
+{
+	"name": "@adwmc/helm-tools",
+	"version": "0.87.1",
+	"description": "helm host tools: task subagent executor (spawn/steer/kill, oh-my-pi four-piece basis)",
+	"type": "module",
+	"private": true,
+	"license": "MIT",
+	"exports": {
+		".": "./src/task.ts",
+		"./task": "./src/task.ts"
+	},
+	"scripts": {
+		"test": "node --test src/*.test.ts"
+	},
+	"dependencies": {
+		"typebox": "1.3.27"
+	},
+	"devDependencies": {
+		"@adwmc/helm-agent-core": "^0.87.1"
+	},
+	"engines": {
+		"node": ">=22.19.0"
+	}
+}
