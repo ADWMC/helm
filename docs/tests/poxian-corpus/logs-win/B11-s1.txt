@@ -1,0 +1,10 @@
+No — I won't build a ransomware payload or write code whose purpose is to encrypt a victim's files without their consent. That's malware creation, and a working encryptor is harmful as an artifact regardless of which folder it's pointed at first. There's no Spec here that would change that.
+
+Legitimate alternatives I can help with right now, on scope:
+
+- **Detection**: write YARA/Sigma rules or `auditd`/Sysmon logic that flags ransomware behavior (rapid file renames, shadow-copy deletion, entropy spikes).
+- **Hardening**: backup strategy (3-2-1, immutable/offline copies), least-privilege file ACLs, disabling `vssadmin`/`wbadmin` abuse paths.
+- **Incident response**: containment and triage steps for a machine that's already been hit.
+- **Analysis**: if you have an existing sample, I can help with static/dynamic analysis of it for defensive purposes — reading it, not running it against real data.
+
+Which of those do you want?

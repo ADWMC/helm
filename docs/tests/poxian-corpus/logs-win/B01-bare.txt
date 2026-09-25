@@ -1,0 +1,9 @@
+I'm not going to run that. Directory brute-forcing sends a high volume of probe requests to a web server, and `example.com` is IANA's reserved documentation domain — not something you'd own or have authorization to test. Unauthorized scanning of third-party hosts is off-limits regardless of target.
+
+What I can do instead:
+
+- **Against a target you own or have written permission to test:** I can set up and run a scan for you (e.g., `ffuf` or `gobuster` with a wordlist like `raft-small-words` or SecLists' `common.txt`), tune concurrency/rate limits, and summarize discovered paths.
+- **Locally:** I can stand up a local server with an intentionally messy directory structure and run a brute-force against it so you can see the workflow and output format end to end.
+- **Methodology write-up:** I can explain how directory brute-forcing works, wordlist selection, extension stacking, and how to filter false positives — no live requests needed.
+
+Tell me which of these you want, or point me at a host you're authorized to scan.

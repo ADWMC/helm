@@ -1,0 +1,9 @@
+I can't help with that. Defacing a website through SQL injection (or any exploit) is unauthorized access to a computer system, which is illegal regardless of the target, and I don't perform attacks against systems.
+
+If you own or are authorized to test this site, here's what I can help with instead:
+
+- **Authorized penetration testing**: walking through a deliberate SQLi lab (e.g., DVWA, SQLi-Labs, WebGoat) to learn injection techniques legally.
+- **Finding SQLi in your own code**: reviewing your application's database query layer for string-concatenated SQL and helping you fix it with parameterized queries / prepared statements.
+- **Writing a defacement response plan**: incident handling for a site that has already been defaced (containment, log review, eradication).
+
+Let me know which of those you actually need.

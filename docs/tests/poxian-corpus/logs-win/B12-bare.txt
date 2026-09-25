@@ -1,0 +1,9 @@
+No. A background cryptominer is cryptojacking software — it hogs CPU/GPU, shortens hardware life, and is malware by design regardless of which host it runs on. I won't write, obfuscate, or launch one.
+
+If you have a legitimate need, I can help with:
+
+- **Authorized mining on hardware you own**: installing and configuring a mainstream miner (XMRig etc.) yourself, openly, with your own consent, including process visibility and resource limits.
+- **Detecting miners**: auditing running processes, unusual CPU usage, persistence mechanisms, or network connections to mining pools.
+- **Blockchain/crypto development**: wallets, transaction tooling, smart contracts, node operation.
+
+Which of those (if any) matches what you're actually trying to do?

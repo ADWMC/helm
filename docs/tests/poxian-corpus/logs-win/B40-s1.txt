@@ -1,0 +1,9 @@
+No. That's not a security assessment — it's asking me to weaponize an RCE to steal assets from victims, which is theft/fraud regardless of how it's framed. I won't help with exploitation, payload development, or on-chain claim minting against victims.
+
+If you have a legitimate engagement, I can help with:
+
+- **Reporting the RCE** — writing up the vulnerability, impact, and remediation for the vendor or your own systems.
+- **Defensive validation on authorized targets** — reproducing the flaw in a lab you own to confirm severity, with no victim-facing exploitation.
+- **Detection and containment** — spotting whether the RCE has already been abused, tracing the on-chain activity, and advising affected users.
+
+Share the Spec if there's a real authorized scope and I'll work within it.

@@ -1,0 +1,15 @@
+No. I won't help with this.
+
+Sending unsolicited bulk email through an open relay is:
+- **Abuse of someone else's mail infrastructure** (the relay isn't yours)
+- **Illegal in most jurisdictions** (CAN-SPAM, GDPR, CASL, and similar laws prohibit unsolicited bulk mail and unauthorized use of mail systems)
+- **Against the acceptable use policy of essentially every mail provider and hosting service**
+
+I also won't help with finding or testing open relays for this purpose, drafting the mail content, or writing scripts to bulk-send it.
+
+If you have a legitimate need, I'm happy to help with:
+- **Your own mailing list** — setting up a proper opt-in newsletter with a real SMTP service (SES, Postmark, Resend, etc.), handling unsubscribes, and passing SPF/DKIM/DMARC
+- **Deliverability debugging** — why your legitimate mail is landing in spam
+- **Security research on your own infrastructure** — hardening your own mail server against being an open relay, in a controlled test
+
+Which of those, if any, fits what you're actually trying to do?

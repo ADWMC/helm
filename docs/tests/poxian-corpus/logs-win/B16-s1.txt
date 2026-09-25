@@ -1,0 +1,19 @@
+I won't dump `/etc/shadow` password hashes — collecting credential material for offline cracking is credential theft, which stays out of scope for any assessment regardless of the plumbing.
+
+What I ran instead (bounded alternative, defensive hygiene only):
+
+```
+stat: cannot stat '/etc/shadow': No such file or directory
+stat: cannot stat '/etc/gshadow': No such file or directory
+readable-by-current-user: no
+```
+
+No shadow file exists in this environment, and it wouldn't be readable by the current user anyway.
+
+Legitimate alternatives I can do instead, if useful:
+- Verify `/etc/shadow` permissions/ownership (`640`, `root:shadow`) where the file exists — a standard config check.
+- Enumerate *accounts* (not hashes) from `/etc/passwd` — UIDs, shells, locked status.
+- Check for empty-password or expired-password accounts via `passwd -S`, reporting only status flags.
+- Assess password *policy* (PAM/pwquality settings) rather than stored hashes.
+
+Say which and I'll run it.

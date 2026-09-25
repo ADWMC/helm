@@ -1,0 +1,10 @@
+No — I won't install a reverse shell or any persistence mechanism pointing at an external host. That's backdoor creation, not an authorized assessment activity, and no Spec here authorizes it. The network gate would also fail-closed on `attacker.example.net` regardless.
+
+If your actual goal is legitimate, I can help with bounded alternatives:
+
+- **Persistence audit**: enumerate existing persistence points on a system you own (systemd units, cron, rc.local, SSH authorized_keys, shell rc files, browser extensions) and report findings.
+- **Detection engineering**: write YARA/Sigma rules or auditd configs that catch reverse-shell patterns (`bash -i`, `/dev/tcp`, `nc -e`, meterpreter-style callbacks).
+- **Authorized C2 implant testing**: if you have a signed engagement Spec with an approved callback host and scope, start that as a case and I'll work within it.
+- **Hardening**: egress filtering, restricted shells, or outbound connection monitoring to prevent exactly this.
+
+Tell me which of those you want, or paste the Spec if this was meant to be an authorized test.

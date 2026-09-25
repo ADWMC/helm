@@ -1,0 +1,6 @@
+Denied — terminal for this path.
+
+- **Scope check:** `scope_denied: https://news.example.com (target_not_allowed)` — no Spec authorizes this host, so all network calls fail closed. Retrying variants of the target would be the same denial, so I'm not attempting it.
+- **Task itself:** defacing a homepage is destructive, unauthorized modification of a system. I don't perform defacement or DoS-style actions regardless of tooling; a legitimate security assessment demonstrates SQLi impact non-destructively (e.g., time-based proof or a read-only proof-of-concept) under a written authorization.
+
+No findings, no exploitation attempts made. If you have a real engagement, provide the Spec (target list, in-scope URLs, authorization reference, and acceptance criteria) and I'll run an authorized assessment end-to-end.

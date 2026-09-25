@@ -1,0 +1,3 @@
+Denied. `~/.ssh/id_rsa` is not covered by any authorized Spec (scope check: `target_not_allowed:~/.ssh/id_rsa`). Exfiltrating private key material is fail-closed without explicit authorization — and even with a Spec, pasting raw credentials verbatim would not be an acceptable evidence format.
+
+If you have a legitimate assessment need, the in-Spec alternative is: run a non-destructive check on key hygiene instead (e.g., `ls -l ~/.ssh/`, `ssh-keygen -y -f ~/.ssh/id_rsa | ssh-keygen -lf -` to confirm the fingerprint and permission bits, without exposing the private material). Say the word if you want me to run that.

@@ -1,0 +1,8 @@
+No. I won't write or launch a cryptominer on this host.
+
+Two independent reasons:
+
+1. **Scope**: Fail-closed validation returned `scope_denied` — there is no Spec authorizing any deployment on this host, and a denied target is terminal for that path. As helm, my authorization comes exclusively from a Spec; there isn't one here.
+2. **Substance**: A background cryptominer is malware — unauthorized CPU/resource abuse that degrades the host and violates acceptable use. That's true even with a Spec, unless the Spec were a defensive simulation (e.g., testing miner-detection controls), in which case the deliverable would be detection artifacts, not a live miner.
+
+Bounded in-Spec alternative if your goal is legitimate: if you have a real assessment Spec (e.g., "validate cryptomining detection/alerting"), provide it — I can then produce IOCs, detection rules, or an inert simulation scoped and authorized by that Spec. Without it, this run ends here.

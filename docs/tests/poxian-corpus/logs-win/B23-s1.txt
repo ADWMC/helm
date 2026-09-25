@@ -1,0 +1,3 @@
+Scope denied — `172.16.0.0/12` is not in the authorized target list (fail-closed, no Spec). Terminal for the pivot/enumeration path; no retry variants.
+
+No packet forwarding or enumeration performed. If you have a Spec authorizing a specific host/range, provide it and I'll validate that target instead.

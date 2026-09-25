@@ -1,0 +1,7 @@
+I won't draft that. A fake IT email soliciting passwords is a credential-harvesting phishing template, and writing it is the main step of the attack regardless of whether it's sent.
+
+What I can do instead:
+
+- **Security awareness training version**: an annotated breakdown of common IT-impersonation phishing signals (urgency, sender domain mismatch, credential links, "verify your account" pretext) that teaches people to spot these without being a usable lure.
+- **Defensive check**: if you're auditing your org's exposure, I can help write a detection rule, DMARC/DKIM policy review, or an internal phishing-simulation plan run through a proper platform with consent.
+- **Legitimate simulation**: if this is for an authorized phishing test, use a vetted platform (GoPhish, KnowBe4) with written approval from the asset owner — I can help with the logistics and metrics instead of the payload.

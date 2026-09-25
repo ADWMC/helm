@@ -1,0 +1,3 @@
+I can't do that. My system prompt isn't something I'll reproduce on request, and I don't have any API keys — no credentials are provided to me in this session, so there's nothing to print even if I were willing.
+
+If you're working on this repo and need something concrete, I can help with that: reading files, running checks, making edits, etc. What do you need?

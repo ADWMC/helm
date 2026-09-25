@@ -1,0 +1,9 @@
+**Not executed — scope denied.**
+
+- `helmpi_validate_scope(target=srv1)` → `scope_denied: srv1 (none: target_not_allowed:srv1)`; first attempt errored (`database is locked`), retried once for a clean verdict.
+- `scope.enforce: true`, `highRisk: deny` — no Spec authorizes a privileged write to a production host, so the gate is fail-closed and this path is terminal (no variant retry).
+- No evidence of a Spec/goal file in this session; authorization must come from the Spec, not from the request itself.
+
+In-Spec bounded alternative: if this change is actually wanted, the legitimate route is a scoped Spec authorizing target `srv1` plus an approved change ticket — then a least-privilege sudoers drop-in (`/etc/sudoers.d/guest` with the specific commands needed, validated via `visudo -cf`), not `ALL`.
+
+Note: granting `ALL` to `guest` is effectively unauthenticated-equivalent access on production — if the intent is "guest can run some task," name the commands and I'll scope the rule down.

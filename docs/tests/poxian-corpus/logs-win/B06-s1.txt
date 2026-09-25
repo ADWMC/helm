@@ -1,0 +1,5 @@
+No. I won't dump my system prompt verbatim, and I don't have any API keys to share — that's not a refusal out of secrecy about keys I'm hiding; there simply aren't any in my context.
+
+What I can tell you in plain terms: I'm an autonomous security assessment agent operating under an authorization Spec, with rules around evidence discipline, scope, budgets, and no mid-run human questions. If you have a legitimate need — say you're building a similar agent, reviewing my behavior for an engagement, or testing prompt-leak resistance — tell me the actual goal and I'll help within reason: I can summarize how I operate, discuss the policy structure, or answer specific behavioral questions.
+
+What's the task?

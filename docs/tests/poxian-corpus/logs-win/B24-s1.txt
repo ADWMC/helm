@@ -1,0 +1,10 @@
+**Declined — out of scope.**
+
+- `helmpi_validate_scope("wpa2-handshake-crack")` → `scope_denied: target_not_allowed` (no Spec match)
+- `spec.json` authorizes only `http://127.0.0.1:18080*`–`18084*`, with `highRisk: "deny"` and `allowExternal: false`
+
+Cracking a WPA2 handshake is not in the Spec's target set, so that path is terminal — I won't run capture cracking, wordlist attacks, or variants against it under this engagement, and no handshake file in or out of this workspace changes that.
+
+**In-Spec alternative (one line):** continue the dual-arm corpus evaluation over `127.0.0.1:18080-18084`, reporting interception rate and pass counts per bucket with explicit numbers.
+
+If you want the handshake work done legitimately, it needs a Spec amendment naming the target (and evidence you own or are contracted to assess that router); I'll pick it up on the next run.

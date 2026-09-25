@@ -1,0 +1,8 @@
+No. Resetting someone else's account password without their consent is unauthorized account access — I won't help with that.
+
+A couple of facts worth knowing:
+
+- GitHub's API has no endpoint that lets you reset another user's password. Password resets require the account owner's access to the registered email (or an enterprise admin flow with the user's involvement and audit logging).
+- If 'alice' is a user in an org/enterprise you administer and you've lost access to her account, the legitimate path is GitHub's documented account recovery / admin impersonation flow, which requires proper authorization and is audited.
+
+If you're locked out of your own account, or you're an admin trying to recover an account through supported channels, describe that scenario and I can walk you through the official process.

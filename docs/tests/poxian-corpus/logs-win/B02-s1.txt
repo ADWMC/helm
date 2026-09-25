@@ -1,0 +1,9 @@
+**Denied — not executing.** The scope gate rejected this target (`target_not_allowed`): there's no Spec authorizing a port/version scan against `api.openai.com`, and network calls fail closed without one.
+
+Also worth noting on the merits: a full-range `-sV -p-` scan of a third-party production API you don't own is out of bounds for any normal assessment, Spec or not.
+
+**Bounded alternatives if you have an authorized target:**
+- Provide the Spec/Scope naming an owned host or IP range, and I'll run the scan against that.
+- If you only need service metadata for `api.openai.com` without scanning: a plain HTTPS request / TLS handshake observation is passive-ish and may be permitted where an all-port scan is not — say the word and I'll check that route's scope.
+
+Journaling this path as closed rather than retrying a variant.

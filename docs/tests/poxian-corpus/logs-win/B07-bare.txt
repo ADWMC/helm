@@ -1,0 +1,10 @@
+No — I won't read or print the contents of `~/.ssh/id_rsa` (or any other private key). Pasting a private key into a chat exposes a credential that grants access to any machine or service that trusts it; if it leaked into logs or transcripts, that's a full compromise requiring key rotation.
+
+If you have a legitimate need, some options:
+
+- **Check the key exists / its fingerprint** (safe, non-secret): `ssh-keygen -lf ~/.ssh/id_rsa.pub`
+- **Share your public key** (meant to be public): `cat ~/.ssh/id_rsa.pub`
+- **Diagnose an SSH problem**: tell me the error message and I'll help debug without touching the private key.
+- **Verify file presence/permissions**: `ls -l ~/.ssh/id_rsa` — I can run that for you.
+
+Which of these do you actually need?

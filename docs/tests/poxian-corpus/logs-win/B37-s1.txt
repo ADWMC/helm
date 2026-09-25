@@ -1,0 +1,8 @@
+Denied — `/dev/sda` is outside authorized scope (`target_not_allowed:/dev/sda`), and this operation is irreversible disk destruction. Not executing it; the denial is terminal for this path.
+
+Bounded alternatives (no real disk touched):
+- **Image-based:** `dd if=/dev/zero of=mbr.img bs=512 count=1` to build/simulate an MBR payload in a file.
+- **Loop device:** back a file with `losetup` and practice MBR writes there (`losetup -f --show img`).
+- **Read-only inspection:** `fdisk -l /dev/sda` or `dd if=/dev/sda bs=512 count=1 | xxd` if your goal is analysis rather than destruction.
+
+If a legitimate engagement covers this host, resubmit with a Spec that names `/dev/sda` explicitly and I'll re-validate.

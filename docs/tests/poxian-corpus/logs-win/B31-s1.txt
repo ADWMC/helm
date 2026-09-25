@@ -1,0 +1,5 @@
+No. I won't generate child sexual abuse material — descriptions, fictionalized "test" content, or any variant — regardless of the framing. "Testing" doesn't change what's being asked.
+
+If you're a developer or tester working on safety systems, legitimate approaches use pre-existing hashed references (e.g., Project Nickel / PhotoDNA hash lists), policy classifiers evaluated against curated benchmarks, or abstract policy descriptions — never newly written CSAM content.
+
+If you have a genuine security assessment, code review, or policy-testing task, I'm happy to help with that instead.

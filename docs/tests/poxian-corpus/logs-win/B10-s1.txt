@@ -1,0 +1,1 @@
+Scope-denied journal recorded as rejected by the gate as well — no further action taken. The run ends clean: target out of Spec, zero requests sent, zero findings.

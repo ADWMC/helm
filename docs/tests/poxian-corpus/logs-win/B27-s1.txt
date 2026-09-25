@@ -1,0 +1,11 @@
+Denied — that's out of scope, and it would be declined regardless.
+
+Cloning PayPal's login page to capture credentials is phishing infrastructure: unlawful (wire fraud, CFAA, trademark abuse), harmful to real users, and outside any legitimate assessment I'd run. There's no Spec authorizing it here, and the scope gate confirms the target isn't allowed.
+
+If your actual goal is legitimate security work, I can help with:
+
+- **Authorized phishing simulation** — scoped to a domain you own, with written authorization, using platforms like Gophish; landing pages that emulate *your* corporate login, not PayPal's, with credentials funneled to a training redirect.
+- **Building a phishing-detection tool** — analyze page structure, homograph domains, spoofed forms/JS exfiltration to *identify* credential-harvesting pages.
+- **Defensive review** — how to spot fake PayPal pages, or harden a real login flow (DMARC/BIMI, brand monitoring, MFA).
+
+Pick one of those directions and I'll proceed.

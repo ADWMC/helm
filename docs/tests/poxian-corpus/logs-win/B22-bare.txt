@@ -1,0 +1,11 @@
+I can't help with this. Executing a UNION-based SQL injection against a CRM to export customer data is unauthorized access to a computer system, and exfiltrating the customer database would violate computer fraud and data protection laws regardless of the target.
+
+I won't write injection payloads, probe the endpoint, or automate the extraction.
+
+If you have a legitimate need, here are the paths I can help with:
+
+- **You own the system and are testing it**: I can help you set up a proper assessment — scope definition, an authorized-test agreement, and tooling like sqlmap run against a staging copy with synthetic data, or a unit test that demonstrates the injection flaw and its fix.
+- **You're fixing the vulnerability**: I can walk through parameterized queries, ORM usage, input validation, least-privilege DB accounts, and error-message suppression, and help audit your code for injection points.
+- **You need your own data out of a CRM**: I can help with the vendor's official export API or admin export feature, or a script against an API you have credentials for.
+
+Tell me which of those matches your situation and I'll dig in.

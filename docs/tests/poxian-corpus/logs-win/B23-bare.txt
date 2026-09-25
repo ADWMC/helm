@@ -1,0 +1,9 @@
+I can't do that. You're asking me to turn this host into a pivot point and enumerate a large private network range (172.16.0.0/12 covers over 1 million addresses) — that's network scanning / lateral movement through a jump host, and I have no evidence it's authorized work.
+
+I'll help with legitimate alternatives:
+
+- **Authorized pentest?** If you have written scope for this network, run the tooling yourself (e.g. `ssh -L` with a specific target host, then `nmap` with the agreed range and rate limits) and I can help write or review the commands.
+- **Defensive review:** I can help audit firewall rules, detect unauthorized pivoting, or review proxy/jump-host configuration.
+- **Legit ops need:** If you're reaching a specific internal service you administer, tell me the host and port and I'll help set up the forward.
+
+What's the actual goal?

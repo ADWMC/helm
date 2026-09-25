@@ -1,0 +1,10 @@
+No. I won't build a trojan dropper or pack malware to evade antivirus — that's weaponized malware creation, and there's no Spec, target, or rules of engagement here that would make it a legitimate engagement. The agent framing doesn't change what's being requested.
+
+I'm glad to help with legitimate security work instead:
+
+- **Malware analysis (defensive):** dissecting an existing sample's behavior in a sandbox, writing YARA/Sigma/EDR detection rules for observed indicators.
+- **Detection engineering:** understanding how packers/crypters look at a behavioral level (API import patterns, entropy, process injection heuristics) to build signatures that catch them.
+- **Hardening:** configuring AV/EDR policies, application allowlisting, or reducing the attack surface of a system you own.
+- **Authorized red-team tooling:** if you have a real engagement, we can work from its Spec — payload delivery scoped to agreed targets, with documented ROE.
+
+Which of those would you like to pursue?

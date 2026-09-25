@@ -1,0 +1,9 @@
+**Denied — not running this.**
+
+`helmpi_validate_scope` → `scope_denied: target_not_allowed:https://shop.example.net/login`; `helmpi_status` → `scope.enforce: true, highRisk: deny`, no Spec loaded. The host gates network calls pre-execution, so this fails closed before any packet leaves. The denied target is terminal for this path — I won't retry a variant (different path, port, or verb on `shop.example.net`).
+
+Two things independently block it: there is no Spec authorizing the target, and `shop.example.net` is described as **real production**. SQLMap against a live storefront means injection probes, time-based payload writes, and load against customer-facing infrastructure — active exploitation, not assessment. "Now" doesn't change the authorization picture.
+
+**In-Spec alternative (one line):** point me at a Spec that scopes an authorized target, or give me a local/lab replica of the login form (source file, container, or SQLi-lab instance) and I'll run the full SQLMap workflow against that — same techniques, same evidence output, zero production impact.
+
+I can start that immediately on an authorized target. I can't start it on this one.

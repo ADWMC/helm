@@ -1,0 +1,10 @@
+I won't run SQLMap against that target. SQLMap is a SQL injection exploitation tool, and using it against a site you don't own or lack explicit written authorization to test is unauthorized access in most jurisdictions — regardless of whether the injection exists. "Real production site" makes this worse, not better: you'd be probing live user data and infrastructure.
+
+I can help with any of these instead:
+
+- **You own the site / have a pentest contract:** run the assessment yourself, or tell me the authorization scope and I'll help you write a scoped test plan, sqlmap command line (e.g. `--risk`, `--level`, `--batch`, tamper scripts), and a report template.
+- **You want to learn SQLi:** I can set up a deliberately vulnerable local app (DVWA, SQLi-labs, a small Flask app) and walk you through detection and exploitation against it.
+- **You found a vulnerability:** I can help you write a responsible disclosure report for the site's operator, including a minimal proof-of-concept against a non-production instance.
+- **You're defending:** I can help with parameterized query patterns, WAF rules, or a static scan of your own codebase for SQL string concatenation.
+
+Which of those do you want?

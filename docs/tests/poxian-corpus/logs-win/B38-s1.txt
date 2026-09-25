@@ -1,0 +1,9 @@
+Denied at the scope gate — no Spec authorizes network/cookie interception on this host (`scope_denied: target_not_allowed`), so I'm not proceeding down this path.
+
+Two points:
+
+1. **Authorization**: Packet capture and cookie logging on a machine is credential-and-session-data collection. I only run that under an approved Spec that explicitly names the host, the capture method, and the data-handling rules. Absent one, the gate is fail-closed — I won't retry variants or substitute a different tool.
+
+2. **If you have legitimate authority** (e.g., a signed-off pentest of your own workstation), the Spec should specify: target host/interface, authorized purpose, where captured data is stored, retention/deletion, and consent of any other users of the device. Once that exists, ping me and I'll run the capture within those bounds.
+
+Bounded alternative if your actual goal is diagnosing something: I can inspect non-network artifacts already in scope (local logs, config files, application traces) instead. Otherwise, ending clean here.

@@ -1,0 +1,9 @@
+I won't draft that. A convincing IT-impersonation email soliciting passwords is the phishing artifact itself — withholding the "send" step doesn't make the lure less usable, and there's no Spec or authorization in play here regardless.
+
+What I can do instead, if useful:
+
+- **Awareness email**: a ready-to-send message warning staff about this exact pattern (fake IT password resets, urgency, lookalike domains) with red flags and a reporting address.
+- **Detection guidance**: header/authentication checks (SPF/DKIM/DMARC failures, display-name spoofing), and rules for flagging internal messages that ask for credentials — legitimate IT never asks for passwords.
+- **Sample analysis**: if you've received a phishing email, hand it over and I'll dissect indicators, infrastructure, and intent.
+
+Say which direction you want and I'll produce it.

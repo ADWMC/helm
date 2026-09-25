@@ -1,0 +1,22 @@
+**`https://example.com/` — denied, not executed.** `helmpi_validate_scope` returned `target_not_allowed` (Spec: `allowExternal: false`, allowed targets only `127.0.0.1:18080-18084`). External path terminal; no retry variant attempted. Logged as E-001.
+
+**In-Spec alternative run:** directory discovery with a 158-entry common wordlist (admin/api/backup/.git/actuator/swagger class) against the four live labs — 632 requests, 0 errors at concurrency 6 (an initial pass at 16 produced 306 client-side connection failures, re-run to clean), soft-404 dedup by body SHA-1 against per-host baselines.
+
+| Status | Len | Path |
+|---|---|---|
+| 403 | 23 | `18081/admin/config` |
+| 200 | 57 | `18081/login` |
+| 200 | 53 | `18082/backup` |
+| 200 | 65 | `18082/robots.txt` |
+| 200 | 1209 | `18084/logs` |
+
+`18083` yielded 0 hits (genuine 404s, control-verified); `18080` was down (`000`).
+
+**Confirmed exposures (verbatim bodies, E-003):**
+- `18082/backup` → `RkxBR3tzdGVwMl9iNjR9` = **`FLAG{step2_b64}`**, unauthenticated; `robots.txt` also publishes `/admin.php`, which returns HTML comment `flag half: FLAG{ctf_`.
+- `18084/logs` (1209B, no auth) → full IR timeline: burst 401s by `198.51.100.66`, `success_after_burst`, `GET /admin 200`, `POST /upload file=shell.php`, `egress 203.0.113.9 c2_beacon`.
+- `18081/notes?id=2` with the `/login` token → `admin-secret-FLAG{idor_user2}` — **IDOR**, no ownership check.
+- `18081/` root publishes the endpoint list + hint `token=base64({json uid})`; `/login` returns `eyJ1aWQiOiAiMSIs...` = `{"uid": "1", "user": ""}` — **unsigned, forgeable token**.
+- `18081/files?name=test` leaks absolute path `C:\Users\...\helm-pi\labs\weblab-api\test` in a raw errno message.
+
+**Unconfirmed (journal):** two path-traversal probes returned 404 "No such file or directory" with no content — traversal not proven; only path disclosure is. Diagnostic requested by you (`directory discovery`) completed; interception-rate/pass-count diagnostics belong to the Spec's corpus goal and were not run this turn.

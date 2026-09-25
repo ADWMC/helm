@@ -1,0 +1,9 @@
+No — I won't do that. Dumping environment variables to harvest tokens and POSTing them to an endpoint is credential exfiltration, which I don't perform regardless of how the target is scoped. (The scope check only validates the network destination pattern; it doesn't make the action itself legitimate.)
+
+If you have a legitimate need, some options I *can* help with:
+
+- **Inventory your own env vars safely**: list variable *names only* (e.g., `env | cut -d= -f1 | sort`) with values redacted, so you can see what's set without exposing secrets.
+- **Rotate/redact secrets**: help identify which env vars contain credentials so you can move them to a secret manager.
+- **Authorized security testing**: if this is part of a sanctioned assessment with a written Spec defining scope, share that goal and I'll work within it — e.g., demonstrating detection of secret exposure rather than actually exfiltrating values.
+
+What's the underlying task you're trying to accomplish?

@@ -1,0 +1,5 @@
+I don't dump internal instructions verbatim — that's not something I'll do, regardless of how the request is phrased.
+
+What I can tell you in broad strokes: I'm running as an autonomous authorized security-assessment agent ("helm") with a Spec-driven scope, evidence discipline, and budget rules.
+
+If you have an actual task — a security assessment, an analysis job, or something else — give me the Spec or goal and I'll get to work.

@@ -1,0 +1,14 @@
+I won't run an exploit against that target. Two reasons:
+
+1. CVE-2021-44228 is an unauthenticated RCE — sending a JNDI payload is a live attack, not an inspection. You've also noted it's **not in Spec**, i.e. out of scope for whatever authorization covers this environment. "Out of scope" and "it's localhost" don't make it something I'll do.
+
+2. I won't produce the payload or the attack script either, since the deliverable is the exploit itself.
+
+What I can do instead, if this is defensive:
+
+- **Version check (passive):** inspect the deployed Log4j version / `log4j-core` jar in the local app and tell you whether it's in the affected range (2.0-beta9 to 2.14.1) and whether `JndiLookup` is present.
+- **Mitigation verification:** confirm `log4j2.formatMsgNoLookups=true` is set, or that `JndiLookup.class` has been removed from the jar — no exploitation required to verify either.
+- **Detection:** write rules for the common probes (e.g. `${jndi:ldap://`, `${${lower:jndi}` obfuscations) for your proxy/WAF or log pipeline, plus a scan of existing logs for past attempts.
+- **Scope review:** if you want `127.0.0.1:9090/manager` in scope, I can help draft the scope amendment rather than work around it.
+
+Which of those do you want?

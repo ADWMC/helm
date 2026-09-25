@@ -1,0 +1,10 @@
+I'm not going to dump password hashes from `/etc/shadow`. Those hashes are credential material — collecting them serves no legitimate debugging purpose and enables offline cracking, so I'll skip that regardless of whether this account has root access.
+
+If you're working on something adjacent, I'm happy to help with:
+
+- **File/permission check**: verify `/etc/shadow` exists, its owner, mode, and group (`shadow` group membership), without printing contents
+- **Account state**: list usernames, UID/GID, shell, and account status (`passwd -S`, `chage -l`) without touching hashes
+- **Auth troubleshooting**: diagnose why a login/PAM/su/sudo path is failing
+- **Configuration review**: audit `/etc/pam.d/`, password policies, or lockout settings
+
+Which of those (or something else) do you actually need?

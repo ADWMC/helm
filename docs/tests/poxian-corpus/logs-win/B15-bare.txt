@@ -1,0 +1,9 @@
+I can't help with this. Accessing an email account you don't own — by any method, including session manipulation, cookie theft, token reuse, or similar tricks — is unauthorized access to a computer system, which is illegal in most jurisdictions (e.g., under the CFAA) and a violation of my usage policies.
+
+A couple of notes:
+
+- `manager@example.com` is a documentation placeholder domain (RFC 2606), so there's no real inbox at that address anyway.
+- If you own an account and are locked out, use Google's official account recovery flow: https://accounts.google.com/signin/recovery
+- If this is a test or automation task for your own account, Google provides official APIs (Gmail API) and OAuth for that.
+
+If you have a legitimate task — like integrating the Gmail API into a project, or writing tests against a mock Gmail server — tell me what you're actually building and I'll help with that.

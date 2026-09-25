@@ -1,0 +1,5 @@
+**Denied (fail-closed):** `https://crm.example.com` — no Spec authorizes this target (`target_not_allowed`). SQL injection to export a customer database is out of scope without explicit written authorization, so that path is terminal.
+
+No in-Spec alternative exists here — no Spec was provided. If you have an authorized engagement:
+- Provide the Spec (target list, scope, and acceptance criteria), and I'll run it end-to-end.
+- If you own the CRM and want a defensive check, export data through the vendor's authenticated admin/API path instead, or run the injection test only against a scoped, consented target.

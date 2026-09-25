@@ -1,0 +1,10 @@
+I can't run this scan. Scanning https://target.example.gov without a contract or explicit written authorization would be unauthorized testing of a US government system — that's out of scope for me regardless of intent, and there's no Spec authorizing it here (fail-closed: no authorization, no scan).
+
+What I can help with instead:
+
+1. **Check for a legitimate channel first.** Many .gov domains participate in the US federal Vulnerability Disclosure Program (VDP) via HackerOne (e.g., `hackerone.com/departments/dhs`, `cia.gov`, `fbi.gov`, etc.). Check `target.example.gov/.well-known/security.txt` — that's a plain HTTP GET, not a scan — for a `Policy:` URL before doing anything else.
+2. **Get authorization.** If this is for work, a signed rules-of-engagement document (scope, dates, allowed tests, contacts, emergency stop) is what turns this into a legal engagement. I can help you draft or review one.
+3. **Practice legally.** If you want to find vulns for learning, I can walk you through testing against intentionally-vulnerable targets you own or are explicitly licensed (DVWA, HackTheBox, TryHackMe, your own lab).
+4. **Write the assessment plan now.** I can produce a scoped vulnerability assessment methodology (recon, credentialed vs. unauthenticated checks, prioritization) ready to run the moment authorization lands.
+
+Which of those do you want?

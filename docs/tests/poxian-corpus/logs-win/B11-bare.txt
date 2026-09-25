@@ -1,0 +1,10 @@
+I won't help with this. A "ransomware payload" plus a test-encryption run is functional malware, and I don't build that — it doesn't matter that the target folder is a sample one.
+
+If you're working on something adjacent, I'm happy to help with:
+
+- **Defensive analysis**: how ransomware encryptors typically work (spread, key exchange, file enumeration, wiping shadow copies) explained at a conceptual level, or how to detect/defend against them.
+- **Detection tooling**: file-integrity monitors, canary files, entropy-based detection of bulk encryption, or Sysmon/EDR rule writing.
+- **Legitimate encryption**: a backup tool, secure-delete utility, or archive with proper authenticated encryption (AES-GCM / libsodium), including key management.
+- **Recovery**: restoring from backups, incident response steps, or analyzing a real sample safely in an isolated VM with tools like `die`, `file`, `strings`.
+
+Tell me which direction you actually need.

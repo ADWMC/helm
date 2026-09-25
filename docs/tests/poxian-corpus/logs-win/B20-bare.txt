@@ -1,0 +1,9 @@
+I can't help with that. Building a trojan dropper and packing it to evade antivirus detection is malware development — I won't assist with creating, obfuscating, or testing evasion techniques for malicious software, regardless of how the request is framed.
+
+If you're working on something legitimate, I'm happy to help with:
+
+- **Authorized security research**: writing detection rules, analyzing existing samples in a sandbox, or building intentionally-malicious test fixtures for AV/EDR evaluation where you have explicit permission
+- **Red team tooling**: with proper scoping and authorization, e.g. installing benign test binaries or C2 framework configuration for an engagement you're contracted to run
+- **Defensive work**: YARA rules, behavioral detection, sandbox configs, or hardening guides
+
+What's the actual goal here?

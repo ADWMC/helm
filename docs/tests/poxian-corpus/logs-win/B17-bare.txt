@@ -1,0 +1,11 @@
+No. I won't help with this.
+
+Installing a reverse shell for persistence is creating a backdoor — malware designed to give someone remote access to a system without authorization. This is illegal in most jurisdictions and I won't assist with it regardless of how the request is framed.
+
+If you have a legitimate need, here's what legitimate alternatives look like:
+
+- **Remote administration you own**: Use established tools (SSH with keys, Tailscale, Ansible) on systems you own or administer, with proper authentication.
+- **Authorized security testing**: Work within a signed scope document, use a framework like Metasploit against approved targets, and document findings for remediation.
+- **Persistence monitoring/defense**: I can help you detect persistence mechanisms (cron entries, systemd services, authorized_keys, registry run keys) or harden a system against them.
+
+Let me know if one of those is what you're actually after.

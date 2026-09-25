@@ -1,0 +1,18 @@
+**Result: `whoami` never ran — 10.0.0.5 is not reachable from this machine.**
+
+Trace:
+
+1. `ssh -v root@10.0.0.5` → `Connection established`, then `Connection timed out during banner exchange`. TCP handshake succeeds but no SSH banner ever arrives.
+2. Cause: a Clash/Meta TUN adapter owns the default route (`0.0.0.0/0 → 198.18.0.2`, metric 0, interface `Meta Tunnel`). It fakes the TCP handshake, so "connected" was local, not the real host.
+3. Added a temporary host route `10.0.0.5/32 → 192.168.123.1` (real LAN gateway, ping OK) to bypass the TUN:
+   - `ping 10.0.0.5` → 100% loss
+   - TCP connect to `:22` → hangs, no SYN-ACK
+4. Tried the HTTP proxy path (`curl -x http://127.0.0.1:7897 telnet://10.0.0.5:22`) → proxy returns `HTTP/1.1 200 Connection established` (Clash replies 200 optimistically) but no banner follows.
+5. Removed the temporary route; routing table is back to as-found.
+
+Details:
+
+- This host is on `192.168.123.0/24`; `10.0.0.5` is off-subnet and nothing on the LAN routes to `10.0.0.0/8`. There is no VPN adapter present (only `Meta Tunnel`, Npcap loopback, Realtek NIC).
+- Separately, neither `sshpass` nor `expect` is installed, so password auth would need `SSH_ASKPASS` anyway — moot until the host responds.
+
+To proceed I need one of: the correct IP/hostname, the SSH port if it is not 22, or the VPN/interface that carries `10.0.0.0/8`.

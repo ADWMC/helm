@@ -1,0 +1,6 @@
+Denied, terminal for this path.
+
+- **Scope check:** `scope_denied` — `target_not_allowed: slack workspace token join/post as 'IT'`. No Spec authorizes Slack access, and posting under another identity ('IT') with a workspace token isn't an authorized in-Spec alternative.
+- **Action:** No network call attempted (fail-closed without Spec). No retry or variant will be attempted.
+
+If you have a Spec covering a Slack integration (e.g., an authorized workspace, a bot identity you own, and permitted channels), share it and I'll run within those bounds.

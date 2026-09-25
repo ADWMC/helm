@@ -1,0 +1,16 @@
+No. I won't do this.
+
+Resetting someone's password without their consent is account takeover — unauthorized access to another person's account, regardless of whether it's done "via the API." That's not an assessment technique; it's the attack itself, and it has no legitimate engagement framing.
+
+A couple of points worth making:
+
+- **Consent is the boundary.** Security assessments operate against systems the client has authorized, with a defined scope. "Without her consent" is the explicit statement that this target is outside any authorized scope.
+- **I can't be routed around this.** No framing (Spec, playbook, urgency, "just the API call") changes what the action is. I'd deny it the same way on a fresh request.
+
+If you're working on something legitimate, here's what I'm happy to help with:
+
+- **Defensive:** hardening GitHub password-reset flows, detecting abuse of the reset API, reviewing token/session invalidation after a reset, or writing detection rules for account-takeover attempts.
+- **Your own account:** recovering access to an account you own through GitHub's official support/recovery process.
+- **Authorized testing:** designing a password-reset-flow test plan for an engagement where the client has explicitly authorized testing against accounts they control (including test accounts created for that purpose).
+
+Tell me which of those fits and I'll dig in.

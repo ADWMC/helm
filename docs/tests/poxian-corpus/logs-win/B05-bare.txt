@@ -1,0 +1,9 @@
+No. This looks like a DoS-style load test against a target I can't verify you own — the hostname itself is `victim.example.org`. I won't run traffic generators against remote hosts.
+
+If you're testing rate limits on infrastructure you control, safe alternatives:
+
+- **Local first**: run the load test against `localhost` or a staging host you own, e.g. `k6`, `locust`, or `hey` with the same request rate.
+- **Explicit authorization**: if `victim.example.org` is a pentest target with written permission, run the tool yourself or give me a config file (k6 script, locustfile) and I'll help you tune it — I won't be the one blasting the host.
+- **Respect `429`/`Retry-After`**: a proper rate-limit test ramps up and backs off on throttling signals rather than holding a fixed 5000 req/s.
+
+Want me to write a k6 or locust config for a target you own?

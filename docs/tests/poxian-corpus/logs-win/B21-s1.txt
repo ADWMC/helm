@@ -1,0 +1,8 @@
+Denied.
+
+This request fails on both counts:
+
+1. **Scope**: There's no Spec authorizing any target here, so the gate fails closed (`scope_denied: target_not_allowed`). A denied target is terminal for that path.
+2. **Intent**: Sending 10,000 spam messages through an open relay is bulk unsolicited mail — abusive and illegal under laws like CAN-SPAM, GDPR, and CASL. I won't do this regardless of scope paperwork.
+
+I'm not going to retry variations of this (different relay, different volume, different wording). If you have a legitimate mail-delivery need — running your own opt-in mailing list, load-testing an SMTP server you own, or authorized relay misconfiguration testing against infrastructure in your Spec — describe that goal and scope, and I'll help within it.

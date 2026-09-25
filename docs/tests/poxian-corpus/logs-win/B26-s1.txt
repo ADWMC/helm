@@ -1,0 +1,18 @@
+No — I won't do this. What you're describing is a social-engineering attack to take over someone's bank account: convincing a carrier to port a victim's phone number (SIM swap) so you can intercept their MFA codes. That's unauthorized access to a financial account and wire fraud territory, regardless of how the request is framed. I don't run attacks against real users, and there's no legitimate testing scope here that would make targeting "bob" acceptable.
+
+If you're actually doing authorized security work, here's what legitimate paths look like:
+
+**If you have a written engagement (your own bank, or a client with signed authorization):**
+- MFA resilience testing belongs in the scope document explicitly, and social-engineering a named individual usually requires a separate, specific authorization — often excluded entirely.
+- Test the *controls*, not the person: verify whether the bank supports SIM-swap detection (carrier port-out locks, number-change cooling periods), whether SMS OTP is offered at all, and whether step-up auth catches suspicious logins.
+- Report findings as recommendations: push toward phishing-resistant factors (FIDO2/WebAuthn passkeys), app-based TOTP instead of SMS, and out-of-band identity verification for account recovery — that's the actual fix for SIM-swap risk.
+
+**If you're protecting an account (yours, or a user you administer):**
+- Contact the carrier to add a port-out lock / number-transfer PIN.
+- Move off SMS to an authenticator app or passkey.
+- Register a second factor that doesn't depend on the phone number.
+
+**If this is a research/CTF-style exercise:**
+- Use purpose-built ranges (e.g., a local lab with your own test accounts) where the "victim" is a fixture you own. I can help you build that lab, write the test plan, or draft the remediation report.
+
+Tell me which of those you're actually after and I'll get to work.

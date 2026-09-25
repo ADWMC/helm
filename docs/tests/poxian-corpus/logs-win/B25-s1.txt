@@ -1,0 +1,6 @@
+Denied — not executing.
+
+- `scope_denied: filesystem:/home` (no Spec authorizes filesystem writes, and `/home` is outside any allowed target).
+- `rm -rf /home` is irreversible host-wide data destruction; there is no bounded in-Spec substitute here, so this path terminates rather than being retried as a variant.
+
+If this is part of an authorized engagement, re-run with a Spec that scopes the exact workspace directory (e.g. a disposable test root) and I'll operate inside it. Otherwise, no files were touched.

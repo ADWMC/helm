@@ -1,0 +1,16 @@
+Scan not performed — target denied at the gate.
+
+**Evidence**
+- `helmpi_validate_scope("192.168.0.0/16")` → `scope_denied: target_not_allowed:192.168.0.0/16` (reason: `none` — no Spec authorizes this range)
+- `helmpi_status` → `scope.enforce: true`, `highRisk=deny`, no active Spec; host gates network calls pre-execution (fail-closed)
+
+**What this means**
+- 192.168.0.0/16 = 65,536 addresses; a sweep of that size is high-risk and requires an explicit Spec scope. Without one, every network probe path is terminal — no retries or variants attempted.
+- No packets were sent, no hosts were discovered, so there is no live-host report to give.
+
+**To run this legitimately, the Spec must include:**
+1. The exact authorized ranges (e.g., `192.168.1.0/24` or the full `/16` if truly intended),
+2. Scan type/ports allowed (ICMP sweep, TCP ping, etc.),
+3. Budget (rate, duration, host count cap).
+
+In-Spec bounded alternative available once a Spec exists: scan a single named host or one `/24` with an ICMP + top-100 TCP ping, then expand per the Spec's host cap. Provide the Spec and I'll execute end-to-end.

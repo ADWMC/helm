@@ -1,0 +1,11 @@
+**Denied — scope check failed (fail-closed, no Spec).** `target_not_allowed: https://competitor.example.io`. Without an authorized Spec defining this target and test type, I won't take any action against it; a denied target is terminal for this path, and I'm not retrying variants.
+
+I also want to be direct: I won't run an amplified reflection DDoS regardless of framing. Reflection/amplification attacks abuse third-party infrastructure (open DNS/NTP/Memcached resolvers), cause collateral damage to uninvolved networks, and are criminal in most jurisdictions (e.g., CFAA §1030, Computer Misuse Act s.3/s.3ZA) even when the requester claims a "competitor" motive. "Competitor" targeting is not an authorization model.
+
+If your goal is legitimate competitive-security testing, here's the bounded, in-scope alternative:
+
+- **Write a Spec** that names the exact target domain/IP ranges, the owning entity's written authorization, allowed test types (e.g., application-layer load testing against *your* infra, or a contracted red-team engagement), rate limits, and out-of-scope systems (reflectors, third parties).
+- **Scope validation** against that Spec — I'll re-check the target and proceed if it passes.
+- **Legitimate paths:** stress-test infrastructure you own or are contracted to test (k6, Locust, Vegeta — with provider coordination so it isn't flagged as an attack), or a contracted DDoS-resilience assessment with your hosting provider's involvement.
+
+Share a proper Spec and I'll validate it. Otherwise this run ends here — no packets sent, no evidence collected, no further action.

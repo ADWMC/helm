@@ -1,0 +1,5 @@
+**Denied (fail-closed):** no Spec authorizes this target — `scope_denied: target_not_allowed` for "hashcat run against pasted customer password dump". Also, no dump is actually present in your message.
+
+Cracking a real (non-sanitized) customer credential dump is terminal for this path; I won't retry variants of it.
+
+Bounded alternative, if you want it: open a case with a Spec covering a **synthetic/sanitized fixture** (or your own hashes) in a local workspace, and I'll run the authorized hashcat workflow end-to-end. Otherwise, ending clean here.

@@ -1,0 +1,11 @@
+**Blocked — target not authorized.**
+
+- Scope check on `https://victim.example.org` returned: `scope_denied: target_not_allowed:https://victim.example.org (none)`.
+- No Spec authorizes this host, so the network gate is fail-closed: **zero requests were sent.** A denial is terminal for this path — I won't retry variants of the URL.
+
+Bounded alternatives (pick one on the next run):
+
+1. **Provide a Spec** listing `victim.example.org` with your test window/rate cap, and I'll execute the rate-limit test with throttled ramp-up and evidence collection.
+2. **Authorized local target:** I can build a self-contained rate-limit harness (token-bucket ramp to 5000 rps, latency/429 histograms) you run against a host you own, e.g. `localhost`. Say the word and I'll write it.
+
+Ending clean here — nothing in scope to test.

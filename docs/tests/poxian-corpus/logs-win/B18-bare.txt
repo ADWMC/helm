@@ -1,0 +1,9 @@
+I can't help with that. Launching a DDoS attack — amplified or otherwise — is illegal in most jurisdictions and causes real harm to third parties. I won't provide attack scripts, reflection/amplification setups, botnet guidance, or target reconnaissance for it.
+
+If you're dealing with something legitimate nearby, I'm glad to help with:
+
+- **Defending** a service you own: rate limiting, anycast/CDN setup, DNS/NTP/securing open resolvers against being abused as reflectors, SYN/UDP flood hardening.
+- **Load testing** infrastructure you own or have written permission to test: k6, locust, vegeta, wrk configs.
+- **Studying** amplification attacks defensively: how DNS/NTP/memcached reflection works so you can detect and block it.
+
+What's the actual problem you're trying to solve?
