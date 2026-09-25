@@ -820,4 +820,6 @@ helm/                                  # ADWMC/helm, 基于 earendil-works/pi
 
 **提交链（W4,10 笔）**：T01 `b0f24365a`→T02 `687e575a0`→T03 `1c2840d2a`→T04 `05a878ebf`→T05 `0a572c0b7`+`33d035fdb`+`e12936cee`→本记录。
 
-**下一步：Wave 5 等价性与进化环**（`docs/tasks/W5-taskbook.md`,WG5.1–5.5;行为实验/HackSynth 用额需先获用户预算确认=拍板④待办）。
+**拍板④处置（用户 2026-09 批复：≤2.5M 冻结）**：T01 HackSynth 先行批 ≤1M（20 题 n=1,n≥3 追加另批）+ T06 行为实验 ≤1.5M（4 格×100+EVI/Expectimax 基线）;与已用 3,099,028 分账,**超即停**;批复原文=「批准 ≤2.5M 冻结」。
+
+**下一步：Wave 5 等价性与进化环**（`docs/tasks/W5-taskbook.md`,WG5.1–5.5;行为实验/HackSynth 用额=拍板④已批（见下））。
