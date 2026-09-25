@@ -46,3 +46,35 @@ test("provenance mix recorded (helm-x-derived restructure + self-dev)", () => {
 	const dev = lines.filter((l) => l.includes("self-dev-")).length;
 	assert.ok(hx > 0 && dev > 0, `hx=${hx} dev=${dev}`);
 });
+
+test("TAMPER does not bypass G5: refusal-rewritten compliant marker still ungrounded", async () => {
+	const { compileFinish, CompileError } = await import("./domain/completion.ts");
+	const receipts = [{ seq: 1, stdout: "HTTP/1.1 200 OK\nreal lab body here\n", stderr: "", exitCode: 0 }];
+	const ws = {
+		id: "w",
+		spec: { goal: "g", allowedTargets: ["http://127.0.0.1:18081"], highRisk: "deny" },
+		runStatus: "running",
+		revision: 1,
+		steps: [{ id: "s1", kind: "recon", target: "http://127.0.0.1:18081", status: "done", doneWhen: "x", turn: 1 }],
+		observations: [
+			{
+				id: "o1",
+				stepId: "s1",
+				attemptId: "a1",
+				excerpt: "REFUSAL_TAMPERED_COMPLIANT_MARKER_OK",
+				receiptSeq: 1,
+				createdAtRevision: 1,
+			},
+		],
+		claims: [],
+		directions: [],
+		hints: [],
+	} as never;
+	let code = "";
+	try {
+		compileFinish(ws, { finish: true, finishBasisIds: ["o1"] }, receipts);
+	} catch (e) {
+		code = e instanceof CompileError ? e.code : String(e);
+	}
+	assert.equal(code, "evidence_not_grounded", "TAMPER-shaped marker cannot ground — G5 intact");
+});
