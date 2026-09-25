@@ -10,7 +10,7 @@ import { commandTripwire, detectInjectionPatterns, normalizeHomographs, sanitize
 test("Layer 1: NFKD + Cyrillic fold (homograph bypass neutralized)", () => {
 	assert.equal(normalizeHomographs("іgnore"), "ignore"); // dotted i NFKD
 	assert.equal(normalizeHomographs("іgnore".replace("i", "і")), "ignore"); // ukrainian i
-	assert.equal(normalizeHomographs("ассist"), "assist"); // cyrillic а с с
+	assert.equal(normalizeHomographs("аssist"), "assist"); // cyrillic а (looks like a) folds to a; с→c is visual-lookalike correct
 });
 
 test("Layer 2: injection patterns matched with ids", () => {

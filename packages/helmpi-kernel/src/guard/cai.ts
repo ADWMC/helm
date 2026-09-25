@@ -21,6 +21,7 @@ const CYRILLIC: Record<string, string> = {
 	о: "o",
 	р: "p",
 	т: "t",
+	і: "i",
 	у: "y",
 	х: "x",
 };
