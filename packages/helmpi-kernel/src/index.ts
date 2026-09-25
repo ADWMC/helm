@@ -38,7 +38,7 @@ export * from "./memory/tool-memory.ts";
 export * from "./phase.ts";
 export { statusText } from "./status.ts";
 
-import { statusText } from "./status.ts";
+import { runStatusLines, statusText } from "./status.ts";
 
 const advisory = new AdvisoryLedger();
 const streamGuard = createStreamGuard();
@@ -284,7 +284,14 @@ export default function helmPiExtension(pi: ExtensionAPI): void {
 		parameters: Type.Object({}),
 		async execute(): Promise<TextResult> {
 			mode = readAnalysisMode(config);
-			return text(statusText({ ...config, session: { ...config.session, analysisMode: mode } }));
+			let runLines = "";
+			try {
+				const extra = runStatusLines(process.cwd());
+				if (extra.length > 0) runLines = `\n${extra.join("\n")}`;
+			} catch {
+				/* read-only render best-effort */
+			}
+			return text(statusText({ ...config, session: { ...config.session, analysisMode: mode } }) + runLines);
 		},
 	});
 

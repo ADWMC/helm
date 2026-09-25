@@ -3,6 +3,7 @@
  */
 
 import type { ThinkingLevel } from "@adwmc/helm-agent-core";
+import { resolveLocale, t } from "@adwmc/helm-kernel/i18n";
 import chalk from "chalk";
 import { APP_NAME, CONFIG_DIR_NAME, ENV_AGENT_DIR, ENV_SESSION_DIR } from "../config.ts";
 import type { ExtensionFlag } from "../core/extensions/types.ts";
@@ -288,12 +289,7 @@ ${chalk.bold("Commands:")}
   ${APP_NAME} validate-scope <target>     Pre-check target against Spec (exit 3 = deny, fail-closed)
   ${APP_NAME} attack-coverage             ATT&CK coverage from mapped findings
   ${APP_NAME} doctor                      Environment probes (tool chain -> tool-memory)
-${APP_NAME} spec init [--force]         Create .helm/spec.json scaffold (engagement Spec)
-${APP_NAME} run | resume                Start/resume session (spec-driven when .helm/spec.json exists)
-${APP_NAME} report [--dir D] [--out F]  Write REPORT.md+json; exit 0=clean · 2=findings
-${APP_NAME} validate-scope <target>     Pre-check target against Spec (exit 3 = deny, fail-closed)
-${APP_NAME} attack-coverage             ATT&CK coverage from mapped findings
-${APP_NAME} doctor                      Environment probes (tool chain -> tool-memory)
+
   ${APP_NAME} <command> --help          Show help for install/remove/uninstall/update/list/config/auth
 
 ${chalk.bold("Options:")}
@@ -467,4 +463,5 @@ ${chalk.bold("Built-in Tool Names:")}
   find       - Find files by glob pattern (read-only, off by default)
   ls         - List directory contents (read-only, off by default)
 `);
+	console.log(`\n${t("cli.help.footer", {}, resolveLocale(process.cwd()))}`);
 }

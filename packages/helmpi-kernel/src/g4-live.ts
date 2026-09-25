@@ -25,6 +25,7 @@ export interface UsageLike {
 	output?: number;
 	cacheRead?: number;
 	cacheWrite?: number;
+	reasoning?: number;
 	totalTokens?: number;
 }
 
@@ -58,6 +59,31 @@ export function sumSessionUsage(entries: unknown[]): number {
 		}
 	}
 	return total;
+}
+
+/** Six-column session usage (W5-T07 预算六列): five cols + grand total. */
+export function usageColumns(entries: unknown[]): {
+	input: number;
+	output: number;
+	cacheRead: number;
+	cacheWrite: number;
+	reasoning: number;
+	grand_total_with_cache: number;
+} {
+	const out = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, reasoning: 0, grand_total_with_cache: 0 };
+	for (const raw of entries) {
+		const e = raw as { usage?: UsageLike } | null;
+		const u = e?.usage ?? (e as { message?: { usage?: UsageLike } } | null)?.message?.usage;
+		if (!u) continue;
+		out.input += num(u.input);
+		out.output += num(u.output);
+		out.cacheRead += num(u.cacheRead);
+		out.cacheWrite += num(u.cacheWrite);
+		out.reasoning += num(u.reasoning);
+		out.grand_total_with_cache +=
+			num(u.input) + num(u.output) + num(u.cacheRead) + num(u.cacheWrite) + num(u.reasoning);
+	}
+	return out;
 }
 
 export interface G4ToolVerdict {
@@ -122,7 +148,11 @@ export function createG4Monitor(deps: G4Deps): G4Monitor {
 					}
 				}
 			}
-			// Watcher cadence (default OFF; structural review, full trace journaled)
+			// W5-T07 ③: budget six-col checkpoint every 5 turns (read-only source for status/report).
+			if (turnIndex > 0 && turnIndex % 5 === 0) {
+				const u = usageColumns(entries);
+				deps.journal("token_checkpoint", { ...u, turnIndex });
+			} // Watcher cadence (default OFF; structural review, full trace journaled)
 			const cfg = deps.readDefense();
 			if (cfg.watcher && turnIndex > 0 && turnIndex % Math.max(1, cfg.watcherEveryTurns) === 0) {
 				const r = deps.review();

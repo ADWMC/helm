@@ -1,3 +1,4 @@
+import { homedir } from "node:os";
 /**
  * helm product shell commands (W1-T03, PLAN §1.5 命令面).
  *
@@ -15,7 +16,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { validateHelmSpec } from "@adwmc/helm-kernel/config";
-import { exportReport, exportReportJson, exportSarif, reportExitCode } from "@adwmc/helm-kernel/export";
+import { exportReport, exportReportJson, exportSarif, reportExitCode, reportFindings } from "@adwmc/helm-kernel/export";
 import { resolveLocale, t } from "@adwmc/helm-kernel/i18n";
 import { Ledger } from "@adwmc/helm-kernel/ledger";
 import { openToolMemory } from "@adwmc/helm-kernel/memory";
@@ -150,7 +151,24 @@ export async function runHelmCommand(args: string[], cwd: string = process.cwd()
 				return true;
 			}
 			const ledger = new Ledger(dbPath);
-			const md = exportReport(ledger);
+			let md = exportReport(ledger);
+			// W5-T07 ④: headline cost-per-verified-finding (six-col grand / findings), source = last token_checkpoint (phase journal)
+			try {
+				const phaseDb = join(homedir(), ".helm", "agent", "phase.db");
+				let ckLine = "unavailable (no token_checkpoint yet)";
+				if (existsSync(phaseDb)) {
+					const pl = new Ledger(phaseDb);
+					const ck = [...pl.journal()].reverse().find((r) => r.kind === "token_checkpoint");
+					if (ck) {
+						const p = JSON.parse(ck.payloadJson ?? "{}") as Record<string, number>;
+						ckLine = `${p.grand_total_with_cache ?? 0} / {findings} (checkpoint@turn ${p.turnIndex ?? "?"})`;
+					}
+					pl.close();
+				}
+				md = `> cost-per-verified-finding: ${ckLine.replace("{findings}", String(reportFindings(ledger.workspace())))}\n\n${md}`;
+			} catch {
+				md = `> cost-per-verified-finding: unavailable\n\n${md}`;
+			}
 			const json = exportReportJson(ledger);
 			const out = flag(args, "--out") ?? join(dir, "REPORT.md");
 			writeFileSync(out, md, "utf8");
