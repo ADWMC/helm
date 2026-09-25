@@ -17,6 +17,7 @@ import {
 	type Model,
 	type Usage,
 } from "@adwmc/helm-ai/compat";
+import { resetLocaleCache } from "@adwmc/helm-kernel/i18n";
 import type {
 	AutocompleteItem,
 	AutocompleteProvider,
@@ -4751,6 +4752,7 @@ export class InteractiveMode {
 			selector = new SettingsSelectorComponent(
 				{
 					autoCompact: this.session.autoCompactionEnabled,
+					locale: this.settingsManager.getLocale(),
 					defaultModel,
 					currentModel: this.session.model,
 					availableDefaultModels: this.session.modelRuntime.getAvailableSnapshot(),
@@ -4795,6 +4797,13 @@ export class InteractiveMode {
 					onAutoCompactChange: (enabled) => {
 						this.session.setAutoCompactionEnabled(enabled);
 						this.footer.setAutoCompactEnabled(enabled);
+					},
+					onLocaleChange: (locale) => {
+						this.settingsManager.setLocale(locale);
+						resetLocaleCache();
+						this.showStatus(
+							`Language: ${locale === "auto" ? "auto (system locale/timezone)" : locale} — applies to newly rendered text`,
+						);
 					},
 					onShowImagesChange: (enabled) => {
 						this.settingsManager.setShowImages(enabled);

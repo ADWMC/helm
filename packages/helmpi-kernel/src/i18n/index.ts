@@ -3,7 +3,9 @@
  *
  * Boundary: machine surfaces (journal event names, json report keys, exit
  * codes, G1 prompts) are FROZEN English — never routed through this module.
- * Locale chain: .helm/config.json `locale` → HELM_LOCALE env → "en";
+ * Locale chain: .helm/config.json `locale` → HELM_LOCALE env → global
+ * settings.json `locale` (TUI /settings; "auto" skips) → system auto-detect
+ * (POSIX LANG/LC_ALL → OS language → timezone) → "en";
  * invalid values warn and fall back. Missing keys fall back PER KEY to the
  * English catalog; missing in both → the key itself is returned (visible).
  *
@@ -13,6 +15,7 @@
 
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
+import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -63,10 +66,51 @@ function normalize(v: string): Locale | undefined {
 	return (LOCALES as readonly string[]).includes(v) ? (v as Locale) : undefined;
 }
 
-/** Locale chain (§1.6): config → HELM_LOCALE → en; invalid warns, never throws. */
+/** Pure helper: CJK/Chinese timezones map to zh-CN, everything else stays on the en fallback. */
+export function localeFromTimeZone(tz: string): Locale {
+	return /^Asia\/(Shanghai|Chongqing|Harbin|Urumqi|Hong_Kong|Macau|Taipei)$/.test(tz) ? "zh-CN" : FALLBACK;
+}
+
+/**
+ * System auto-detect (user directive 2026-09: 时区/语言自动判断):
+ * 1) POSIX LANG/LC_MESSAGES/LC_ALL — authoritative when present (an explicit
+ *    locale choice, even `C` → en);
+ * 2) OS/UI language via ICU (Windows user locale, macOS system language);
+ * 3) timezone hint (Asia/Shanghai-class → zh-CN), else en.
+ */
+export function detectSystemLocale(): Locale {
+	const posix = process.env.LC_ALL || process.env.LC_MESSAGES || process.env.LANG;
+	// NOTE: match with /^zh/ — not ^zh\b ("_" is a word char, so zh_CN has no \b after zh)
+	if (posix) return /^zh/i.test(posix) ? "zh-CN" : FALLBACK;
+	try {
+		// Intl is an object (not callable) — resolve the OS locale via a formatter instance
+		if (/^zh/i.test(new Intl.DateTimeFormat().resolvedOptions().locale)) return "zh-CN";
+	} catch {
+		/* ICU unavailable → timezone hint */
+	}
+	try {
+		return localeFromTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone ?? "");
+	} catch {
+		return FALLBACK;
+	}
+}
+
+/** Global TUI preference (`/settings` → settings.json); "auto"/invalid → chain continues. */
+function readLocaleFromGlobalSettings(): Locale | undefined {
+	try {
+		const dir = process.env.HELM_CODING_AGENT_DIR ?? join(homedir(), ".helm");
+		const raw = JSON.parse(readFileSync(join(dir, "settings.json"), "utf8")) as { locale?: unknown };
+		if (typeof raw.locale === "string" && raw.locale !== "auto") return normalize(raw.locale);
+	} catch {
+		/* missing/invalid → auto-detect next */
+	}
+	return undefined;
+}
+
+/** Locale chain (§1.6 + auto-detect): config → env → global settings → system → en; invalid never throws. */
 export function resolveLocale(cwd: string = process.cwd()): Locale {
 	if (cachedLocale !== undefined && cachedCwd === cwd) return cachedLocale;
-	let resolved: Locale = FALLBACK;
+	let resolved: Locale | undefined;
 	const fromConfig = readLocaleFromConfig(cwd);
 	if (fromConfig) {
 		resolved = fromConfig;
@@ -75,9 +119,11 @@ export function resolveLocale(cwd: string = process.cwd()): Locale {
 		if (fromEnv) {
 			const n = normalize(fromEnv);
 			if (n) resolved = n;
-			else console.warn(`[i18n] invalid HELM_LOCALE=${fromEnv}, falling back to ${FALLBACK}`);
+			else console.warn(`[i18n] invalid HELM_LOCALE=${fromEnv}, falling back down the chain`);
 		}
 	}
+	if (!resolved) resolved = readLocaleFromGlobalSettings();
+	if (!resolved) resolved = detectSystemLocale();
 	cachedLocale = resolved;
 	cachedCwd = cwd;
 	return resolved;

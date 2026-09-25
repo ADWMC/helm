@@ -19,6 +19,7 @@ import {
 	type FullscreenExitOutput,
 	type MermaidRenderingMode,
 	type TuiMode,
+	type UiLocale,
 	type WarningSettings,
 } from "../../../core/settings-manager.ts";
 import { getSettingsListTheme, parseAutoThemeSetting, type TerminalTheme, theme } from "../theme/theme.ts";
@@ -48,8 +49,19 @@ const DEFAULT_PROJECT_TRUST_BY_LABEL = new Map(
 	Object.entries(DEFAULT_PROJECT_TRUST_LABELS).map(([value, label]) => [label, value as DefaultProjectTrust]),
 );
 
+const UI_LOCALE_LABELS: Record<UiLocale, string> = {
+	auto: "Auto (system)",
+	en: "English",
+	"zh-CN": "中文（简体）",
+};
+
+const UI_LOCALE_BY_LABEL = new Map(
+	Object.entries(UI_LOCALE_LABELS).map(([value, label]) => [label, value as UiLocale]),
+);
+
 export interface SettingsConfig {
 	autoCompact: boolean;
+	locale: UiLocale;
 	defaultModel: string;
 	currentModel?: Model<any>;
 	availableDefaultModels: readonly Model<any>[];
@@ -93,6 +105,7 @@ export interface SettingsConfig {
 
 export interface SettingsCallbacks {
 	onAutoCompactChange: (enabled: boolean) => void;
+	onLocaleChange: (locale: UiLocale) => void;
 	onShowImagesChange: (enabled: boolean) => void;
 	onImageWidthCellsChange: (width: number) => void;
 	onAutoResizeImagesChange: (enabled: boolean) => void;
@@ -462,6 +475,14 @@ export class SettingsSelectorComponent extends Container {
 		const currentModelKey = config.currentModel ? modelSettingKey(config.currentModel) : undefined;
 
 		const items: SettingItem[] = [
+			{
+				id: "language",
+				label: "Language / 语言",
+				description:
+					"UI language. Auto: system locale (POSIX LANG/LC_ALL, then OS language), then timezone (Asia/Shanghai-class → 中文). Machine outputs stay English.",
+				currentValue: UI_LOCALE_LABELS[config.locale ?? "auto"],
+				values: Object.values(UI_LOCALE_LABELS),
+			},
 			{
 				id: "autocompact",
 				label: "Auto-compact",
@@ -841,6 +862,11 @@ export class SettingsSelectorComponent extends Container {
 			getSettingsListTheme(),
 			(id, newValue) => {
 				switch (id) {
+					case "language": {
+						const locale = UI_LOCALE_BY_LABEL.get(newValue);
+						if (locale) callbacks.onLocaleChange(locale);
+						break;
+					}
 					case "autocompact":
 						callbacks.onAutoCompactChange(newValue === "true");
 						break;

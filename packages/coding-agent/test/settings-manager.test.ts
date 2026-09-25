@@ -665,4 +665,27 @@ describe("SettingsManager", () => {
 			expect(manager.getShellPath()).toBe(homedir());
 		});
 	});
+
+	describe("locale (UI language, /settings TUI)", () => {
+		it("defaults to auto", () => {
+			const manager = SettingsManager.create(projectDir, agentDir);
+			expect(manager.getLocale()).toBe("auto");
+		});
+
+		it("persists a chosen locale across a reload", async () => {
+			const manager = SettingsManager.create(projectDir, agentDir);
+			manager.setLocale("zh-CN");
+			await manager.flush(); // save() enqueues the write — must flush before re-reading
+			expect(SettingsManager.create(projectDir, agentDir).getLocale()).toBe("zh-CN");
+			const again = SettingsManager.create(projectDir, agentDir);
+			again.setLocale("auto");
+			await again.flush();
+			expect(SettingsManager.create(projectDir, agentDir).getLocale()).toBe("auto");
+		});
+
+		it("ignores invalid persisted locale values (falls back to auto)", () => {
+			writeFileSync(join(agentDir, "settings.json"), JSON.stringify({ locale: "fr" }));
+			expect(SettingsManager.create(projectDir, agentDir).getLocale()).toBe("auto");
+		});
+	});
 });

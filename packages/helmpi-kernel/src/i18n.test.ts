@@ -15,6 +15,8 @@ import { fileURLToPath } from "node:url";
 import {
 	catalog,
 	charWidth,
+	detectSystemLocale,
+	localeFromTimeZone,
 	padToWidth,
 	placeholders,
 	resetLocaleCache,
@@ -98,8 +100,13 @@ test("WG1.7-4: CJK width — wide chars are 2 cols, truncation never splits a co
 	assert.equal(cols, 8);
 });
 
-test("WG1.7: locale chain — config beats env, invalid env warns to en (memo reset between)", () => {
+test("WG1.7: locale chain — config beats env, invalid env falls through to system detect (memo reset between)", () => {
 	const dir = mkdtempSync(join(tmpdir(), "helm-i18n-"));
+	// isolate the global settings step (TUI /settings writes agentDir/settings.json)
+	const savedAgentDir = process.env.HELM_CODING_AGENT_DIR;
+	const tempAgentDir = mkdtempSync(join(tmpdir(), "helm-i18n-agent-"));
+	process.env.HELM_CODING_AGENT_DIR = tempAgentDir;
+	const savedLc = { LC_ALL: process.env.LC_ALL, LC_MESSAGES: process.env.LC_MESSAGES, LANG: process.env.LANG };
 	try {
 		resetLocaleCache();
 		const prev = process.env.HELM_LOCALE;
@@ -112,15 +119,107 @@ test("WG1.7: locale chain — config beats env, invalid env warns to en (memo re
 		resetLocaleCache();
 		process.env.HELM_LOCALE = "klingon";
 		writeFileSync(join(dir, ".helm", "config.json"), JSON.stringify({}), "utf8");
-		assert.equal(resolveLocale(dir), "en", "invalid env → en");
+		// deterministic auto-detect for this assertion (POSIX locale is authoritative when present)
+		delete process.env.LC_MESSAGES;
+		delete process.env.LANG;
+		process.env.LC_ALL = "en_US.UTF-8";
+		assert.equal(resolveLocale(dir), "en", "invalid env → chain ends at system detect (=en under en_US locale)");
 		if (prev === undefined) delete process.env.HELM_LOCALE;
 		else process.env.HELM_LOCALE = prev;
 		resetLocaleCache();
 	} finally {
+		process.env.LC_ALL = savedLc.LC_ALL;
+		if (savedLc.LC_ALL === undefined) delete process.env.LC_ALL;
+		process.env.LC_MESSAGES = savedLc.LC_MESSAGES;
+		if (savedLc.LC_MESSAGES === undefined) delete process.env.LC_MESSAGES;
+		process.env.LANG = savedLc.LANG;
+		if (savedLc.LANG === undefined) delete process.env.LANG;
+		if (savedAgentDir === undefined) delete process.env.HELM_CODING_AGENT_DIR;
+		else process.env.HELM_CODING_AGENT_DIR = savedAgentDir;
 		try {
-			rmSync(dir, { recursive: true, force: true });
+			rmSync(tempAgentDir, { recursive: true, force: true });
 		} catch {
 			/* ignore */
 		}
+		resetLocaleCache();
+	}
+});
+
+test("WG1.7-5: system auto-detect — POSIX locale authoritative; timezone helper maps CJK zones (user directive)", () => {
+	const savedLc = { LC_ALL: process.env.LC_ALL, LC_MESSAGES: process.env.LC_MESSAGES, LANG: process.env.LANG };
+	const apply = (v: string | undefined) => {
+		if (v === undefined) delete process.env.LC_ALL;
+		else process.env.LC_ALL = v;
+	};
+	try {
+		delete process.env.LC_MESSAGES;
+		delete process.env.LANG;
+		process.env.LC_ALL = "zh_CN.UTF-8";
+		assert.equal(detectSystemLocale(), "zh-CN", "POSIX zh → zh-CN");
+		process.env.LC_ALL = "en_US.UTF-8";
+		assert.equal(detectSystemLocale(), "en", "POSIX en → en (explicit choice wins over OS/tz)");
+		process.env.LC_ALL = "C";
+		assert.equal(detectSystemLocale(), "en", "POSIX C → en");
+	} finally {
+		apply(savedLc.LC_ALL);
+		process.env.LC_MESSAGES = savedLc.LC_MESSAGES;
+		if (savedLc.LC_MESSAGES === undefined) delete process.env.LC_MESSAGES;
+		process.env.LANG = savedLc.LANG;
+		if (savedLc.LANG === undefined) delete process.env.LANG;
+	}
+	// timezone tier (pure): CJK/Chinese zones → zh-CN, others → en fallback
+	assert.equal(localeFromTimeZone("Asia/Shanghai"), "zh-CN");
+	assert.equal(localeFromTimeZone("Asia/Taipei"), "zh-CN");
+	assert.equal(localeFromTimeZone("Asia/Hong_Kong"), "zh-CN");
+	assert.equal(localeFromTimeZone("Europe/Berlin"), "en");
+	assert.equal(localeFromTimeZone("America/New_York"), "en");
+});
+
+test("WG1.7-6: global settings (TUI /settings) sits between env and auto-detect", () => {
+	const project = mkdtempSync(join(tmpdir(), "helm-i18n-proj-"));
+	const agent = mkdtempSync(join(tmpdir(), "helm-i18n-glob-"));
+	const savedAgentDir = process.env.HELM_CODING_AGENT_DIR;
+	const savedLocale = process.env.HELM_LOCALE;
+	const savedLc = { LC_ALL: process.env.LC_ALL, LC_MESSAGES: process.env.LC_MESSAGES, LANG: process.env.LANG };
+	try {
+		process.env.HELM_CODING_AGENT_DIR = agent;
+		delete process.env.HELM_LOCALE;
+		delete process.env.LC_MESSAGES;
+		delete process.env.LANG;
+		process.env.LC_ALL = "en_US.UTF-8"; // deterministic auto tier → en
+		// no settings.json → auto-detect
+		resetLocaleCache();
+		assert.equal(resolveLocale(project), "en", "no global settings → system detect");
+		// TUI persisted preference wins over auto
+		writeFileSync(join(agent, "settings.json"), JSON.stringify({ locale: "zh-CN" }), "utf8");
+		resetLocaleCache();
+		assert.equal(resolveLocale(project), "zh-CN", "global settings locale beats auto-detect");
+		// "auto" is the explicit opt-out → back to system detect
+		writeFileSync(join(agent, "settings.json"), JSON.stringify({ locale: "auto" }), "utf8");
+		resetLocaleCache();
+		assert.equal(resolveLocale(project), "en", "locale=auto skips to system detect");
+		// env still beats the persisted TUI preference (per-run override)
+		process.env.HELM_LOCALE = "zh-CN";
+		resetLocaleCache();
+		assert.equal(resolveLocale(project), "zh-CN", "env beats global settings");
+	} finally {
+		if (savedLocale === undefined) delete process.env.HELM_LOCALE;
+		else process.env.HELM_LOCALE = savedLocale;
+		process.env.LC_ALL = savedLc.LC_ALL;
+		if (savedLc.LC_ALL === undefined) delete process.env.LC_ALL;
+		process.env.LC_MESSAGES = savedLc.LC_MESSAGES;
+		if (savedLc.LC_MESSAGES === undefined) delete process.env.LC_MESSAGES;
+		process.env.LANG = savedLc.LANG;
+		if (savedLc.LANG === undefined) delete process.env.LANG;
+		if (savedAgentDir === undefined) delete process.env.HELM_CODING_AGENT_DIR;
+		else process.env.HELM_CODING_AGENT_DIR = savedAgentDir;
+		for (const d of [project, agent]) {
+			try {
+				rmSync(d, { recursive: true, force: true });
+			} catch {
+				/* ignore */
+			}
+		}
+		resetLocaleCache();
 	}
 });

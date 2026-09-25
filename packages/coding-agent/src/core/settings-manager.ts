@@ -107,6 +107,8 @@ export type PackageSource =
 			themes?: string[];
 	  };
 
+export type UiLocale = "auto" | "en" | "zh-CN"; // UI language; "auto" = system detect (POSIX/OS locale → timezone)
+
 export interface Settings {
 	lastChangelogVersion?: string;
 	defaultProvider?: string;
@@ -125,6 +127,7 @@ export interface Settings {
 	externalEditor?: string; // Command for Ctrl+G external editor; takes precedence over VISUAL/EDITOR
 	shellPath?: string; // Custom shell path (e.g., for Cygwin users on Windows); supports leading ~ expansion
 	quietStartup?: boolean;
+	locale?: UiLocale; // UI language (default "auto" — system language/timezone detect)
 	defaultProjectTrust?: DefaultProjectTrust; // default: "ask"; global setting only
 	shellCommandPrefix?: string; // Prefix prepended to every bash command (e.g., "shopt -s expand_aliases" for alias support)
 	npmCommand?: string[]; // Command used for npm package lookup/install operations, argv-style (e.g., ["mise", "exec", "node@20", "--", "npm"])
@@ -1025,6 +1028,17 @@ export class SettingsManager {
 	setQuietStartup(quiet: boolean): void {
 		this.globalSettings.quietStartup = quiet;
 		this.markModified("quietStartup");
+		this.save();
+	}
+
+	getLocale(): UiLocale {
+		const v = this.settings.locale;
+		return v === "en" || v === "zh-CN" ? v : "auto";
+	}
+
+	setLocale(locale: UiLocale): void {
+		this.globalSettings.locale = locale;
+		this.markModified("locale");
 		this.save();
 	}
 

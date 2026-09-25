@@ -135,4 +135,27 @@ describe("SettingsSelectorComponent", () => {
 		expect(output).toContain("  ✓ medium");
 		expect(output).toContain("→   high");
 	});
+
+	it("offers the Language row and reports locale changes (/settings TUI)", () => {
+		const onLocaleChange = vi.fn();
+		const config = {
+			locale: "auto",
+			defaultModel: "not set",
+			availableDefaultModels: [],
+			modelThinkingLevels: {},
+			availableThemes: [],
+			warnings: {},
+		} as unknown as SettingsConfig;
+		const callbacks = { onLocaleChange, onCancel: () => {} } as unknown as SettingsCallbacks;
+		const list = new SettingsSelectorComponent(config, callbacks).getSettingsList();
+
+		const output = stripAnsi(list.render(120).join("\n"));
+		expect(output).toContain("Language / 语言");
+
+		list.selectItem("language");
+		list.handleInput("\r"); // Auto → English
+		expect(onLocaleChange.mock.calls.flat()).toEqual(["en"]);
+		list.handleInput("\r"); // English → 中文（简体）
+		expect(onLocaleChange.mock.calls.flat()).toEqual(["en", "zh-CN"]);
+	});
 });
