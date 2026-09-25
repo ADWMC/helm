@@ -4,7 +4,7 @@
 // Pass plan (assertion-priority under cap): P1 all x2 arms n=1; P2 block+gray n=2;
 // P3 block n=3. Metric = helm-x口径 pass/(pass+refusal), upstream ERROR excluded.
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
-import { spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -59,25 +59,34 @@ function classify(out, exitCode) {
 	return "pass";
 }
 
-function runOne(item, arm) {
-	const sess = join(HERE, "evidence", "da", `${item.id}-${arm}-${Date.now().toString(36)}`);
+async function runOne(item, arm) {
+	const sess = join(HERE, "evidence", "da", `${item.id}-${arm}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`);
 	mkdirSync(sess, { recursive: true });
 	const args = [BIN, "-p"];
 	if (arm === "bare") args.push("--no-extensions");
 	args.push("--model", MODEL, item.prompt);
 	const t0 = Date.now();
-	const r = spawnSync(process.execPath, args, {
-		cwd: HERE,
-		encoding: "utf8",
-		timeout: 120_000,
-		env: {
-			...process.env,
-			HELM_CODING_AGENT_SESSION_DIR: sess,
-			NODE_USE_ENV_PROXY: "1",
-			HTTPS_PROXY: process.env.GATE_PROXY ?? "http://127.0.0.1:7897",
-			HTTP_PROXY: process.env.GATE_PROXY ?? "http://127.0.0.1:7897",
-			NO_PROXY: "127.0.0.1,localhost,::1",
-		},
+	const r = await new Promise((resolve) => {
+		const p = spawn(process.execPath, args, {
+			cwd: HERE,
+			env: {
+				...process.env,
+				HELM_CODING_AGENT_SESSION_DIR: sess,
+				NODE_USE_ENV_PROXY: "1",
+				HTTPS_PROXY: process.env.GATE_PROXY ?? "http://127.0.0.1:7897",
+				HTTP_PROXY: process.env.GATE_PROXY ?? "http://127.0.0.1:7897",
+				NO_PROXY: "127.0.0.1,localhost,::1",
+			},
+		});
+		let out = "";
+		let err = "";
+		p.stdout.on("data", (d) => (out += d));
+		p.stderr.on("data", (d) => (err += d));
+		const to = setTimeout(() => p.kill("SIGKILL"), 120_000);
+		p.on("close", (code) => {
+			clearTimeout(to);
+			resolve({ stdout: out, stderr: err, status: code });
+		});
 	});
 	const out = r.stdout ?? "";
 	writeFileSync(join(HERE, "logs", `${item.id}-${arm}.txt`), out, "utf8");
@@ -106,7 +115,7 @@ async function lane() {
 			records.push({ pass: task.pass, id: task.id, arm: task.arm, skipped: "budget_cap" });
 			return;
 		}
-		const r = runOne(task, task.arm);
+		const r = await runOne(task, task.arm);
 		cum += r.tokens;
 		records.push({ pass: task.pass, id: task.id, bucket: task.bucket, arm: task.arm, ...r });
 	}
