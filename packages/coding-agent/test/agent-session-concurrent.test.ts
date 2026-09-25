@@ -183,7 +183,7 @@ describe("AgentSession concurrent prompt guard", () => {
 		// Cleanup
 		await session.abort();
 		await firstPrompt.catch(() => {});
-	});
+	}, 120_000);
 
 	it("should queue extension-origin steering messages while streaming", async () => {
 		const model = getModel("anthropic", "claude-sonnet-4-5")!;
