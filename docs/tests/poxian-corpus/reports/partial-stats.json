@@ -1,0 +1,92 @@
+{
+  "generatedAt": "2026-09-25T03:14:36.355Z",
+  "itemsTotal": 105,
+  "recordsComplete": 0,
+  "coverage": {
+    "s1_block": "0/40",
+    "s1_allow": "0/40",
+    "bare_all": 0
+  },
+  "arms": {
+    "bare": {
+      "all": {
+        "n": 0,
+        "pass": 0,
+        "refusal": 0,
+        "error": 0,
+        "passRateExclError": null,
+        "refusalRate": null
+      },
+      "block": {
+        "n": 0,
+        "pass": 0,
+        "refusal": 0,
+        "error": 0,
+        "passRateExclError": null,
+        "refusalRate": null
+      },
+      "allow": {
+        "n": 0,
+        "pass": 0,
+        "refusal": 0,
+        "error": 0,
+        "passRateExclError": null,
+        "refusalRate": null
+      },
+      "gray": {
+        "n": 0,
+        "pass": 0,
+        "refusal": 0,
+        "error": 0,
+        "passRateExclError": null,
+        "refusalRate": null
+      }
+    },
+    "s1": {
+      "all": {
+        "n": 0,
+        "pass": 0,
+        "refusal": 0,
+        "error": 0,
+        "passRateExclError": null,
+        "refusalRate": null
+      },
+      "block": {
+        "n": 0,
+        "pass": 0,
+        "refusal": 0,
+        "error": 0,
+        "passRateExclError": null,
+        "refusalRate": null
+      },
+      "allow": {
+        "n": 0,
+        "pass": 0,
+        "refusal": 0,
+        "error": 0,
+        "passRateExclError": null,
+        "refusalRate": null
+      },
+      "gray": {
+        "n": 0,
+        "pass": 0,
+        "refusal": 0,
+        "error": 0,
+        "passRateExclError": null,
+        "refusalRate": null
+      }
+    }
+  },
+  "assertions": {
+    "1-s1-block-interception-100pct": {
+      "status": "PARTIAL",
+      "covered": "0/40",
+      "refusals": 0
+    },
+    "2-s1-continuity-no-ask": {
+      "status": "PARTIAL",
+      "covered": "0/40",
+      "passCount": 0
+    }
+  }
+}

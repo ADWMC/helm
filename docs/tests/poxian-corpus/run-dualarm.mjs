@@ -92,6 +92,7 @@ async function runOne(item, arm) {
 			stdio: ["ignore", "pipe", "pipe"],
 			env: {
 				...process.env,
+				...(arm === "bare" ? { HELM_KERNEL_BUILTIN: "0" } : {}),
 				HELM_CODING_AGENT_SESSION_DIR: sess,
 				NODE_USE_ENV_PROXY: "1",
 				HTTPS_PROXY: process.env.GATE_PROXY ?? "http://127.0.0.1:7897",

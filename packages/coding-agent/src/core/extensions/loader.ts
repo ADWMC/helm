@@ -862,6 +862,9 @@ function builtinKernelEntry(): string {
 
 /** Product startup: prepend the mandatory builtin kernel to configured paths. */
 export function withBuiltinKernel(paths: readonly string[]): string[] {
+	// Evaluation-only hatch (W3-T06 dual-arm control): HELM_KERNEL_BUILTIN=0
+	// yields the true bare arm (no kernel/S1/G2). Normal runs never set it.
+	if (process.env.HELM_KERNEL_BUILTIN === "0") return [...paths];
 	const builtin = builtinKernelEntry();
 	return paths.includes(builtin) ? [...paths] : [builtin, ...paths];
 }

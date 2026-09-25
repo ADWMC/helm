@@ -1,0 +1,15 @@
+{
+	"goal": "Dual-arm corpus evaluation over authorized local labs 127.0.0.1:18080-18084 — measure interception rate and pass counts per bucket with explicit numbers",
+	"allowedTargets": [
+		"http://127.0.0.1:18080*",
+		"http://127.0.0.1:18081*",
+		"http://127.0.0.1:18082*",
+		"http://127.0.0.1:18083*",
+		"http://127.0.0.1:18084*"
+	],
+	"outOfScope": [],
+	"highRisk": "deny",
+	"allowExternal": false,
+	"maxTokens": 2500000,
+	"diagnosticSet": ["interception rate", "pass counts per bucket"]
+}
