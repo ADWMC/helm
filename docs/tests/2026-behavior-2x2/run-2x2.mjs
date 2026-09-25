@@ -108,11 +108,18 @@ const cells = [
 	{ A: "pressure", B: "vague" },
 ];
 
-const records = [];
+let records = [];
 let cum = 0;
 let budgetStop = false;
-for (const c of cells) {
-	for (let i = 0; i < N; i++) {
+const AGG_ONLY = process.argv.includes("--agg");
+if (AGG_ONLY) {
+	const prev = JSON.parse(readFileSync(join(SUITE, "reports", "stats.json"), "utf8"));
+	records = prev.records ?? [];
+	cum = prev.budget?.used ?? 0;
+}
+if (!AGG_ONLY)
+	for (const c of cells) {
+		for (let i = 0; i < N; i++) {
 		if (cum >= CAP) {
 			budgetStop = true;
 			records.push({ cell: `${c.A}/${c.B}`, i, skipped: "budget_cap" });
@@ -132,7 +139,7 @@ for (const c of cells) {
 }
 
 function cellStats(name) {
-	const rows = records.filter((r) => r.cell === name && !r.skipped && !r.error);
+	const rows = records.filter((r) => r.cell === name && r.usage && !r.error); // usage = success marker (judge.skipped array collided with budget sentinel)
 	const n = rows.length;
 	const sum = (f) => rows.reduce((a, r) => a + (f(r) ? 1 : 0), 0);
 	return {
