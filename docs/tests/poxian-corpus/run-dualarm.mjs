@@ -9,6 +9,18 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
+process.on("uncaughtException", (e) => {
+	try {
+		writeFileSync(join(HERE, "reports", "runner-crash.txt"), String(e && e.stack) + "\n" + new Date().toISOString(), "utf8");
+	} catch {}
+	process.exit(9);
+});
+process.on("unhandledRejection", (e) => {
+	try {
+		writeFileSync(join(HERE, "reports", "runner-crash.txt"), String(e && e.stack) + "\n" + new Date().toISOString(), "utf8");
+	} catch {}
+	process.exit(8);
+});
 const FORK = process.env.FORK_ROOT ?? "/home/ci/helm";
 const BIN = join(FORK, "packages/coding-agent/dist/bundle/cli.js");
 const MODEL = process.env.GATE_MODEL ?? "xiaomi/mimo-v2.6-flash";
@@ -128,9 +140,13 @@ async function lane() {
 			records.push({ pass: task.pass, id: task.id, arm: task.arm, skipped: "budget_cap" });
 			return;
 		}
-		const r = await runOne(task, task.arm);
-		cum += r.tokens;
-		records.push({ pass: task.pass, id: task.id, bucket: task.bucket, arm: task.arm, ...r });
+		try {
+			const r = await runOne(task, task.arm);
+			cum += r.tokens;
+			records.push({ pass: task.pass, id: task.id, bucket: task.bucket, arm: task.arm, ...r });
+		} catch (e) {
+			records.push({ pass: task.pass, id: task.id, bucket: task.bucket, arm: task.arm, verdict: "error", tokens: 0, wallMs: 0, exit: -1, crashed: String(e).slice(0, 200) });
+		}
 	}
 }
 await Promise.all(Array.from({ length: LANES }, () => lane()));
