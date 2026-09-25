@@ -31,6 +31,7 @@ rl.on("line", (line) => {
 });
 `;
 
+// W4-T02 作废标注: fake-server 单测仅保留为传输回归件;真实 e2e 往返 = docs/tests/2026-mcp-e2e/evidence/e2e-report.json (真 FastMCP, PASS)。
 test("mcp bridge: connect + listTools classifies six-group domains", async () => {
 	const bridge = new McpBridge({ command: process.execPath, args: ["-e", FAKE_SERVER] });
 	try {

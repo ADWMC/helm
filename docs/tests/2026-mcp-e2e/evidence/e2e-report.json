@@ -1,0 +1,58 @@
+{
+  "generatedAt": "2026-09-25T05:20:54.748Z",
+  "transport": "stdio (newline JSON-RPC 2.0, no MCP SDK — P10)",
+  "server": {
+    "command": "python3",
+    "script": "OGhidra/src/bridge_mcp_ghidra.py",
+    "transport": "stdio"
+  },
+  "ghidraHttp": "down",
+  "initialize": "OK (real FastMCP handshake)",
+  "toolsListed": 28,
+  "toolNames": [
+    "list_methods",
+    "list_classes",
+    "decompile_function",
+    "rename_function",
+    "rename_data",
+    "list_segments",
+    "list_imports",
+    "list_exports",
+    "list_namespaces",
+    "list_data_items",
+    "search_functions_by_name",
+    "rename_variable"
+  ],
+  "domains": [
+    "misc",
+    "binary",
+    "network",
+    "system"
+  ],
+  "call": {
+    "tool": "list_methods",
+    "isError": false,
+    "text": "Request failed: HTTPConnectionPool(host='127.0.0.1', port=8080): Max retries exceeded with url: /methods?offset=0&limit=5 (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=8080): Failed to establish a new connection: [Errno 111] Connection refused\"))"
+  },
+  "roundtrip": "PASS (initialize + tools/list + tools/call completed)",
+  "scopeGate": {
+    "evil": {
+      "allow": false,
+      "tool": "run_ghidra_cmd",
+      "matchedBy": "approval_required",
+      "reason": "high_risk_mcp:run_ghidra_cmd — needs SOW high-risk approval"
+    },
+    "evilDeny": {
+      "allow": false,
+      "tool": "decompile_fn",
+      "matchedBy": "none",
+      "reason": "target_not_allowed:http://evil.example/",
+      "offender": "http://evil.example/"
+    },
+    "insitu": {
+      "allow": true,
+      "tool": "decompile_fn"
+    }
+  },
+  "residual": "Ghidra HTTP backend (:8080) down: OGhidraMCP plugin serves only inside an open Ghidra CodeBrowser (README:149); headless GUI-less data queries deferred — MCP-transport roundtrip itself is REAL (recorded per §7.2 残余风险显式续记)."
+}

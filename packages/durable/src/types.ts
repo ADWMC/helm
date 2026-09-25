@@ -1,6 +1,6 @@
+import type { Message } from "@adwmc/helm-ai";
 import type { Context, Draft, JsonValue } from "@adwmc/helm-chord";
 import type { Op } from "@adwmc/helm-chord/delta";
-import type { Message } from "@adwmc/helm-ai";
 
 /** JSON object used as the root of every durable document. */
 export type JsonObject = { [key: string]: JsonValue };
