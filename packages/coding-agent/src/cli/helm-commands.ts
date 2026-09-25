@@ -15,7 +15,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { validateHelmSpec } from "@adwmc/helm-kernel/config";
-import { exportReport, exportReportJson, reportExitCode } from "@adwmc/helm-kernel/export";
+import { exportReport, exportReportJson, exportSarif, reportExitCode } from "@adwmc/helm-kernel/export";
 import { resolveLocale, t } from "@adwmc/helm-kernel/i18n";
 import { Ledger } from "@adwmc/helm-kernel/ledger";
 import { openToolMemory } from "@adwmc/helm-kernel/memory";
@@ -157,7 +157,14 @@ export async function runHelmCommand(args: string[], cwd: string = process.cwd()
 			const jsonOut = `${out.replace(/\.md$/i, "")}.json`;
 			writeFileSync(jsonOut, JSON.stringify(json, null, 2), "utf8");
 			const findings = Number(json.findings ?? 0);
-			console.log(`wrote ${out}\nwrote ${jsonOut}\nfindings=${findings}`);
+			const lines = [`wrote ${out}`, `wrote ${jsonOut}`];
+			if (args.includes("--sarif")) {
+				const sarifOut = `${out.replace(/\.md$/i, "")}.sarif`;
+				writeFileSync(sarifOut, JSON.stringify(exportSarif(ledger), null, 2), "utf8");
+				lines.push(`wrote ${sarifOut}`);
+			}
+			lines.push(`findings=${findings}`);
+			console.log(lines.join("\n"));
 			// strix exit semantics: 0 = clean · 2 = findings present
 			process.exitCode = reportExitCode(findings);
 			ledger.close();

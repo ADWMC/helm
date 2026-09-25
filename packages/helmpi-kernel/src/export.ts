@@ -214,3 +214,39 @@ export function exportReport(ledger: Ledger): string {
 	];
 	return lines.join("\n");
 }
+
+/** W5-T04: SARIF 2.1.0 twin of the report (findings -> results; §7.3#7 parse gate). */
+export function exportSarif(ledger: Ledger): Record<string, unknown> {
+	const ws = ledger.workspace();
+	const results = ws.claims
+		.filter((c) => c.role === "fact")
+		.map((c) => ({
+			ruleId: "helm/finding",
+			level: "error",
+			message: { text: c.description },
+			partialFingerprints: { helmClaimId: c.id },
+			properties: { evidenceRefs: c.evidenceRefs ?? [] },
+		}));
+	return {
+		version: "2.1.0",
+		$schema: "https://json.schemastore.org/sarif-2.1.0.json",
+		runs: [
+			{
+				tool: {
+					driver: {
+						name: "helm",
+						informationUri: "https://github.com/ADWMC/helm",
+						rules: [
+							{
+								id: "helm/finding",
+								shortDescription: { text: "Verified finding (claim role=fact)" },
+								defaultConfiguration: { level: "error" },
+							},
+						],
+					},
+				},
+				results,
+			},
+		],
+	};
+}

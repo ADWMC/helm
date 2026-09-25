@@ -134,4 +134,37 @@ describe("helm product commands", () => {
 		expect(process.exitCode).toBe(2);
 		expect(args).toEqual(["run"]); // subcommand NOT stripped when refused
 	});
+	it("W5-T04: report --sarif writes parseable SARIF consistent with json findings", async () => {
+		const dir = fs.mkdtempSync(path.join(os.tmpdir(), "helm-sarif-"));
+		try {
+			const { Ledger } = await import("@adwmc/helm-kernel/ledger");
+			const led = new Ledger(path.join(dir, "ledger.db"));
+			led.setSpec({
+				goal: "sarif twin check with measurable finding count 1",
+				allowedTargets: ["http://127.0.0.1:18080"],
+				highRisk: "deny",
+				maxTokens: 10000,
+			} as never);
+			led.setRunStatus("running");
+			led.addClaim({
+				id: "c1",
+				role: "fact",
+				description: "SARIF sample finding",
+				evidenceRefs: ["o1"],
+				creator: "t",
+				createdAt: Date.now(),
+			});
+			led.close();
+			const args = ["report", "--dir", dir, "--sarif"];
+			await expect(runHelmCommand(args, cwd)).resolves.toBe(true);
+			expect(process.exitCode).toBe(2);
+			const sarif = JSON.parse(fs.readFileSync(path.join(dir, "REPORT.sarif"), "utf8"));
+			expect(sarif.version).toBe("2.1.0");
+			const j = JSON.parse(fs.readFileSync(path.join(dir, "REPORT.json"), "utf8"));
+			expect(sarif.runs[0].results.length).toBe(j.findings);
+			expect(sarif.runs[0].results[0].ruleId).toBe("helm/finding");
+		} finally {
+			fs.rmSync(dir, { recursive: true, force: true });
+		}
+	});
 });

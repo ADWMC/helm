@@ -42,7 +42,7 @@ test("A-G6: findings → exit 2; none → exit 0 (strix semantics)", () => {
 	}
 });
 
-test("A-G6: md + json twins carry the same core fields", () => {
+test("A-G6: md + json twins carry the same core fields", async () => {
 	const { dir, led } = tmpLedger();
 	try {
 		led.setSpec({ goal: "twin-check", allowedTargets: ["http://127.0.0.1:18081"], highRisk: "deny" } as never);
@@ -64,6 +64,19 @@ test("A-G6: md + json twins carry the same core fields", () => {
 		assert.equal(findings, 1, "json findings match workspace fact-claims");
 		assert.equal(reportExitCode(Number(findings ?? 0)), 2);
 		// journal trail intact after writes (single-writer bump events present)
+		// W5-T04: SARIF twin — parseable + consistent + exit samples
+		const sarifTwin = (await import("./export.ts")).exportSarif(led) as {
+			version?: string;
+			runs?: Array<{ results?: Array<{ ruleId?: string; level?: string; message?: { text?: string } }> }>;
+		};
+		assert.equal(sarifTwin.version, "2.1.0");
+		const sres = sarifTwin.runs?.[0]?.results ?? [];
+		assert.equal(sres.length, findings, "SARIF results == json findings");
+		assert.equal(sres[0]?.ruleId, "helm/finding");
+		assert.equal(sres[0]?.level, "error");
+		assert.ok(sres[0]?.message?.text, "message text");
+		assert.equal(reportExitCode(Number(findings)), 2, "findings -> 2");
+		assert.equal(reportExitCode(0), 0, "clean -> 0");
 		// W3-T05: engagement metadata twin (EN keys only)
 		const eng = json.engagement as { roe?: { highRisk?: string }; attack?: { techniques?: string[] } };
 		assert.ok(eng?.roe?.highRisk, "roe present in json");
