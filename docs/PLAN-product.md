@@ -823,3 +823,19 @@ helm/                                  # ADWMC/helm, 基于 earendil-works/pi
 **拍板④处置（用户 2026-09 批复：≤2.5M 冻结）**：T01 HackSynth 先行批 ≤1M（20 题 n=1,n≥3 追加另批）+ T06 行为实验 ≤1.5M（4 格×100+EVI/Expectimax 基线）;与已用 3,099,028 分账,**超即停**;批复原文=「批准 ≤2.5M 冻结」。
 
 **下一步：Wave 5 等价性与进化环**（`docs/tasks/W5-taskbook.md`,WG5.1–5.5;行为实验/HackSynth 用额=拍板④已批（见下））。
+---
+
+**🔶 WAVE 5 等价性与进化环（WG5.1/5.2/5.4/5.5 证据齐,WG5.3=终验待跑;2026-09,T01–T07 七任务全完成=34/34 任务总达成）**
+
+**T01 HackSynth 子集（拍板④批次1）**:20 题抽样（seed,12 bandit+8 picoctf,README:9-10 真锚勘正）真机跑 **pass=true:actionable 17/20、error 0、零菜单**、772,145/900k;13 超时=跑限非模型错→`judge-pass` 零花费 session-JSONL 判向回捞10;n≥3=追加批待拍板（余 228k 不足,记录在案）。
+**T02 竞品对照框架**:`docs/competitor-equivalence.md`——公式（passRateExclError/costPerVerifiedFinding/equivalenceClaim）+11 行证据矩阵（**复核 6 锚真读**;HackSynth 行漂移 :17-18→**:9-10 勘正入方案**;4 未复核格如实标）+实测成本点。
+**T03 对外 README**:179 行三块（quickstart/exit 四码表/六列 stats 对齐 omp 布局+真实行 150501 拆列/竞品表=证据落点）+上游文档保留。
+**T04 SARIF**:`exportSarif`+`--sarif`+三胞一致性断言+strix 退出样本（§7.3 第7项锚）。
+**T05 SkillOpt 离线环**:harvest 实据（**scope_denied=359,tripwire=12**）→收2（勿重试变体/外容=数据入 G1 文本~45tok）驳2入缓冲（与零菜单/G4 机制红线冲突）→**replay 157/157**→held-out=WG 门分离;**commit 现场 diff=仅 prompt-lib 文本**（零机制改动负向✓）。
+**T06 行为实验 2×2（拍板④）**:400 直连真跑,**117,357/1.5M**（预算裁定留痕:全 pi≈3.2M 超批→判决型直连口径）;**敌意拆分面不诱导 ✓、零菜单 ✓**;澄清全0=L6 硬门必要实证;18 无据跳=vague×pressure 真弱点记实;**G4 反标 evi_min_diagnostics=4**;EVI 基线+曲线数据入 reports;双修正留痕（cellStats 哨兵撞名致首版 n=0;JSON-only 判定惩罚散文格→rejudge 零花费）。
+**T07 UX 六项**:help 去重+`bin` 字段 typo 终诊（walk/cwd 皆被冤）+本地化页脚（en/zh）+bins 等价;doctor 联调;runStatusLines 只读渲染（阶段门+六列+instead）;报告头条;零菜单归档扫描;zh-CN 机检面仍 en。
+**波末 rebase**:upstream **+3**（rpc/pinned-git 修复）——rebase 89 提交一次过（`.helm/` 遗留挡回放清后 iter0 完成）;全树 earendil 扫描=代码零漏,USAGE 装包行勘正（`4cf3b87a6`）。
+**波门**:round10 四码=**CI0/BUILD0/CHECK0/TEST0 @ `4cf3b87a6`**（286+292 测试;中途 `bin` typo 与 cwd 双假设两轮假败均修,skillopt held-out=本门即验证✓）。
+**拍板账**:④执行 889k/2.5M（T01 772k+T06 117k,分账）;主账 3,099,028 已封档。
+
+**下一步:§7.3 终验 13/13（WG5.3）** → 全账验收。
