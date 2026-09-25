@@ -43,19 +43,19 @@ describe("T07 ① help discoverable + alias equivalence", () => {
 			path.join(process.cwd(), "packages", "coding-agent", "package.json"),
 			path.join(process.cwd(), "package.json"),
 		];
-		let pkg: { bins?: Record<string, string> } | null = null;
+		let pkg: { bin?: Record<string, string> } | null = null;
 		for (const cand of cands) {
 			if (fs.existsSync(cand)) {
-				const j = JSON.parse(fs.readFileSync(cand, "utf8")) as { bins?: Record<string, string> };
-				if (j.bins?.helm) {
+				const j = JSON.parse(fs.readFileSync(cand, "utf8")) as { bin?: Record<string, string> };
+				if (j.bin?.helm) {
 					pkg = j;
 					break;
 				}
 			}
 		}
-		if (!pkg) throw new Error(`no package.json with bins found in: ${cands.join(", ")}`);
-		expect(pkg, "package.json with bins found").toBeTruthy();
-		expect(pkg?.bins?.helmpi).toBe(pkg?.bins?.helm);
+		if (!pkg) throw new Error(`no package.json with bin found in: ${cands.join(", ")}`);
+		expect(pkg, "package.json with bin found").toBeTruthy();
+		expect(pkg?.bin?.helmpi).toBe(pkg?.bin?.helm);
 	});
 });
 
