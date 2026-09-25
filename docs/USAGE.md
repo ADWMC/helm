@@ -269,7 +269,7 @@ Run.finish → 无 open Step + finish_basis ⊆ done 的 Obs
 
 | 现象 | 处理 |
 |------|------|
-| `pi` 命令不存在 | 全局装 `@earendil-works/pi-coding-agent`，或用项目 `node_modules` 路径 |
+| `pi` 命令不存在 | 全局装 `@adwmc/helm-coding-agent`（或等价别名入口 `helm`/`helmpi`），或用项目 `node_modules` 路径 |
 | SoL-Pi 一直报错 | 不要用 `--no-session` |
 | phase enter 被拒 | 先 `satisfy` 本阶段全部 required deliverable |
 | tool_memory 搜索「不能当证据」 | 设计如此；补 `save_evidence` + `record_finding` |
