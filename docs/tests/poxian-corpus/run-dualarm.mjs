@@ -93,20 +93,25 @@ const passes = [
 const records = [];
 let cum = 0;
 let budgetStop = false;
-outer: for (const pass of passes) {
-	for (const item of pass.items) {
-		for (const arm of ["bare", "s1"]) {
-			if (cum >= BUDGET_CAP) {
-				budgetStop = true;
-				records.push({ pass: pass.name, id: item.id, arm, skipped: "budget_cap" });
-				break outer;
-			}
-			const r = runOne(item, arm);
-			cum += r.tokens;
-			records.push({ pass: pass.name, id: item.id, bucket: item.bucket, arm, ...r });
+const queue = [];
+for (const pass of passes)
+	for (const item of pass.items) for (const arm of ["bare", "s1"]) queue.push({ pass: pass.name, id: item.id, bucket: item.bucket, arm, prompt: item.prompt });
+const LANES = Number(process.env.LANES ?? 4);
+async function lane() {
+	while (true) {
+		const task = queue.shift();
+		if (!task) return;
+		if (cum >= BUDGET_CAP) {
+			budgetStop = true;
+			records.push({ pass: task.pass, id: task.id, arm: task.arm, skipped: "budget_cap" });
+			return;
 		}
+		const r = runOne(task, task.arm);
+		cum += r.tokens;
+		records.push({ pass: task.pass, id: task.id, bucket: task.bucket, arm: task.arm, ...r });
 	}
 }
+await Promise.all(Array.from({ length: LANES }, () => lane()));
 
 // ── aggregation ──
 function agg(arm, bucketFilter) {
