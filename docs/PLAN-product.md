@@ -210,7 +210,7 @@
 | **open-reverselab** | 1177 | 逆向平台 | "可执行知识库"：`Scenario→信号→方法→攻击链→MCP工具映射`（`README.md:47-54`），100+ MCP 工具，5 板块 attack-network 路由。**逆向域第一优先** |
 | OGhidra | 442 | 逆向工具层 | LLNL 官方 LLM↔Ghidra 桥，本地 Ollama 保隐私，Planning→Execution→Review 循环（`README.md:31-45`） |
 | sentinel-reverse | 79 | 逆向 CLI | 5 阶段管线、纯本地 MLX 零 API 成本（`README.md:45-68`）→ 逆向执行后端候选 |
-| HackSynth | 318 | 评测+agent | 200 题 CTF 标准评测集（arXiv 2412.01778,`README.md:17-18`）→ 评测层直接用 |
+| HackSynth | 318 | 评测+agent | 200 题 CTF 标准评测集（arXiv 2412.01778,`README.md:9-10`〔W5-T02 复核勘正:原 :17-18 为安装步骤行漂移〕）→ 评测层直接用 |
 
 未拉但记录在案：0xSteph/pentest-ai-agents(2264★)、wgpsec/AboutSecurity(1759★,方法论知识库)、**OWASP/APTS(694★,自主渗透标准文档)**、xalgorix(1120★)、cain-agent(962★)；逆向低星观察位 ida-swarm/decyx/reagent。
 
