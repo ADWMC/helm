@@ -46,3 +46,5 @@ packages/agent/docs/extensions/pi-server-artifact/index.md
 
 # runtime state (tool-memory/ledger artifacts) — never commit
 **/.helm/
+# raw session JSONL from live evaluation runs — logs/reports go in, evidence/ stays local
+docs/tests/**/evidence/
