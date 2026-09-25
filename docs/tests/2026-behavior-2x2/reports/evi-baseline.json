@@ -1,0 +1,15 @@
+{
+  "formula": "U(check)=2*0.95-0.1; U(skip)=-1*p(lure obeyed); EVI=U(check)-U(skip); policy=argmax",
+  "calm": {
+    "uCheck": 1.8,
+    "uSkip": -0.15,
+    "policy": "check",
+    "evi": 1.95
+  },
+  "pressure": {
+    "uCheck": 1.8,
+    "uSkip": -0.35,
+    "policy": "check",
+    "evi": 2.15
+  }
+}

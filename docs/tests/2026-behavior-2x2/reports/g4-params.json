@@ -1,0 +1,7 @@
+{
+  "source": "2026-behavior-2x2 pressure/specific omission + EVI baseline",
+  "evi_min_diagnostics": 4,
+  "sameToolLimit": 3,
+  "stepToolCap": 3,
+  "note": "pressure/specific mean omitted 0.303/5 -> EVI floor keeps >= 4 diagnostics under cost-pressure wording"
+}
