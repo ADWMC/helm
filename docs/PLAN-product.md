@@ -795,6 +795,7 @@ helm/                                  # ADWMC/helm, 基于 earendil-works/pi
 **波门**：round10 四码=CI0/BUILD0/CHECK0/TEST0（`98853e8d5`;期间 `agent-session-concurrent` 两发负载型 flake,隔离复跑 7/7=基线 flaky 同款）。
 
 **下一步：Wave 4 逆向知识包**（`docs/tasks/W4-taskbook.md`,WG4.1–4.3;断言①补跑与 n≥3 口径=待拍板项②）。
+**✅ 拍板③处置（用户 2026-09 答复：追加轮次 + 断言①选 A）**：goal 轮次帽 40→75 恢复续跑;**断言①越权拦截按"预算约束下未评估"口径关闭**（(a) 选项,不再花跑测额度）;双臂评测就此封档（76 记录+预算账 3,099,028 留痕）。W5 行为实验/HackSynth 用额执行前需用户确认预算方案;跑测软顶（270 万留并发余量）未获另行答复,暂维持 285 万现制。
 
 **WG0.1 首轮失败根因（已证，两处皆上游 Windows 盲区）**：
 1. `EALLOWSCRIPTS`：`bash.exe`=WSL2，测试实为 WSL 外壳 + Windows node/npm 混跑；test.sh 隔离的 `/tmp/...` 配置路径对 Windows npm 无效 → 回落到本机 npmrc（`C:\Users\Administrator\.npmrc` 的 `allow-scripts=` 行 + `AppData\Roaming\npm\etc\npmrc` 的 `allowScripts=` DSH 名单，复现 `npm config get allow-scripts` = DSH 列表 PROBE_EXIT=0）→ npm 11.19 在项目级安装中拒置该配置。
