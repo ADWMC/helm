@@ -1,0 +1,12 @@
+{
+  "generatedBy": "W4-T04 ledger coverage record (I19) — finish gate completion.ts zero-change",
+  "coverage": [
+    {
+      "id": "c1",
+      "surface": "re/packed-elf-entropy-chain: no-network-termination",
+      "outcome": "clean",
+      "createdAtRevision": 1
+    }
+  ],
+  "requireCoverage": true
+}

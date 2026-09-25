@@ -19,7 +19,11 @@ phases:
     gate_out: all_deliverables_have_evidence
     next: [triage]
     refs:
-      - toolbox/decision-tree.md
+      - re/index.md
+      - re/packed-elf-entropy-chain.md
+      - re/elf-weakcrypto-chain.md
+      - re/firmware-extraction-chain.md
+      - re/protocol-state-replay-chain.md
   - id: triage
     title: 分诊
     deliverables:
@@ -55,6 +59,9 @@ phases:
       - key: behavior_model
         description: 验证后的行为模型
         evidence: required
+      - key: function_claim_slices
+        description: 函数级 claim 必附证据切片（G5 exact-slice 语义,复述不计）
+        evidence: required
     gate_out: all_deliverables_have_evidence
     next: [vuln_review]
   - id: vuln_review
@@ -73,6 +80,9 @@ phases:
     deliverables:
       - key: report
         description: 报告或完成链记录
+        evidence: required
+      - key: coverage_records
+        description: 负空间 coverage 记录（I19）已落 ledger coverage 表,finish 门零改动复用
         evidence: required
     gate_out: all_deliverables_have_evidence
     next: []
