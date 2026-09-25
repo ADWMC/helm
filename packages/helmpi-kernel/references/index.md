@@ -11,4 +11,5 @@
 - `agentic-sec-radar.md` — agentic 安全**技术雷达**（7 个未覆盖方向）· Use when: 选型/新机制调研 · **不用于**: 运行时注入、系统提示、Agent 指令（雷达≠知识） · kw: radar mcp receipt sandbox anti-pattern
 - `toolbox/decision-tree.md`、`toolbox/methodology.md` — 分诊与方法论（**待迁入**，当前缺 → 路由走 `route_task`）
 
+- `re/index.md` — **RE 领域入口**（破壳/弱加密/固件/协议重放 4 条可执行链索引）· Use when: 逆向样本/固件/私有协议域 · **不用于**: Web 面（→web-pentest.yaml） · kw: reverse re packer firmware protocol replay
 垂直域：android / web / native / protocol / malware / ai-security / evidence / blue —— 各域 `index.md` 按需添加，**每行遵守上面四要素**（缺失域不建空文件）。
