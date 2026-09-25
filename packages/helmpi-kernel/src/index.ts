@@ -176,9 +176,18 @@ export default function helmPiExtension(pi: ExtensionAPI): void {
 			const m = /(https?:\/\/[^\s"'`]+)/.exec(String(input.command ?? event.command));
 			if (m) target = m[1];
 		}
+		const spec = loadSessionSpec();
+		// W4-T03: sample_hash mode — hash-like tokens are scope-checked pre-exec too.
+		if (!target && spec?.targetKind === "sample_hash") {
+			const cand =
+				(typeof input.hash === "string" && input.hash) ||
+				(typeof input.path === "string" && input.path) ||
+				(typeof (input.command ?? event.command) === "string" ? String(input.command ?? event.command) : "");
+			const hm = /\b[a-f0-9]{32,64}\b/i.exec(cand);
+			if (hm) target = hm[0];
+		}
 		// W2-T01 scope gate FIRST (越界是 W2 主契约,deny 返回在前).
 		if (target) {
-			const spec = loadSessionSpec();
 			const d = validateScopeQuery(spec, target);
 			if (!d.allow) {
 				pendingReminders.push(

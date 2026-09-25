@@ -36,6 +36,8 @@ export interface Spec {
 	readonly requireCoverage?: boolean;
 	/** Token budget for the Run (I10 convergence class): exhausted → failed. */
 	readonly maxTokens?: number;
+	/** W4-T03: scope interpretation mode — url (default) | host | sample_hash. */
+	readonly targetKind?: "url" | "host" | "sample_hash";
 }
 
 export interface Claim {

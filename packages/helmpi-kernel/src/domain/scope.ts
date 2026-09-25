@@ -105,6 +105,43 @@ export function assertStepTarget(spec: Spec, target: string): ScopeDecision {
 			};
 		}
 	}
+	// W4-T03 targetKind modes — fail-closed semantics unchanged (I13/I14):
+	//   url (default): exact/glob/cidr as before · host: host-level allow ·
+	//   sample_hash: EXACT whitelist compare (globs deliberately NOT honored, §5.2).
+	const kind = (spec.targetKind ?? "url") as string;
+	if (!["url", "host", "sample_hash"].includes(kind)) {
+		return { allow: false, matchedBy: "target_kind_invalid", reason: `target_kind_invalid:${kind}` };
+	}
+	if (kind === "sample_hash") {
+		if (spec.allowedTargets.includes(target)) {
+			return { allow: true, matchedBy: `exact:${target}`, reason: `allowed_by:sample_hash:${target}` };
+		}
+		const globHit = spec.allowedTargets.find((p) => p.includes("*") && globMatches(p, target));
+		if (globHit) {
+			return { allow: false, matchedBy: "hash_glob_denied", reason: `hash_must_be_exact:${target}` };
+		}
+		return { allow: false, matchedBy: "none", reason: `target_not_allowed:${target}` };
+	}
+	if (kind === "host") {
+		const host = hostOf(target);
+		if (!host) {
+			return { allow: false, matchedBy: "host_unparseable", reason: `host_unparseable:${target}` };
+		}
+		const hit = spec.allowedTargets.find((p) => {
+			const noScheme = p.replace(/^[a-z][a-z0-9+.-]*:\/\//i, "");
+			const hp = (noScheme.split("/")[0] ?? "").replace(/\*+$/, "");
+			const entryHost = hp.startsWith("[") ? `${(hp.split("]")[0] ?? "").slice(1)}]` : (hp.split(":")[0] ?? "");
+			if (entryHost === host) return true;
+			return hp.includes("*") && globMatches(hp, host);
+		});
+		if (!hit) {
+			return { allow: false, matchedBy: "none", reason: `target_not_allowed:${host}` };
+		}
+		if (!isPrivateHost(host) && spec.allowExternal !== true) {
+			return { allow: false, matchedBy: "fail_closed", reason: `external_not_allowed:${host}` };
+		}
+		return { allow: true, matchedBy: `host:${hit}`, reason: `allowed_by:host:${hit}` };
+	}
 	const host = hostOf(target);
 	const matchedBy = matchAllowed(target, host, spec.allowedTargets);
 	if (matchedBy === null) {
