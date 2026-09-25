@@ -24,6 +24,8 @@
 | I11 | Playbook `gate_out` 不满足则不得进入 `next` 阶段。 |
 | I12 | 关案须：L3/L4 记录，或 Journal 中显式 `no-evidence` 逃逸。 |
 | I19 | `Run.finish` 若 Spec/playbook 声明 coverage 要求：finish 须携带 ≥1 条本 Run 的 coverage 记录（阴性面：查过且干净），或 Journal 中显式 `coverage-waived` 豁免；两者皆缺 → `finish` 拒绝。 |
+| I20 | **合法硬停仅三**:scope 拒绝（`scope_denied` 硬拒+journal）、预算熔断（`token_budget_exhausted`）、注入 tripwire（`tripwire` block+terminate）。supervise/streak 类限额**永不硬停**,只给 why+阶梯（instead 行）。（W3-T04 结构性钉死） | `w3-t04.test.ts`、`g4-live.ts`、`g2-scope-gate.test.ts` |
+| I21 | **finish 证据必须 exact-slice 于真实 receipt**（G5）:复述/截断/缺据三拒（`evidence_not_grounded`）;ledger 必须持久化 receipts 内容（observation 只存 seq 不足）。（W2-T06） | `domain/completion.ts`、`g5-finish.test.ts`、ledger `receipts` 表 |
 
 ## 范围与图
 

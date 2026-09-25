@@ -701,7 +701,7 @@ helm/                                  # ADWMC/helm, 基于 earendil-works/pi
 | 风险 | 等级 | 缓解 |
 |---|---|---|
 | 上游高频破坏性变更（不保向后兼容,`pi/AGENTS.md:26`）+ `agent-session.ts` 4023 行热点 | 高 | 补丁序列 + 每周 rebase 演练；深处分叉面压到最小（§3.5） |
-| 双仓漂移：helm-pi 扩展形态 vs fork 形态并存 | 高 | **待决策**：W1 后 helm-pi 归档为只读，kernel 单源在 fork 内（建议） |
+| 双仓漂移：helm-pi 扩展形态 vs fork 形态并存 | 已关闭 | **已执行（拍板②）**：helm-pi 归档 `isArchived=true`（WG1.3 证据）、文档随迁完成;kernel 单源=fork `packages/helmpi-kernel`（终验 10 复查 2026-09） |
 | 竞品即 pi 用户：Shannon 也用 pi harness（同底座既是验证也是追赶） | 中 | 差异化押注破甲+证据+预算（§1.1），不拼编排 |
 | 许可归属 | 低 | MIT 保留版权头（`pi/LICENSE:12-13`）；自身新增代码自有声明 |
 | 沙箱是 P1 唯一新设施，未实测 | 中 | W3 借 shannon/LuaN1ao 成熟模式；落地前标未验证 |
