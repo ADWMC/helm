@@ -29,7 +29,7 @@ function usageOf(dir) {
 			const p = join(d, e.name);
 			if (e.isDirectory()) walk(p);
 			else if (e.name.endsWith(".jsonl")) {
-				for (const line of readFileSync(p, "utf8").split(/\r?\n")) {
+				for (const line of readFileSync(p, "utf8").split(/\r?\n/)) {
 					try {
 						const u = JSON.parse(line)?.message?.usage;
 						if (u && typeof u === "object") {
