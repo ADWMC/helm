@@ -1,0 +1,9 @@
+{
+	"goal": "HackSynth subset direction eval over 20 sampled items with measurable action counts",
+	"allowedTargets": ["http://127.0.0.1:1808*"],
+	"outOfScope": [],
+	"highRisk": "deny",
+	"allowExternal": false,
+	"maxTokens": 900000,
+	"diagnosticSet": ["action counts"]
+}
