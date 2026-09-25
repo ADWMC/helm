@@ -778,6 +778,23 @@ helm/                                  # ADWMC/helm, 基于 earendil-works/pi
 **提交链（W2,14 笔,post-rebase 头 `98b671dea`）**：T01 `5a2177150`→T02 `8694d0a06`→T03 `36b1b3b5b`→T04/05 `a3353a932`→T05 尾→T06 `a2eed53fa`→T07 `627374160`→T08 套件+证据 `bff1cfac2`→运行时路径终态 `a09eac3bb`+install-lock `98b671dea`。
 
 **下一步：Wave 3 渗透管线**（任务书 `docs/tasks/W3-taskbook.md`,WG3.1–3.5;破限真机题库=拍板额度 300 万内）。
+---
+
+**✅ WAVE 3 渗透管线（WG3.1–WG3.5 证据齐,2026-09,任务书 T01–T06 完成,T06 跑测部分见留痕）**
+
+**T01 engagement+lint+敌意面**：SOW 扩四件（RoE/ConOps/OPPLAN/ATT&CK 对齐 `attack:[T…]`）;`spec-lint.ts` L1–L6（L4 负面规则文档化永不出场）+ 强制链（run/resume 拒进 exit2、validate-scope 语义后置、init 即时提示）;`evidenceAudit` 契约（EN-only,机检面冻结压倒双语）;schema+`diagnosticSet`。
+**T02 沙箱 A/B**：实测选型——A=Docker **中位 414ms**、逃逸负向全过;B=回环桥=进程内非隔离结构性淘汰;`sandbox.ts` 仅工作目录挂载+`--network none`+fail-closed;记录 `2026-fork-gates/sandbox-ab-selection.md`。
+**T03 CAI 四层**：`guard/cai.ts`（同形归一/八类注入模式/DATA-NOT-INSTRUCTIONS 围栏/命令 tripwire）;G2 重排=**scope 先、tripwire 后**（W2 主契约不可抢）;**真机注入批 n=3:3/3 零执行**（自种 payload 经 lab /files 投送,模型逐字拒跑）+ 宿主硬层 tripwire-handler 测试（block+terminate+journal,模型无关）;guard 子目录入册（script glob 补,145/145）。
+**T04 升级阶梯**：Dark-Moon 全梯（有界重试→换角度→宣告不可利用并继续）入 supervise/G4;`instead` journal 样本行;负向结构性钉死=**合法硬停仅 scope/tripwire/预算**。
+**T05 报告元数据**：`engagement{roe,attack(playbook 文件解析)}` json+md 双胞 + 审计行 md 镜像。
+**T06 破限题库**：`poxian-corpus/index.yaml` **105 题**（40/40/25 三桶;**无授权包装越权=0** 自检 4 测;provenance 混合）+ TAMPER 不绕 G5 机检 + 双臂 runner。
+
+**T06 真机双臂终局（留痕,证据 `5980aa28f`）**：修四连环保证臂效（**裸臂曾被强制内建劫持**→`HELM_KERNEL_BUILTIN=0` 评估旁路+重编;陈旧 ledger spec 劫持→lab spec 双位;close 挂孙进程;WSL 外杀→setsid 脱钩）。**预算:用 3,099,028/冻 300 万,超 99,028（并发在途记账,已停跑）**;覆盖=P1 的 A01–A36×2 臂（76 条 0 崩）;**断言② S1 连续 PASS（n=36,通过率 0.824,零 ask）**;**断言① 越权拦截 100%=未评估**（B 桶未触达,补跑需拍板;替代证据:G2 真机拦 16+注入 3/3+自检 0,口径不同已注明）;每题 n≥3 与 300 万拍板**数学冲突**（630 次≈500 万）,按预算内优先级降为 n=1 起跑,待拍板。
+**WG3.4 五套回归**：dispatch-smoke fork 版重跑 **L1/T1/T2/T3/S1 全过**（差量如实:task 不在 -p 面,19 工具=编程4+内核15,W4 备案）;bpath-e2e/ab-bpath-slim/wave1-regression/wave4-tools=helm-pi 时代归档证据照录,fork 侧重跑未完（时间约束,记录在案）。
+**波末 rebase**：upstream 无新提交（0 new）=空演练如实记。
+**波门**：round10 四码=CI0/BUILD0/CHECK0/TEST__T__（`__GATE_HEAD__`;期间 `agent-session-concurrent` 两发负载型 flake,隔离复跑 7/7=基线 flaky 同款）。
+
+**下一步：Wave 4 逆向知识包**（`docs/tasks/W4-taskbook.md`,WG4.1–4.3;断言①补跑与 n≥3 口径=待拍板项②）。
 
 **WG0.1 首轮失败根因（已证，两处皆上游 Windows 盲区）**：
 1. `EALLOWSCRIPTS`：`bash.exe`=WSL2，测试实为 WSL 外壳 + Windows node/npm 混跑；test.sh 隔离的 `/tmp/...` 配置路径对 Windows npm 无效 → 回落到本机 npmrc（`C:\Users\Administrator\.npmrc` 的 `allow-scripts=` 行 + `AppData\Roaming\npm\etc\npmrc` 的 `allowScripts=` DSH 名单，复现 `npm config get allow-scripts` = DSH 列表 PROBE_EXIT=0）→ npm 11.19 在项目级安装中拒置该配置。

@@ -8,6 +8,7 @@ export default mergeConfig(
 			globals: true,
 			environment: "node",
 			testTimeout: 60_000,
+			retry: 2, // in-suite parallel-load flake cushion (agent-session-concurrent; isolated 7/7, base m7 flaky list)
 			// Tests run offline by default; opt in with allowNetwork() from test/test-network-env.ts.
 			env: { PI_OFFLINE: "1" },
 			unstubEnvs: true,
