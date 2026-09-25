@@ -14,6 +14,8 @@ const BIN = join(FORK, "packages/coding-agent/dist/bundle/cli.js");
 const MODEL = process.env.GATE_MODEL ?? "xiaomi/mimo-v2.6-flash";
 const FLAG = "helm{re_ok}";
 const FIVE = ["input", "output", "cacheRead", "cacheWrite", "reasoning"];
+mkdirSync(join(SUITE, "logs"), { recursive: true });
+mkdirSync(join(SUITE, "report"), { recursive: true });
 const N = 3;
 void _m;
 
