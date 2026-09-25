@@ -64,6 +64,13 @@ test("A-G6: md + json twins carry the same core fields", () => {
 		assert.equal(findings, 1, "json findings match workspace fact-claims");
 		assert.equal(reportExitCode(Number(findings ?? 0)), 2);
 		// journal trail intact after writes (single-writer bump events present)
+		// W3-T05: engagement metadata twin (EN keys only)
+		const eng = json.engagement as { roe?: { highRisk?: string }; attack?: { techniques?: string[] } };
+		assert.ok(eng?.roe?.highRisk, "roe present in json");
+		assert.ok(Array.isArray(eng?.attack?.techniques), "attack techniques array");
+		assert.ok(md.includes("## Engagement (RoE + ATT&CK)"), "md twin carries the same section");
+		assert.ok(md.includes("Evidence audit: acquisition="), "md twin carries the audit line");
+		assert.ok(json.evidenceAudit, "json audit present");
 		const kinds = led.journal().map((r) => r.kind);
 		assert.ok(
 			kinds.includes("spec") || kinds.includes("run_status") || kinds.includes("claim"),

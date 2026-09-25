@@ -145,9 +145,18 @@ export function createG4Monitor(deps: G4Deps): G4Monitor {
 				}
 				if (streak > limit) {
 					deps.journal("tool_streak_cap", { tool: toolName, count: streak, limit });
-					deps.pushReminder(
-						`same-tool streak (${toolName} x${streak} > ${limit}) — switch approach or take the instead path`,
-					);
+					const ladderWhy = `same tool repeated ${streak}x (limit ${limit}) — no state change visible`; // W3-T04
+					const ladderInstead =
+						"bounded ladder: retry once bounded (vary args), change angle (different tool/source), then declare this vector not-exploitable and move on";
+					deps.journal("instead", {
+						tool: toolName,
+						count: streak,
+						limit,
+						why: ladderWhy,
+						instead: ladderInstead,
+						source: "streak",
+					});
+					deps.pushReminder(`instead: ${ladderWhy} — ${ladderInstead} (W3-T04)`);
 					streak = 0;
 				}
 			}

@@ -118,7 +118,10 @@ test("same-tool streak → journal + instead reminder (no hard block)", () => {
 	assert.equal(v, null, "instead path continues (not blocked)");
 	const j = f.journaled.find((x) => x.kind === "tool_streak_cap");
 	assert.ok(j);
-	assert.ok(f.reminders.some((r) => r.includes("instead path")));
+	assert.ok(
+		f.reminders.some((r) => r.includes("instead:") && r.includes("change angle")),
+		JSON.stringify(f.reminders),
+	);
 });
 
 test("EVI floor: un-sourced omission fails, justified skip passes (评分#11)", () => {

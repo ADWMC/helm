@@ -1,5 +1,8 @@
 /** Report export — structural completion summary from ledger. */
 
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { classifyEvidence } from "./domain/evidence.ts";
 import type { Workspace } from "./domain/types.ts";
 import type { Ledger } from "./ledger.ts";
@@ -24,6 +27,7 @@ export function exportReportJson(ledger: Ledger): Record<string, unknown> {
 	return {
 		schema: "helm-pi-report/1",
 		evidenceAudit: buildEvidenceAudit(ledger, ws),
+		engagement: buildEngagement(ws),
 		generatedAt: new Date().toISOString(),
 		run: {
 			status: ws.runStatus,
@@ -71,6 +75,51 @@ export function exportReportJson(ledger: Ledger): Record<string, unknown> {
 	};
 }
 
+/** W3-T05: engagement metadata — RoE summary + ATT&CK coverage from playbook attack field (EN keys only). */
+function buildEngagement(ws: Workspace): Record<string, unknown> {
+	const spec = ws.spec as {
+		goal?: string;
+		allowedTargets?: string[];
+		outOfScope?: string[];
+		highRisk?: string;
+		playbookId?: string;
+		maxTokens?: number;
+	};
+	let techniques: string[] = [];
+	if (spec.playbookId) {
+		try {
+			const path = join(
+				dirname(fileURLToPath(import.meta.url)),
+				"references",
+				"playbooks",
+				`${spec.playbookId}.yaml`,
+			);
+			const text = readFileSync(path, "utf8");
+			const m = /^attack:\s*\[([^\]]*)\]/m.exec(text);
+			if (m)
+				techniques = (m[1] ?? "")
+					.split(",")
+					.map((s) => s.trim())
+					.filter(Boolean);
+		} catch {
+			techniques = [];
+		}
+	}
+	return {
+		roe: {
+			allowedTargets: spec.allowedTargets ?? [],
+			outOfScope: spec.outOfScope ?? [],
+			highRisk: spec.highRisk ?? "deny",
+			maxBudgetTokens: spec.maxTokens ?? null,
+		},
+		attack: {
+			playbook: spec.playbookId ?? null,
+			techniques,
+			techniqueCount: techniques.length,
+			source: "playbook attack field (mapped against findings manually until W4 targetKind)",
+		},
+	};
+}
 /** W3-T01 信息面敌意假设 (§2.7 #11c): acquisition vs utilization — 没查≠查了不会; 诊断集获取不可协商. */
 function buildEvidenceAudit(ledger: Ledger, ws: Workspace): Record<string, unknown> {
 	let eviSkips = 0;
@@ -93,6 +142,11 @@ export function exportReport(ledger: Ledger): string {
 	const findings = ws.observations.slice(0, 20);
 	const statuses = ws.observations.map((o) => classifyEvidence(o.excerpt).status);
 	const count = (s: string) => statuses.filter((x) => x === s).length;
+	const eng = buildEngagement(ws);
+	const auditRow = buildEvidenceAudit(ledger, ws);
+	const roe = eng.roe as { highRisk?: string; outOfScope?: string[] };
+	const atk = eng.attack as { playbook?: string | null; techniques?: string[] };
+
 	const lines: string[] = [
 		"# helm-pi Run Report",
 		"",
@@ -101,6 +155,11 @@ export function exportReport(ledger: Ledger): string {
 		`- Allowed targets: ${ws.spec.allowedTargets.join(", ") || "(none)"}`,
 		`- Run status: **${ws.runStatus}** (structural; semantic needs GoalVerifier)`,
 		`- Revision: ${ws.revision}`,
+		"",
+		`## Engagement (RoE + ATT&CK)`,
+		`- RoE highRisk: ${roe.highRisk ?? "deny"}${roe.outOfScope?.length ? `; outOfScope: ${roe.outOfScope.join(", ")}` : ""}`,
+		`- ATT&CK (${atk.playbook ?? "no playbook"}): ${atk.techniques?.join(", ") || "(none mapped)"}`,
+		`- Evidence audit: acquisition=${String(auditRow.acquisition)}, utilization=${String(auditRow.utilization)} — ${String(auditRow.note)}`,
 		"",
 		`## Steps`,
 		...(ws.steps.length === 0
