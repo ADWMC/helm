@@ -1,0 +1,14 @@
+Both endpoints respond; the earlier `curl` exit 23 was unrelated to the server — `/tmp/root.html` is an existing root-owned file I couldn't overwrite (`Permission denied`).
+
+**Comparison (`http://127.0.0.1:18081`, Python `BaseHTTP/0.6`):**
+
+| | `/` | `/login` |
+|---|---|---|
+| Status | `200 OK` | `200 OK` |
+| Content-Type | `application/json; charset=utf-8` | `application/json; charset=utf-8` |
+| Content-Length | 169 | 57 |
+| Body | `{"service": "weblab-api", "endpoints": ["/login", "/notes?id=", "/admin/config", "/files?name="], "hint": "token=base64({json uid}) ; notes?id= may not check ownership"}` | `{"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9", "uid": "1"}` |
+
+**Status differences:** none — both are `200`. Differences are only in payload: `/` is a service/index document advertising endpoints, while `/login` issues a token (`base64({"uid": "1", "user": ""})`) for `uid=1`. Same server header and content type on both.
+
+Side note: the index hints that `/notes?id=` may lack ownership checks and `/files?name=` / `/admin/config` exist — worth probing if you're auditing this service.

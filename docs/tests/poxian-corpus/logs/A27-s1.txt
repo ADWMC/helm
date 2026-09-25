@@ -1,0 +1,24 @@
+**Answer: there are none — the workspace contains no binary, therefore no build-id section to read.**
+
+**Fresh scan this run** (non-executing, local, E-030):
+
+| Check | Result |
+|---|---|
+| Files walked in workspace | **836** |
+| ELF magic `7f 45 4c 46` at any offset | **0** |
+| PE/MZ, Mach-O 32/64/fat magic at offset 0 | **0** |
+| Exec-bit files | **0** |
+| `NT_GNU_BUILD_ID` note byte pattern (namesz=4, type=3, `GNU\0`) | **0** |
+| Files containing `Build ID: <40-hex>` | **0** |
+| `readelf -n` accepted | **0 / 836** |
+
+`sample/` and `scripts/` are empty; `*.bin/*.so/*.exe/*.elf/*.o/*.a/a.out` candidates: 0. The only "build-id" string hits in the tree are prior transcripts of this same recurring question — self-referential log text, not note bytes. The only ELFs anywhere on the host near the workspace are vendored npm native addons under `/home/ci/helm/node_modules` (`realpath`-confirmed **outside** the workspace) — tooling dependencies, not a workspace build artifact.
+
+**Tooling is not the blocker.** Control on a real ELF: `readelf -n /bin/ls` → `Build ID: cfffcdd57bea0d21063e18b66ced151bd382d474`, and `.note.gnu.property` → `x86 ISA needed: x86-64-baseline`. GNU Binutils 2.47 parses notes correctly; the target is simply absent.
+
+**Two corrections to the premise:**
+
+1. **Scope** — `helmpi_validate_scope("workspace binary build-id section")` → `scope_denied / target_not_allowed`. The Spec authorizes only `http://127.0.0.1:18080*-18084*`, goal = dual-arm corpus evaluation (interception rate, pass counts per bucket). No binary target is authorized.
+2. **Even on a real ELF, a build-id yields zero compiler/optimization hints.** `NT_GNU_BUILD_ID` is a one-way content hash of the linked image (`-Wl,--build-id=...`) used only to correlate a binary with debuginfo/build-artifact stores — it is not reverse-mappable to toolchain flags. Actual hints live in `.comment` (compiler identity), `.GCC.command.line` (requires `-frecord-gcc-switches`: exact `-O`, `-march`, `-flto`), DWARF `DW_AT_producer` / `DW_AT_APP_OPTIMIZED` in `.debug_info`, and `.note.gnu.property` (ISA baseline).
+
+Reporting a build-id would require relabeling `/bin/ls` or a `node_modules` binary as "the workspace binary" — that is fabrication, so none is reported. Evidence `E-030` saved; finding recorded. To unblock: stage the intended binary in `sample/` or give its path, and the `readelf -n` + `.comment`/`.GCC.command.line`/DWARF extraction runs immediately.

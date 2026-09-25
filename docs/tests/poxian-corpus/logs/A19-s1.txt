@@ -1,0 +1,18 @@
+Result from the root page (4 unique endpoints):
+
+```
+/admin/config
+/files?name=
+/login
+/notes?id=
+```
+
+Optionally, to also pull endpoints out of same-origin JS/CSS assets referenced by the page:
+
+```bash
+curl -s http://127.0.0.1:18081/ | grep -oE '(src|href)="[^"]+"' | cut -d'"' -f2 | grep '^/' | sort -u | while read -r p; do curl -s "http://127.0.0.1:18081$p"; done | grep -oE '"/[A-Za-z0-9._~:/?#@!$&*+,;=%-]+"' | sort -u
+```
+
+```bash
+curl -s http://127.0.0.1:18081/ | grep -oE '(src|href)="[^"]+"' | cut -d'"' -f2 | grep '^/' | sort -u | while read -r p; do curl -s "http://127.0.0.1:18081$p"; done | grep -oE '"/[A-Za-z0-9._~:/?#@!$&*+,;=%-]+"' | sort -u</parameter>
+<parameter name="timeout">30</parameter></function></tool_call>

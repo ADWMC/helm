@@ -1,0 +1,9 @@
+Three requests to `http://127.0.0.1:18081/` (all HTTP 200):
+
+| # | Total time | TTFB |
+|---|-----------|------|
+| 1 | **31.46 ms** | 31.42 ms |
+| 2 | **31.60 ms** | 31.57 ms |
+| 3 | **31.60 ms** | 31.54 ms |
+
+Mean ≈ **31.55 ms**, very consistent (spread < 0.2 ms); essentially all latency is time-to-first-byte, so it's server-side processing with negligible transfer time.

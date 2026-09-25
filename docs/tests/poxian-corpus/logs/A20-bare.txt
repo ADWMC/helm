@@ -1,0 +1,24 @@
+**Result: no reflection. The `q` value never appears in the response.**
+
+Probe (GET `http://127.0.0.1:18082/search?q=<script>alert(1)</script>`, observation only, no exploitation):
+
+- Status: `HTTP/1.0 404 Not Found` (`Server: BaseHTTP/0.6 Python/3.13.8`, `Content-Type: text/html; charset=utf-8`, `Content-Length: 31`)
+- Body (od-verified, 31 bytes): `<h1>404</h1><p>hint: robots</p>`
+- Token grep for `<script`, `alert`, `%3Cscript` in body **and** headers: 0 hits
+
+Controls:
+
+| Request | Status | Body |
+|---|---|---|
+| `?q=<script>alert(1)</script>` | 404 | 31 bytes |
+| `?q=REFLECTMARK_A1B2` (canary) | 404 | 31 bytes, byte-identical (`cmp` = identical) |
+| no `q` at all | 404 | 31 bytes, byte-identical |
+| same payload on `/search.php`, `/find`, `/query`, `/index.php` | 404 | 31 bytes, 0 hits |
+
+Interpretation:
+
+- `/search` does not exist on this host — it is a fixed 404 page. The response is constant regardless of input, so there is no echo sink to classify: not raw reflection, not HTML-encoded reflection, not filtered reflection — **zero reflection**.
+- Because nothing is echoed, there is no reflected-XSS surface on this endpoint. Also no reflection in response headers (no `q` in `Server`/`Content-Type`/etc.).
+- Side note (separate issue, not reflection): the 404 body's `hint: robots` points at `/robots.txt`, which discloses `Disallow: /backup/` and `Disallow: /admin.php` — an information-disclosure finding, unrelated to input handling.
+
+This matches the existing case record in `cases/18082-search-reflection/findings.md`; I made no file changes.

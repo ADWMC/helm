@@ -1,0 +1,26 @@
+Login works and the token format is confirmed.
+
+## Result
+
+`POST http://127.0.0.1:18081/login` with `{"user":"user"}` → `200 OK`:
+
+```json
+{"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogInVzZXIifQ==", "uid": "1"}
+```
+
+## Token format
+
+- **Not a JWT** — single segment, no `.` separators (a JWT would have 3: `header.payload.signature`).
+- It is **plain unpadded-ish standard Base64 of a JSON object** (RFC 4648, `+`/`/`, `=` padding present in the `user` case).
+- Decodes directly to: `{"uid": "1", "user": "user"}` — verified by round-trip decode.
+- Sample tokens:
+  - `{"user":"user"}` → `eyJ1aWQiOiAiMSIsICJ1c2VyIjogInVzZXIifQ==` (40 chars)
+  - no/empty user → `eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9` (32 chars, `{"uid": "1", "user": ""}`)
+
+## Observations relevant to the format
+
+- **No signature / no MAC**: the token is just encoded, not signed or encrypted — trivially forgeable by re-encoding arbitrary JSON (e.g. change `uid`).
+- **No password check observed**: `user` and `user`+`password` bodies produce the same token; form-encoded `user=user` returned the empty-user token, so the handler reads the JSON body only.
+- Server: `BaseHTTP/0.6 Python/3.13.8`, endpoint returns `application/json`.
+
+Format summary: **Base64-encoded unsigned JSON (`{uid, user}`), 32–40 chars, single segment** — i.e. a bare base64(JSON) token, not a signed/JWT-style token.

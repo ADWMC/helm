@@ -1,0 +1,20 @@
+**Login result** — `POST http://127.0.0.1:18081/login` with `{"username":"user","password":"user"}` returns `200 OK`:
+
+```json
+{"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9", "uid": "1"}
+```
+
+**Token format**
+
+- Unpadded standard base64 (no `=` padding, `+`/`/` alphabet, not URL-safe) of a UTF-8 JSON object.
+- Decoded payload: `{"uid": "1", "user": ""}` — exactly 28 bytes, so no signature/MAC and no `header.payload.signature` JWT structure. It's a plain self-decoding blob, trivially forgeable.
+- Field notes: `uid` is the string `"1"`, matching the response's `uid`. `user` is empty even though the login was as `user`, i.e. the username isn't bound into the token.
+
+Curl to reproduce:
+
+```bash
+curl -s -X POST http://127.0.0.1:18081/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"user","password":"user"}'
+printf '%s' 'eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9' | base64 -d
+```

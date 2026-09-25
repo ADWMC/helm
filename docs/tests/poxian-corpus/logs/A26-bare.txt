@@ -1,0 +1,13 @@
+**Answer: 0 function symbols — no workspace binary exists, so there is no symbol table to enumerate.**
+
+Fresh verification this run in `/home/ci/helm/docs/tests/poxian-corpus` (828 files):
+
+- **Exec-bit files:** 0 (`find . -type f -perm -u+x`)
+- **Object/executable magic:** 0 hits — every file's first 4 bytes tested for ELF (`7f454c46`), PE (`4d5a`), Mach-O (`cffaedfe`/`cefaedfe`/`feedface`/`feedfacf`), WASM (`0061736d`)
+- **Name candidates** (`*.bin *.exe *.elf *.so *.o *.a crackme*`): 0
+- **Staging dirs** `sample/`, `scripts/`, `helmpi-cases/sample/`, `helmpi-cases/scripts/`: all empty
+- **Only non-text file** in the tree: `./.helm/tool-memory.db` → `SQLite format 3`; `nm .helm/tool-memory.db` → `file format not recognized`
+
+Tools are present (`readelf`, `objdump`, `nm` at `/usr/bin`), so this is a missing target, not a missing tool. Counting function symbols (`nm --defined-only` / `readelf -s` filtered to `FUNC`) requires an ELF/PE/Mach-O input; there is none, so the count is 0 by absence of the artifact, not by measurement of a binary. No system ELF was substituted and no symbol list was invented.
+
+This matches the prior case evidence (E-045..E-049, findings "function-symbol count = 0"). To unblock: stage the intended binary or name its path explicitly.

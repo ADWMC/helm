@@ -1,0 +1,20 @@
+`POST http://127.0.0.1:18083/api/login` (empty body) does not return a JSON error schema — the server is a plain Python `BaseHTTP` handler that answers with raw text.
+
+```
+HTTP/1.0 405 Method Not Allowed
+Server: BaseHTTP/0.6 Python/3.13.8
+Content-Type: text/html; charset=utf-8
+Content-Length: 14
+
+use GET /check
+```
+
+Schema: no structured payload. Status `405`, `Content-Type: text/html; charset=utf-8`, body is the literal string `use GET /check` (14 bytes, no JSON, no error code/field names).
+
+Related responses from the same server:
+
+- `GET /api/login` → `404`, body `not found`
+- `POST /api/login` with `Content-Type: application/json` → same `405` as above (body/parsing never reached)
+- `GET /check` → `401 Unauthorized`, body `<h1>INVALID</h1>`
+
+So the error "schema" for this endpoint is just status line + plain-text body; there is no JSON error object to map.

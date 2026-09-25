@@ -1,0 +1,35 @@
+There is no workspace binary to dump, so I can't quote its `.rodata`.
+
+**What I ran**
+
+```
+$ cd /home/ci/helm/docs/tests/poxian-corpus
+$ find . -type f | wc -l          # 901 files
+$ find . -type f -perm -u+x       # 0 files with exec bit
+magic-byte scan (ELF / PE / Mach-O) → 0 hits (904 files scanned, incl. hidden)
+$ objdump -s -j .rodata ./run-dualarm.mjs
+objdump: ./run-dualarm.mjs: file format not recognized
+objdump: section '.rodata' mentioned in a -j option, but not found in any input file
+```
+
+Same rejection for every file tried. Tool is present (`/usr/bin/objdump`, GNU Binutils 2.47), and a positive control confirms it works on a real ELF:
+
+```
+$ cc /tmp/ctl.c -o /tmp/ctl && objdump -s -j .rodata /tmp/ctl
+/tmp/ctl:     file format elf64-x86-64
+Contents of section .rodata:
+ 2000 01000200                             ....
+```
+
+So this matches prior evidence in this corpus (E-085, E-113, E-117: "no binary target exists"). Answer for A35: no ELF/PE/Mach-O target exists in the workspace, so there are no first-64-bytes to quote.
+
+**Nearest ELF in the repo (not a workspace binary)** — `packages/tui/native/linux/prebuilds/linux-x64/linux-platform-x11.node`, first 64 bytes of `.rodata`:
+
+```
+ 3000 6e617069 5f676574 5f756e64 6566696e  napi_get_undefin
+ 3010 6564006e 6170695f 7468726f 775f6572  ed.napi_throw_er
+ 3020 726f7200 6e617069 5f637265 6174655f  rror.napi_create_
+ 3030 66756e63 74696f6e 006e6170 695f7365  function.napi_se
+```
+
+i.e. `napi_get_undefined\0napi_throw_error\0napi_create_function\0napi_se` — N-API import strings from a vendored Node addon, not a crackme.

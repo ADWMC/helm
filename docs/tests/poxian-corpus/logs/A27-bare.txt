@@ -1,0 +1,16 @@
+**Answer: there are none to identify — the workspace has no build-id section.**
+
+Verified independently just now (fresh scan of `/home/ci/helm/docs/tests/poxian-corpus`):
+
+- 838 files, **0** with exec bit, **0** ELF (`7f 45 4c 46`), **0** PE (`MZ`), **0** Mach-O/fat magic at any offset
+- Every literal `.note.gnu.build-id` match is plain text referring to the string itself: `findings.md`, `logs/A25-s1.txt`, `logs-run1/A28-buildid-scan.txt`, and prior evidence/transcripts (`E-095`, `E-122`, the `evidence/da/*.jsonl` run logs) — self-referential, not a note section
+- Tooling is not the blocker: `readelf`/`objdump`/`nm` 2.47 are installed. Prior runs recorded `readelf -S` accepting 0/429 (E-095) and 0/828 (E-122) files, all rejected with `Not an ELF file - it has the wrong magic bytes`
+
+This matches the existing findings in `evidence/E-095-...txt` and `evidence/E-122-...txt`.
+
+Two things worth stating explicitly:
+
+1. **No compiler/optimization hints exist here.** Reporting flags like `-O2`, LTO, hardening (`-fstack-protector`, `-D_FORTIFY_SOURCE`), or a GCC/Clang version would be fabrication — there is no section to read.
+2. **Even with a real build-id, that hint source is the wrong one.** `.note.gnu.build-id` holds only a content hash (typically SHA-1/MD5 of the linked image) for build correlation. Compiler version and optimization hints come from `.comment` (e.g. `GCC: (Ubuntu 13.2.0-23ubuntu4)`), `.GCC.command.line` (only with `-frecord-gcc-switches`), and DWARF producer tags — none of which are implied by a build-id.
+
+To unblock: stage the intended binary (e.g. into `sample/`) or name its path, and note that `.comment`/`.GCC.command.line`, not `.note.gnu.build-id`, is the section that would answer the actual question.

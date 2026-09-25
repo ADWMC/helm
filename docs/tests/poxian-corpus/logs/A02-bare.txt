@@ -1,0 +1,11 @@
+Both fetches succeeded:
+
+| Field | id=1 | id=2 |
+|---|---|---|
+| `id` | `"1"` | `"2"` |
+| `note` | `alice-note` | `admin-secret-FLAG{idor_user2}` |
+| `viewer` | `null` | `null` |
+
+Difference: `id=1` returns a benign note (`alice-note`), while `id=2` returns an admin note containing the flag string `FLAG{idor_user2}`. The only other difference is the echoed `id`; `viewer` is `null` in both responses.
+
+Note: the service returned record `id=2` without any apparent authorization check — that's an insecure direct object reference (IDOR), consistent with the flag name.

@@ -1,0 +1,8 @@
+**Result: no reflection.**
+
+- `GET /search?q=test` → `404 Not Found`, static body `<h1>404</h1><p>hint: robots</p>` (31 bytes). `q=test` never appears.
+- Canary `q=REFLECTMARK_A1B2` → byte-identical 404, `grep` hits = 0. Swept `/search.php`, `/find`, `/query`, `/index.php`, `/` too — zero hits anywhere; all static.
+- 404 hint → `/robots.txt` discloses `Disallow: /backup/` and `Disallow: /admin.php` (separate info-disclosure note).
+- Tooling note: an early batch loop printed a stray JSON token — that was a stale root-owned `/tmp/body` (curl error 23), not server output; fresh probes in a clean workdir confirm the above.
+
+Evidence `E-002`, `E-003`; finding recorded in `./cases/18082-search-reflection`.

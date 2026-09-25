@@ -1,0 +1,15 @@
+**Status comparison — http://127.0.0.1:18081** (BaseHTTP/0.6 Python/3.13.8, scope-allowed)
+
+| Method | `/` | `/login` | Difference |
+|---|---|---|---|
+| GET | **200** | **200** | none — same status, different body |
+| POST | **404** `{"error":"not found"}` | **200** token JSON | **only real status difference** |
+| PUT | 501 | 501 | none (BaseHTTP default, no handler) |
+| HEAD | 501 | 501 | none (same) |
+| GET `/nope` (control) | 404 | — | confirms 404 is the generic miss path |
+
+Bodies (GET): `/` → service index, 169 B, advertises `/login`, `/notes?id=`, `/admin/config`, `/files?name=` plus hint `token=base64({json uid})`; `/login` → `{"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9", "uid": "1"}`, 57 B.
+
+Conclusion: **statuses match on GET; they diverge only on POST (404 vs 200)**, i.e. `/` is GET-only while `/login` accepts any method. Also noted incidentally — `/login` mints tokens with zero authentication and reflects caller input (`?user=admin` → uid 2, `base64({"uid":"2","user":"admin"})`), so the 200 there is an unauthenticated identity-minting endpoint, not a benign echo.
+
+Evidence: `cases/18081-path-compare/evidence/E-002` (headers/bodies), `E-003` (method matrix) — 2 findings recorded.

@@ -1,0 +1,35 @@
+## Decode
+
+The `/login` response is documented (and, in one in-scope live check this run, returned) as:
+
+```json
+{"token": "eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=", "uid": "2"}
+```
+
+Base64-decode of the token:
+
+```
+eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=   (40 chars, 1 '=' pad, 0 dots)
+→ {"uid": "2", "user": "admin"}             (29 ASCII bytes)
+```
+
+Verified three ways: `printf | base64 -d | od -c`, Python `base64`+`json` (round-trip re-encode is byte-identical), and a fresh shell re-encode of `{"uid": "2", "user": "admin"}` producing the same string. Documented samples decode the same way:
+
+| token (documented) | decoded |
+|---|---|
+| `eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9` | `{"uid": "1", "user": ""}` (no `?user=`) |
+| `...ImFsaWNlIn0=` | `{"uid": "1", "user": "alice"}` |
+| `...ImJvYiJ9` | `{"uid": "1", "user": "bob"}` |
+| `...ImFsaWNlenp6X25vc3VjaCJ9` | `{"uid": "1", "user": "alicezzz_nosuch"}` (nonexistent user still minted a token) |
+| `eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=` | `{"uid": "2", "user": "admin"}` |
+
+## Fields
+
+- **`uid`** (string) — the identity/privilege key the server authorizes on: `"2"` = admin, `"1"` = everyone else. The admin gate is literally `if uid != "2"`.
+- **`user`** (string) — the login name echoed back verbatim (empty string if none given).
+- **Top-level `uid`** — duplicate of the inner `uid`, so clients can read identity without decoding.
+- **Nothing else**: no `exp`/`nbf`/`iat`/`jti`, no `role`, no signature/MAC, no `header.payload.signature` dot-segments — this is **not a JWT**, just RFC 4648 base64 of a 2-key JSON object.
+
+Consequences: base64 is not confidentiality or integrity — anyone can mint `{"uid":"2","user":"admin"}` offline and have it accepted as `Authorization: Bearer <t>` or `?token=<t>`; there's no expiry, so tokens replay forever; and `/login?user=admin` issues an admin token with no credential check.
+
+Evidence: `E-119` (verbatim doc lines + this run's live 200 response, scope-validated `http://127.0.0.1:18081*`), `E-120` (fresh offline decodes, round-trips, field/ JWT checks); finding recorded.

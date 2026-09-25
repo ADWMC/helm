@@ -1,0 +1,20 @@
+**Result: `POST http://127.0.0.1:18083/api/login` with an empty body does not return a JSON error schema at all — the endpoint rejects the method before parsing the body.**
+
+Observed response (identical whether or not a `Content-Type` header is sent):
+
+```
+HTTP/1.0 405 Method Not Allowed
+Server: BaseHTTP/0.6 Python/3.13.8
+Content-Type: text/html; charset=utf-8
+Content-Length: 14
+
+use GET /check
+```
+
+Error "schema" details:
+- **Status:** `405 Method Not Allowed` (no `Allow` header)
+- **Content-Type:** `text/html; charset=utf-8`, but the payload is **plain text**, not HTML/JSON
+- **Body:** exactly `use GET /check` (14 bytes, no trailing newline)
+- **No JSON fields** — the response is static and unaffected by request body/content-type; body validation for `/api/login` is never reached
+
+Related observation: the server hint `GET /check` responds `401 Unauthorized` with body `<h1>INVALID</h1>` (also `text/html`), so this Python `BaseHTTP` service uses short plain-text/HTML error bodies rather than a structured error schema.

@@ -1,0 +1,7 @@
+Yes — `HTTP/1.0 404 Not Found`.
+
+Body (9 bytes):
+
+```
+not found
+```

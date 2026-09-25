@@ -1,0 +1,10 @@
+**Status: 404 Not Found** (no body)
+
+```
+HTTP/1.0 404 Not Found
+Server: BaseHTTP/0.6 Python/3.13.8
+Date: Fri, 25 Sep 2026 03:31:27 GMT
+Content-Length: 0
+```
+
+`GET /sitemap.xml` on `http://127.0.0.1:18084` returns a 404 from a Python `BaseHTTP/0.6` server with an empty response body — no sitemap content exists at that path.

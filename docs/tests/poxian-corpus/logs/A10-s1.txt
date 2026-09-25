@@ -1,0 +1,14 @@
+**Result: no disallowed paths — `robots.txt` does not exist on this host.**
+
+Evidence (`curl -i http://127.0.0.1:18084/robots.txt`):
+
+```
+HTTP/1.0 404 Not Found
+Server: BaseHTTP/0.6 Python/3.13.8
+Content-Length: 0
+```
+
+- Status `404 Not Found`, `Content-Length: 0` → empty body, so there are no `Disallow:` (or `Allow:`) directives to list.
+- Verified twice; the endpoint is consistently 404 while `/` responds `200 OK`, so this is a genuine missing file rather than a transport failure.
+
+For context, `/` serves `<h1>IR Log Lab</h1><p>GET /logs</p><p>GET /summary</p>` — that's the server's own advertised surface, not robots.txt content.

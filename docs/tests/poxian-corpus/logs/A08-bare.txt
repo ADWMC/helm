@@ -1,0 +1,9 @@
+`GET http://127.0.0.1:18083/api/items` returns **HTTP 404 "not found"** — there are no JSON entries to count.
+
+That port is not an items API. It's a Python `BaseHTTP` "License Server" exposing:
+
+- `GET /` — index
+- `GET /check?serial=...&license=...`
+- `GET /serial` (demo serial)
+
+If you want, I can count entries from one of those endpoints instead.

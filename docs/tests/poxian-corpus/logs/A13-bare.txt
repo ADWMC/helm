@@ -1,0 +1,7 @@
+Three requests to http://127.0.0.1:18081/:
+
+- Request 1: 32.9 ms
+- Request 2: 31.6 ms
+- Request 3: 32.7 ms
+
+Average: ~32.4 ms (curl `time_total`, includes connection setup).

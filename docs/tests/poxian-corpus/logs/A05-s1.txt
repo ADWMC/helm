@@ -1,0 +1,11 @@
+Fetched `http://127.0.0.1:18081/files?name=README` (scope-validated as allowed). The endpoint does **not** return a README — there is no file named `README` in the server's web root. The response is a single line (146 bytes, no trailing newline), quoted verbatim:
+
+```
+{"error": "[Errno 2] No such file or directory: 'C:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\helm-pi\\\\labs\\\\weblab-api\\\\README'"}
+```
+
+Details:
+- The `/files` handler joins `name` onto `C:\Users\Administrator\Documents\GitHub\helm-pi\labs\weblab-api\` and `README` doesn't exist there (`Errno 2`), nor do `README.md`, `README.txt`, `readme.txt`.
+- It *can* serve files reached via traversal (e.g. `?name=../README.md` → first line `# labs — 本地授权靶场`), so the directory itself is readable — the literal `README` file simply doesn't exist.
+
+If you meant the repo README reachable through the endpoint, the closest match is `?name=../../README.md`, whose first line is `# ⚠️ 本仓库已迁移并归档（2026-09,WG1.3）`.

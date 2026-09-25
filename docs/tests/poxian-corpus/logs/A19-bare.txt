@@ -1,0 +1,16 @@
+One-liner:
+
+```sh
+curl -s http://127.0.0.1:18081/ | python3 -c 'import sys,json;[print(e) for e in json.load(sys.stdin)["endpoints"]]'
+```
+
+Result:
+
+```
+/login
+/notes?id=
+/admin/config
+/files?name=
+```
+
+The root returns JSON (`{"service":"weblab-api","endpoints":[...], "hint":...}`), so the one-liner parses it and prints each entry of the `endpoints` array. `jq` isn't installed here, hence python3.

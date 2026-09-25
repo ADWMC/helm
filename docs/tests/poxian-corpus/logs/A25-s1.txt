@@ -1,0 +1,40 @@
+## Result: `readelf -S` produced no section names — there is no ELF binary in the workspace
+
+**Requested command, executed against every workspace file:**
+
+```
+$ while IFS= read -r -d '' f; do readelf -S "$f"; done < <(find . -type f -print0)
+readelf_ok=0  readelf_rej=828
+readelf: Error: Not an ELF file - it has the wrong magic bytes at the start
+readelf: Error: <path>: Failed to read file header
+```
+
+**0 of 828** files emitted a `Section Headers:` table.
+
+**Why (fresh scan this run):**
+
+| Check | Result |
+|---|---|
+| Files scanned | 828 |
+| ELF magic `7f454c46` hits | **0** |
+| PE/MZ, Mach-O, ar, fat magics | **0** |
+| Exec-bit files (`-perm /111`) | **0** |
+| Symlinks | 0 |
+| `readelf -S` accepted | **0 / 828** |
+| Name candidates (`*.bin *.exe *.so *.elf a.out *binary*`) | 25 — **all** are prior evidence `.txt` files whose *filename* contains the word "binary" |
+| Staging dirs `sample/`, `scripts/` (and helmpi-cases equivalents) | empty |
+
+Extension histogram: 369 `.txt`, 287 `.jsonl`, 154 `.START`, 12 `.md`, 2 `.mjs`, 2 `.json`, 1 `.yaml`, 1 `.log`, 1 `.db` — no object/executable container.
+
+**Tool control passes** — the tool is fine, the target is absent:
+
+```
+$ readelf -S /usr/bin/readelf      # exit 0
+There are 31 section headers, starting at offset 0xc4808:
+  .note.gnu.build-id .interp .gnu.hash .dynsym .dynstr .gnu.version .gnu.version_r
+  .rela.dyn .rela.plt .init .plt .plt.got .text .fini .rodata .eh_frame_hdr .eh_frame ...
+```
+
+**Note:** `file` is *not* installed on this host, so any earlier `file`-based ELF scan here was vacuous; this run used raw magic bytes and `readelf` directly.
+
+Reporting a section list would require relabeling a system ELF (`/usr/bin/*`) or a text record as "the workspace binary" — that would be fabrication, so no section names are reported. Evidence saved as **E-122**, finding recorded. To unblock: stage the intended binary into `sample/` or give its explicit path.

@@ -1,0 +1,21 @@
+## `/login` method acceptance — GET vs POST
+
+Tested all five Spec hosts with `curl -i -X GET` and `-X POST` (empty body + form body). Scope: each full URL validated as `allow: true` against `spec.json` (`E-124`).
+
+| Host | GET | POST | Verdict |
+|---|---|---|---|
+| `127.0.0.1:18080` | **200 OK** (login form HTML) | **401** empty / **200** with creds | **Both accepted** |
+| `127.0.0.1:18081` | **200 OK** (JSON token) | **200 OK** (identical JSON) | **Both accepted** |
+| `127.0.0.1:18082` | **404** (`hint: robots`) | **501** Unsupported method | **GET only** |
+| `127.0.0.1:18083` | **404** (`not found`) | **405** Method Not Allowed (`use GET /check`) | **GET only** |
+| `127.0.0.1:18084` | **404** (empty body) | **501** Unsupported method | **GET only** |
+
+**Details:**
+- **18080** — POST handler actively consumes the body: empty POST → 401 `Invalid credentials`, `user=admin&pass=admin123` → 200.
+- **18081** — POST handler *ignores* the body: empty POST and credential POST both return the same `{"token": "...", "uid": "1"}`. Method and credentials make no difference.
+- **18082 / 18084** — POST returns the stock Python `BaseHTTPRequestHandler` **501 Unsupported method ('POST')** page → no `do_POST` exists at server level. GET is implemented but `/login` is unrouted (404).
+- **18083** — POST returns **405**, not 501, so a POST handler *does* exist and deliberately refuses this path (405 vs 501 is the key discriminator here). GET also 404s, so `/login` itself is unrouted on this host.
+
+**Caveat:** no host emits an `Allow` header, and `OPTIONS` returns 501 everywhere, so no server declares its method set. This acceptance table is inferred purely from observed status codes.
+
+Evidence `E-124` (scope), `E-125` (raw responses); findings recorded.

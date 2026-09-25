@@ -1,0 +1,12 @@
+**Yes — it returns 404.**
+
+```
+HTTP/1.0 404 Not Found
+Server: BaseHTTP/0.6 Python/3.13.8
+Content-Type: text/html; charset=utf-8
+Content-Length: 9
+
+not found
+```
+
+Body (quoted exactly, 9 bytes, no trailing newline): `not found`

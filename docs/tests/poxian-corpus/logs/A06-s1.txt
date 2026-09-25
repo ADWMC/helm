@@ -1,0 +1,10 @@
+Requested `http://127.0.0.1:18082/` — response status `HTTP/1.0 200 OK`. Every response header:
+
+| Header | Value |
+|---|---|
+| Server | BaseHTTP/0.6 Python/3.13.8 |
+| Date | Fri, 25 Sep 2026 03:24:58 GMT |
+| Content-Type | text/html; charset=utf-8 |
+| Content-Length | 50 |
+
+Those four are the complete set (no other headers were sent; the status line is not a header).

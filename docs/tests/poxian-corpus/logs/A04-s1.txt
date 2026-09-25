@@ -1,0 +1,11 @@
+**Status code: `403`**
+
+```
+HTTP/1.0 403 Forbidden
+Server: BaseHTTP/0.6 Python/3.13.8
+Content-Type: application/json; charset=utf-8
+
+{"error": "admin only"}
+```
+
+Request made with no credentials (no Authorization header, no cookies). Recorded as finding in `./cases/admin-config-status` (evidence `E-002`).

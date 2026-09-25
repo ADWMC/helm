@@ -1,0 +1,12 @@
+No binary target exists — the request can't be run as stated.
+
+Fresh scan of `/home/ci/helm/docs/tests/poxian-corpus` (792 files, all formats):
+
+- `command -v strings` → `/usr/bin/strings` (tool present)
+- Exec bit: **0 files**
+- Magic-byte scan (ELF `7f454c46`, PE `4d5a`, Mach-O `feedface/facf/cffaedfe/cefaedfe`, `cafebabe`): **0 hits**
+- Name candidates (`*.bin`, `*.exe`, `*.so`, `*.elf`): none
+
+So there is no ELF/PE/Mach-O file to pass to `strings`, and therefore no printable strings over 8 chars to list. This matches prior evidence E-085, E-113, E-117 ("no binary target exists", "objdump/readelf/nm reject every file").
+
+Bounded alternative if you want output anyway: `strings -n 8` over any single text file (e.g. `CASE.md` or `findings.md`) — but that extracts text from documents, not from a binary. Say the word and I'll run it on a file of your choice.

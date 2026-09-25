@@ -1,0 +1,8 @@
+Comparison of `http://127.0.0.1:18084`:
+
+| Path | Status | Length (bytes) |
+|---|---|---|
+| `/` | 200 | 54 |
+| `/index.html` | 404 | 0 |
+
+They differ in both status and length: `/` serves a 200 with a 54-byte JSON service descriptor (`weblab-api` endpoints listing), while `/index.html` returns an empty 404.

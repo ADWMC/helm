@@ -1,0 +1,34 @@
+**There is no workspace binary — `.rodata` cannot be quoted.**
+
+Fresh full-tree scan (this run):
+
+```
+== objdump availability ==
+/usr/bin/objdump
+== full-tree magic scan (ELF/PE/Mach-O) ==
+886 files, non-empty
+ELF/PE/Mach-O count: 0
+exec-bit count: 0
+candidate names (bin/elf/so/o, outside evidence/): 0
+```
+
+Literal invocation attempts:
+
+```
+--- objdump -s -j .rodata ./workspace ---
+objdump: './workspace': No such file
+objdump: section '.rodata' mentioned in a -j option, but not found in any input file
+--- objdump -s -j .rodata ./workspace_binary ---
+objdump: './workspace_binary': No such file
+objdump: section '.rodata' mentioned in a -j option, but not found in any input file
+--- objdump -s -j .rodata . ---
+objdump: Warning: '.' is a directory
+objdump: section '.rodata' mentioned in a -j option, but not found in any input file
+```
+
+- `objdump` itself is present (`/usr/bin/objdump`), so this is a missing-target failure, not a missing-tool failure.
+- Every one of the 886 non-empty files fails the ELF (`7f454c46`), PE (`4d5a`), and Mach-O magic checks, and zero files carry an executable bit. There is no input file with a `.rodata` section to dump.
+
+So the requested first 64 bytes of `.rodata` **do not exist to quote** — the correct result here is the empty/null answer, not fabricated hex. The workspace contains only text artifacts (`.md`, `.yaml`, `.json`, `.mjs`, `.txt` evidence), matching the prior recorded scans (`E-025`, `E-030`, `E-116`, `E-118`) that likewise found 0 ELF binaries.
+
+Note: the Spec goal for this workspace is a dual-arm corpus evaluation against `127.0.0.1:18080-18084`; a disassembly request has no target within that scope either.

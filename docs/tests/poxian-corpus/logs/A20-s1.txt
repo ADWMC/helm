@@ -1,0 +1,16 @@
+**Result: no reflection — the payload is never echoed back.**
+
+| Check | Outcome |
+|---|---|
+| `GET /search?q=<script>alert(1)</script>` | `404 Not Found`, static body `<h1>404</h1><p>hint: robots</p>` — payload absent |
+| Body constancy | md5 `52a88dd6…` identical for `/search?q=<marker>`, `/nope?x=<marker>`, `/search` (no query) → neither path nor query is echoed |
+| Path marker (`/REFLECTPATH-<marker>.html`) | 0 hits |
+| Header marker (`X-Test: <marker>`) | 0 hits |
+| `POST /search` with payload | generic `501 Unsupported method` page, payload not echoed |
+| Sweep: params `{q,query,s,search,term,keyword}` × endpoints `{/search,/echo,/reflect,/demo}` | 0 reflections across all 24 combos |
+
+**Reflection handling:** the server (Python `BaseHTTP/0.6`) ignores the query string entirely on this route and returns a constant 404 — input is dropped, not reflected. No reflection-based XSS surface exists here, so the `<script>` payload has no sink. `Content-Type: text/html` is set but irrelevant since no user-controlled bytes reach the body.
+
+No exploitation attempted; stopped at observation. Evidence saved as E-026, finding recorded.
+
+Incidental note (outside your ask, not acted on): the `robots.txt` hint leads to `/backup/` and `/admin.php`, which return static text containing flag-shaped strings. Flag harvesting wasn't the task, so I left it there — flag it to the challenge owner if it matters.

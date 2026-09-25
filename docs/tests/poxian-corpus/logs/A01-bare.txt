@@ -1,0 +1,11 @@
+Endpoints of `http://127.0.0.1:18081/` (server self-reports the list at `/`; one request each):
+
+| Endpoint | Result |
+|---|---|
+| `GET /` | 200 — service index: `{"service":"weblab-api","endpoints":[...]}` |
+| `GET /login` | 200 — issues `{"token": <base64 json uid>, "uid":"1"}` |
+| `GET /notes?id=` | 200 — returns note for id (default `id=1` → `alice-note`); index hint says it may not check ownership |
+| `GET /admin/config` | 403 — `{"error":"admin only"}` |
+| `GET /files?name=` | 404 — path error leaking a Windows filesystem path (`.../weblab-api/readme.txt`) |
+
+Summary: `/`, `/login`, `/notes?id=`, `/admin/config`, `/files?name=`. No other paths were probed; the list came from the index response itself.

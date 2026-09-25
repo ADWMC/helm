@@ -1,0 +1,16 @@
+**Function symbols: 0 — there is no workspace binary to symbolize.**
+
+Verification (fresh, cwd `poxian-corpus`, 828 files):
+
+| Check | Result |
+|---|---|
+| Magic-byte scan (ELF / PE `MZ` / Mach-O 64·32·fat·BE) | **0 hits** of 828 files |
+| Files with any execute bit | **0** |
+| Name candidates (`*.bin *.so* *.exe *.o *.a *.elf a.out`) | **0** |
+| Extension histogram | `.txt` 368, `.jsonl` 287, `.START` 154, `.md` 12, `.mjs` 2, `.json` 2, `.yaml`/`.log`/`.db` 1 each — no binary formats |
+| `sample/`, `scripts/` | empty |
+| Largest file | 295,831-byte `.jsonl` log |
+
+Tooling is not the blocker: `nm`, `objdump`, `readelf`, `strings`, `strip` are all present, and a control run (`readelf -s /usr/bin/nm`) successfully parsed a symbol listing. The active Spec authorizes only HTTP endpoints `http://127.0.0.1:18080-18084`, which carry no binary artifact — this is an environment limitation, not a scope denial.
+
+Evidence `E-029` saved, finding recorded. Consistent with prior case evidence E-025/E-027/E-028/E-111/E-113/E-121. Exit 0 (verified clean — no executable exists to enumerate).

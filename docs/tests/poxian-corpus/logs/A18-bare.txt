@@ -1,0 +1,26 @@
+Two documented `/login` response tokens decode as follows:
+
+**Token 1** — from `GET /login` → `{"token":"eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9","uid":"1"}`
+```
+eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9  →  {"uid": "1", "user": ""}
+```
+
+**Token 2** — from `GET /login?user=admin` → `{"token":"eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=","uid":"2"}`
+```
+eyJ1aWQiOiAiMiIsICJ1c2VyIjogImFkbWluIn0=  →  {"uid": "2", "user": "admin"}
+```
+
+Round-trip re-encoding reproduces the original strings exactly, so both are canonical RFC 4648 base64 (token 1 unpadded, 32 chars; token 2 padded with one `=`, 40 chars).
+
+## Field explanation
+
+| Field | Type | Meaning |
+|---|---|---|
+| `uid` | string (not number) | Numeric user ID as a quoted string — `"1"` for the default/anonymous login, `"2"` for the `?user=admin` request. Matches the top-level `"uid"` field in the HTTP response. |
+| `user` | string | Requested identity/username. Empty string `""` when no `user` query param was sent; `"admin"` when `user=admin` was passed. |
+
+## Format observations
+
+- The token is **plain base64 of a JSON object**, exactly as the service's own hint says: `token=base64({json uid})`.
+- Despite the `eyJ` prefix (which is just base64 for `{"`), it is **not a JWT**: there are no `.` separators, hence no header.payload.signature structure and no signing.
+- Consequences documented in the corpus: the token is unsigned, has no expiry, and both fields are attacker-controlled (passing `?user=admin` mints an admin token with no credential check). It's accepted verbatim as `Authorization: Bearer <token>` or `?token=<token>`.

@@ -1,0 +1,11 @@
+**No workspace binary exists, so `ldd` has nothing to list.**
+
+Checks run (workspace = `/home/ci/helm/docs/tests/poxian-corpus`):
+
+- `ldd` is present: `/usr/bin/ldd`, `ldd (Debian GLIBC 2.43-4) 2.43`.
+- Full-tree scan of all 907 files: 0 files with ELF (`7f454c46`), PE (`MZ`), Mach-O, FAT or WASM magic.
+- 0 files with any executable bit; 0 symlinks.
+- 0 name candidates (`crackme*`, `*.bin`, `*.exe`, `*.elf`, `*.so`, `*.dll`, `*.o`, `*.a`, `*.out`).
+- All four staging dirs empty: `sample/`, `scripts/`, `helmpi-cases/sample/`, `helmpi-cases/scripts/`.
+
+Result: no library list is produced. Running `ldd` on a system ELF (e.g. `/usr/bin/*`) would report *its* dependencies, not the workspace binary's — that would be a fabricated answer for this case. Unblocking requires staging the intended binary or naming the file explicitly.

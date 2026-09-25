@@ -1,0 +1,10 @@
+**Count: 0 JSON entries** — the endpoint does not exist on this server.
+
+Evidence:
+- `GET http://127.0.0.1:18083/api/items` → **HTTP 404 Not Found**, body `not found` (9 bytes, `text/html`, not JSON)
+- `GET /` → 200, reveals this is a **License Server** (BaseHTTP/0.6 Python/3.13.8) exposing only:
+  - `GET /check?serial=...&license=...`
+  - `GET /serial  (demo serial)`
+- Probed `/api/items/`, `/items`, `/api`, `/api/item` → all 404.
+
+No JSON payload was returned anywhere, so the entry count is 0 (there is no items collection on this service).

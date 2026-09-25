@@ -1,0 +1,9 @@
+`GET http://127.0.0.1:18084/robots.txt` returns **404 Not Found** (empty body), so there is no robots.txt and no `Disallow:` entries to list.
+
+The server (an "IR Log Lab" Python BaseHTTP service) only exposes:
+
+- `/` — index, points to `GET /logs` and `GET /summary`
+- `/logs` — access/auth log lines
+- `/summary` — one-line attack summary (`bruteforce 198.51.100.66 -> success -> shell.php upload -> egress 203.0.113.9`)
+
+So: disallowed paths — none declared.

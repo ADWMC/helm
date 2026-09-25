@@ -1,0 +1,9 @@
+Enumeration complete — evidence saved to `cases/port18082-paths/evidence/E-002`.
+
+| Path | Status |
+|---|---|
+| `/a` | **404** |
+| `/b` | **404** |
+| `/admin` | **404** |
+
+Service is live on `127.0.0.1:18082` (baseline `/` → 200); none of the three requested paths are exposed. No anomaly → clean completion (exit 0).

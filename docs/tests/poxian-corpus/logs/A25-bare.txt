@@ -1,0 +1,17 @@
+No section names can be extracted — there is no ELF file in the workspace.
+
+Checks run (read-only, nothing executed):
+
+1. **Tool present and working**: `/usr/bin/readelf`, GNU Binutils for Debian 2.47. Positive control `readelf -S /bin/ls` succeeds, so readelf itself is fine.
+
+2. **Target absent**: full-tree magic scan of all 821 files under `docs/tests/poxian-corpus`:
+   - files containing `\x7fELF` at any offset: **0** (`grep -rlP`)
+   - files with the executable bit: **0**
+   - `sample/`, `scripts/`, `helmpi-cases/sample/`, `helmpi-cases/scripts/` are all empty — no artifact was ever staged.
+   - only non-text magic in the tree is `.helm/tool-memory.db` = `SQLite format 3` (not an object file).
+
+3. **Tool-vs-target proof**: `readelf -S` on each top-level candidate (`run-dualarm.mjs`, `CASE.md`, `findings.md`, `index.yaml`, `.helm/tool-memory.db`) → `readelf: Error: Not an ELF file - it has the wrong magic bytes at the start`, exit 1.
+
+So the presupposition "the workspace binary" does not hold: there is no binary, hence no section table and no section names to report. I did not substitute a system ELF (e.g. `/bin/ls`) for the missing target, and did not fabricate a section list. This matches the prior scans recorded in `findings.md` (E-045/046/047/093/095 and the 642-file sweep).
+
+To unblock: stage an ELF artifact in the workspace (e.g. under `sample/`) and name it as the allowed target; `readelf -S <file>` then runs immediately.

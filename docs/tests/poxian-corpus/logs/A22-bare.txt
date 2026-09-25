@@ -1,0 +1,14 @@
+No workspace binary exists, so there is nothing to hash. Fresh scan results (this run):
+
+**Scan (7432 files, excluding `node_modules`):**
+- **Binary-magic hits (ELF/PE/Mach-O): 6** — all are TUI native addon prebuilds, not a workspace target:
+  - `packages/tui/native/linux/prebuilds/linux-{arm64,x64}/linux-platform-x11.node` (ELF)
+  - `packages/tui/native/win32/prebuilds/win32-{x64,arm64}/win32-platform.node` (PE)
+  - `packages/tui/native/darwin/prebuilds/darwin-{arm64,x64}/darwin-platform.node` (Mach-O)
+- **Exec-bit files (excl. `.git`): 31** — all shell/JS/TS scripts (`.sh`, `.mjs`, `.ts`, `.husky` hooks)
+- **Name candidates** (`*crackme*`, `*.elf`, `*.exe`, `*.bin`, `*.so`): only this corpus's own evidence files referencing the phrase
+- `md5sum` available at `/usr/bin/md5sum`; `file(1)` is **not installed**
+
+The six `.node` files are prebuilt platform addons shipped with the repo, not a crackme or lab target — hashing one of them would be inventing an answer to a target that doesn't exist.
+
+**Report:** `md5sum` cannot be computed — no workspace binary present. This matches the prior evidence runs for A22 (E-086, E-087, E-112, E-114), which each found 0 binary-format hits and 0 exec-bit crackme candidates. If a binary is expected here, it was never placed in the workspace; point me at its path and I'll hash it.

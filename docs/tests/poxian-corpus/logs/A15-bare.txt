@@ -1,0 +1,8 @@
+Both requests return identical responses — there's nothing to diff:
+
+| | status | body |
+|---|---|---|
+| `/api/items/1` | 404 | `not found` |
+| `/api/items/2` | 404 | `not found` |
+
+The server is up (`/` returns 200), but neither item route exists. Want me to probe for the correct paths (e.g. `/api/items`, `/items/1`)?

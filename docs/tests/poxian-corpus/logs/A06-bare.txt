@@ -1,0 +1,10 @@
+GET http://127.0.0.1:18082/ returns `HTTP/1.0 200 OK` with these response headers:
+
+| Header | Value |
+|---|---|
+| Server | BaseHTTP/0.6 Python/3.13.8 |
+| Date | Fri, 25 Sep 2026 03:24:57 GMT |
+| Content-Type | text/html; charset=utf-8 |
+| Content-Length | 50 |
+
+(For reference, `HEAD` on the same URL returns `501 Unsupported method ('HEAD')` and additionally includes `Connection: close`.)

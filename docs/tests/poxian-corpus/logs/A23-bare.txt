@@ -1,0 +1,11 @@
+**Result: no workspace binary exists; `file(1)` itself is also not installed.**
+
+Raw output from the fresh scan:
+
+- `command -v file` → `file(1): not installed`
+- Exec-bit scan across all 811 files → **0** files with any execute bit
+- Magic-byte scan (`od -An -tx1` on first 4 bytes of every file, matched against `7f454c46` ELF, `4d5a` PE/MZ, `cffaedfe`/`cefaedfe`/`feedface`/`feedfacf` Mach-O) → **0** hits
+
+So there is no format/arch to report: the workspace contains only text/data files (markdown, yaml, mjs, logs), no ELF, PE, or Mach-O target. This matches the prior findings E-045/E-046/E-091/E-116 recorded in `CASE.md`.
+
+Evidence location if you want it persisted: I can write this to `evidence/` as a new numbered entry — say which number slot.

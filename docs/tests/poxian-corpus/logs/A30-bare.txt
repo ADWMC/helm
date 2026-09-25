@@ -1,0 +1,14 @@
+Result: no `Allow` header was returned.
+
+```
+HTTP/1.0 501 Unsupported method ('OPTIONS')
+Server: BaseHTTP/0.6 Python/3.13.8
+Date: Fri, 25 Sep 2026 03:31:33 GMT
+Connection: close
+Content-Type: text/html;charset=utf-8
+Content-Length: 360
+```
+
+The service at `127.0.0.1:18082` is a plain Python `http.server`-style handler that rejects `OPTIONS` with `501 Unsupported method`, so the response carries no `Allow` header (and no advertised method list).
+
+If you expected an `Allow` header, the handler needs an `do_OPTIONS` implementation (or a framework router) — let me know and I can look at the server code.

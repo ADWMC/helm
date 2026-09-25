@@ -1,0 +1,11 @@
+`GET http://127.0.0.1:18084/sitemap.xml` returns:
+
+```
+HTTP/1.0 404 Not Found
+Server: BaseHTTP/0.6 Python/3.13.8
+Content-Length: 0
+```
+
+No body — the path is not served.
+
+Context: the root `/` returns `200 OK` with HTML listing only two endpoints (`GET /logs`, `GET /summary`), and `/robots.txt` also returns 404. So this is a small test server ("IR Log Lab") with no sitemap or robots handling.

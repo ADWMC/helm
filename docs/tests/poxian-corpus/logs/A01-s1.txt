@@ -1,0 +1,17 @@
+Enumerated from the service's own root listing (`GET /` → `{"service":"weblab-api","endpoints":[...]}`), then one request per endpoint:
+
+| # | Endpoint | Method | Result |
+|---|---|---|---|
+| 1 | `/` | GET | 200 — service index, self-declares the endpoint list + hint |
+| 2 | `/login` | GET | 200 — `{"token":"eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9","uid":"1"}` (base64 token) |
+| 3 | `/notes?id=` | GET (`?id=1`) | 200 — `{"id":"1","note":"alice-note","viewer":null}` |
+| 4 | `/admin/config` | GET | 403 — `{"error":"admin only"}` |
+| 5 | `/files?name=` | GET (`?name=index`) | 404 — leaks absolute server path `C:\Users\Administrator\Documents\GitHub\helm-pi\labs\weblab-api\index` |
+
+Notes from the responses (not yet probed — one request each as asked):
+- `/login` requires no credentials on GET and mints a token for `uid=1`.
+- The `/` hint flags `notes?id=` as possibly missing an ownership check (IDOR candidate).
+- `/files?name=` takes a raw filename with no evident sanitization (path traversal candidate) and errors verbose filesystem paths.
+- `/admin/config` is gated by role, likely the token's `user` claim.
+
+All 5 requests were in-scope (`pattern:http://127.0.0.1:18081*`), one request per endpoint.

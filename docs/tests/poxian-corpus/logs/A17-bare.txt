@@ -1,0 +1,7 @@
+**Python's `http.server` (stdlib `BaseHTTPRequestHandler`)** — identified by:
+
+```
+Server: BaseHTTP/0.6 Python/3.13.8
+```
+
+Details: HEAD returns `501 Unsupported method` (default `BaseHTTPRequestHandler` behavior), GET returns `200` with `Content-Length: 54`. `HTTP/1.0` and `Connection: close` are also characteristic of that server.

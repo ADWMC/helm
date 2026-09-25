@@ -1,0 +1,18 @@
+**No workspace binary exists — the disassembly cannot be produced.**
+
+Static, header-only scan of `/home/ci/helm/docs/tests/poxian-corpus` (nothing executed, no network calls):
+
+| Check | Result |
+|---|---|
+| Files walked (all depths, incl. hidden) | 814 |
+| Exec-bit files (`-perm /111`) | 0 |
+| `sample/`, `scripts/` | both empty |
+| Name pattern `*.elf *.so* *.exe *.dll *.bin *.o *.a *.dylib *.out *.ko` + symlinks | 0 |
+| Magic at offset 0 (ELF `7f454c46`, PE `MZ`, Mach-O, fat, a.out) | **0 hits** |
+| Same magics at *any* offset (embedded in archives/logs) | **0 hits** |
+| `readelf -h` / `nm` / `objdump -d` on 4 largest files | `Not an ELF file - it has the wrong magic bytes` / `file format not recognized` (first bytes `7b 22 74 79` = `{"ty`) |
+| Control: `readelf -h /usr/bin/readelf` | full ELF64 header printed → toolchain functional |
+
+There is no ELF/PE/Mach-O header in the workspace, so there is no header to dump and no symbol table from which a `main` listing could be read. Supplying an address range or instruction listing would be fabrication — the negative is a property of the workspace content, not of objdump/readelf/nm.
+
+Evidence: `evidence/E-121-Workspace_binary_header_main-symbol_disassembly_scan_static_no_e.txt` (finding recorded, linked to E-121). If a binary is meant to be a target, it must first be placed in the workspace — and, for anything beyond this static header-only read, added to the Spec's allowed surface.

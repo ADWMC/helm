@@ -1,0 +1,12 @@
+`GET /api/items?limit=2` returns **HTTP 404** with body `not found` — the endpoint doesn't exist on that server.
+
+Count of returned entries: **0**
+
+For context, port 18083 serves a "License Server" sample (`/`, `/check?serial=...`, `/serial`), not an items API:
+
+```
+$ curl "http://127.0.0.1:18083/"
+<h1>License Server</h1><p>Sample serial in docs: use check endpoint</p>...
+```
+
+So there's no JSON array/object to count. If the items API lives elsewhere (different port or path), tell me and I'll re-run it.

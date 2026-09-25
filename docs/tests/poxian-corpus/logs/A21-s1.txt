@@ -1,0 +1,31 @@
+**Result: there is no workspace binary, so there are no strings to list.**
+
+Fresh full-tree scan this run over `/home/ci/helm/docs/tests/poxian-corpus`:
+
+| Check | Result |
+|---|---|
+| Files scanned | 795 |
+| ELF (`\x7fELF`) / PE (`MZ`) / Mach-O / NUL-magic hits | **0** |
+| Files with any exec bit | **0** |
+| Symlinks | 0 |
+| Name candidates (`binary`, `*.elf`, `a.out`, `*.exe`, `*.so`, `*.bin`) | 22 hits — all prior `evidence/*.txt` files about this same question |
+| Extension census | `.txt` 352, `.jsonl` 276, `.START` 144, `.md` 12, `.mjs` 2, `.json` 2, `.yaml` 1, `.db` 1, `.log` 1 — text-only |
+
+**`strings` tool control** (proves the operation itself works, `-n 9` = strings longer than 8 chars):
+
+```
+$ strings -n 9 /usr/bin/strings | head -8
+/lib64/ld-linux-x86-64.so.2
+_ITM_deregisterTMCloneTable
+__gmon_start__
+_ITM_registerTMCloneTable
+__libc_start_main
+__cxa_finalize
+setlocale
+bindtextdomain
+[exit 0]
+```
+
+**Bounded alternative executed:** `strings -n 9` run over all 795 workspace files → 786 yield >8-char runs, but those are the corpus `.txt`/`.jsonl` text records, not a binary, so they are not the requested target and are not reported as binary strings.
+
+Evidence saved as **E-027** (raw scan + control output), consistent with E-025; finding recorded. No output fabricated.

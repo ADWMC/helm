@@ -1,0 +1,18 @@
+**No md5 is reported — there is no workspace binary to hash.**
+
+Fresh full-tree scan of `/home/ci/helm/docs/tests/poxian-corpus` this run:
+
+| Check | Result |
+|---|---|
+| Files total / non-empty scanned | 804 / 795 |
+| Binary magic (ELF `7f454c46`, PE `MZ`, Mach-O, `ar`, zip) | **0 hits** |
+| Files with execute bit | **0** |
+| Name candidates (`*.bin *.exe *.so* *.elf *.dll *.o *.a *.out crackme*`) | **0** |
+| Staging dirs (`sample/`, `scripts/`, `helmpi-cases/sample/`, `helmpi-cases/scripts/`) | all empty |
+| Tool | `/usr/bin/md5sum` present (GNU coreutils 9.10) |
+
+Everything in the tree is text/data (Markdown, YAML, JSON/JSONL, JS, SQLite, logs). The blocker is a **missing target, not a missing tool**.
+
+Producing a digest anyway would mean hashing a system ELF (e.g. `/usr/bin/*`) or a case log file and labeling it "the workspace binary" — that would be fabricated. Six earlier independent scans of this same tree reached the identical result; this one corroborates them.
+
+Evidence `E-028` saved, finding **A22** recorded. To unblock: stage the intended binary into `sample/` (or name the file explicitly) and the md5sum follows immediately.

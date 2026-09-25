@@ -1,0 +1,12 @@
+**Target:** `http://127.0.0.1:18081/login` (in scope per `.helm/spec.json` allowedTargets `http://127.0.0.1:18081*`), Python `BaseHTTP/0.6`.
+
+| Method | Status | Result |
+|---|---|---|
+| GET | 200 OK | accepted, `{"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9", "uid": "1"}` |
+| POST | 200 OK | accepted, same response shape |
+| PUT (control) | 501 `Unsupported method ('PUT')` | rejected |
+
+Findings:
+- Both GET and POST are accepted; the handler does not require a body (POST with no body works).
+- Response body differs only by the decoded token payload: GET yields `{"uid": "1", "user": ""}`; POST with `-d '{"user":"u",...}'` yields `{"uid": "1", "user": "u"}` — the `user` field from the POST JSON is echoed into the base64 token.
+- The 501 on PUT shows method gating exists; only GET and POST are implemented on this endpoint.

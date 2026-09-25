@@ -1,0 +1,15 @@
+**Result: no `Allow` header returned.**
+
+```
+$ curl -sS -i -X OPTIONS http://127.0.0.1:18082/
+HTTP/1.0 501 Unsupported method ('OPTIONS')
+Server: BaseHTTP/0.6 Python/3.13.8
+Date: Fri, 25 Sep 2026 03:31:36 GMT
+Connection: close
+Content-Type: text/html;charset=utf-8
+Content-Length: 360
+```
+
+The server (Python `BaseHTTP/0.6`, Python 3.13.8) does not implement `OPTIONS` at all and answered `501 Unsupported method ('OPTIONS')` with an HTML error body. Per RFC 9110, `Allow` is only required on `405` responses — a `501` carries no such obligation — so the absence of the header is expected here, not a header-filtering artifact.
+
+What can be concluded: the service does not advertise an allowed-methods list on `/`, and `OPTIONS` is unsupported rather than rejected by method policy. Whether `Allow` would appear on other responses (e.g. a `405` from a supported-method handler) is untested by this call.

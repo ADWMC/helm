@@ -1,0 +1,16 @@
+**Result: no format/arch can be reported — there is no workspace binary, and `file` is not installed.**
+
+Tool output from this run:
+
+1. **`file` itself is absent**
+   - `command -v file` → empty (exit 1); `file --version` and `file ./*` → `file: command not found`, `rc=127`
+   - `dpkg -l file` → `un  file  <none>` (not installed); `/usr/bin/file` does not exist
+   - The only file-named executable on the system is `/usr/lib/apt/methods/file` (an apt transport helper, not file(1), not in PATH)
+
+2. **No binary target exists** — fresh full-workspace scan (808 files):
+   - Magic scan for ELF (`7f454c46`), Mach-O (all 5 byte orders + fat), PE/`MZ`, WASM, `ar` → **0 hits**
+   - Only hit in the whole tree: `SQLite format 3\0` on `./.helm/tool-memory.db` (helm's own tool-memory database, not a target artifact)
+   - Exec-bit (`0o111`) scan → **0 files**
+   - `sample/`, `scripts/` are empty; no `*.exe/*.so/*.dll/*.o/*.elf/*.bin` anywhere in the tree
+
+So: **format/arch = N/A**. `file(1)` cannot run (rc=127), and even a magic-byte substitute finds no ELF/PE/Mach-O/WASM file to identify. This reproduces the earlier scans recorded in CASE.md (E-046/E-115/E-116: same tool absence, same zero-binary result).

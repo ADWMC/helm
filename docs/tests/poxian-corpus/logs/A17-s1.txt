@@ -1,0 +1,18 @@
+**Server technology: `BaseHTTP/0.6 Python/3.13.8`**
+
+Evidence (curl output, GET http://127.0.0.1:18084/):
+
+```
+HTTP/1.0 200 OK
+Server: BaseHTTP/0.6 Python/3.13.8
+Date: Fri, 25 Sep 2026 03:27:02 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 54
+```
+
+Interpretation:
+- **BaseHTTP/0.6** — Python's stdlib `http.server` / `BaseHTTPRequestHandler` (the `BaseHTTP/0.6` server banner).
+- **Python/3.13.8** — runtime interpreter version.
+- Corroborated by HTTP/1.0 response framing and `Connection: close` on the HEAD request, which also returned `501 Unsupported method ('HEAD')` — typical of a minimal hand-written `BaseHTTPRequestHandler` that only implements `do_GET`.
+
+The server exposes an "IR Log Lab" app with `GET /logs` and `GET /summary` endpoints.

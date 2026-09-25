@@ -1,0 +1,18 @@
+Both requests returned identical responses — the diff is empty.
+
+**Result**
+
+| | `/api/items/1` | `/api/items/2` |
+|---|---|---|
+| Status | `404 Not Found` | `404 Not Found` |
+| Body | `not found` (9 bytes) | `not found` (9 bytes) |
+| Headers | `Server: BaseHTTP/0.6 Python/3.13.8`, `Content-Type: text/html; charset=utf-8`, `Content-Length: 9` | same |
+
+`diff` of headers+body → no output; md5 of each header block and each body match exactly (`355f7dff…` / `d8f4a199…`). Zero differences between the two responses.
+
+**Why:** there is no items API on this host. Probing showed the service is a *License Server*:
+
+- `GET /` → 200, HTML: `GET /check?serial=...&license=...` and `GET /serial (demo serial)`
+- `/api`, `/api/items`, `/items`, `/items/1`, `/api/item/1` → all 404 `not found`
+
+So the 404s are the generic not-found handler, not item-specific data. If you intended to compare actual records, the reachable endpoints are `/check` and `/serial` — say the word and I'll fetch and diff those instead.
