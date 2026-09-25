@@ -839,3 +839,5 @@ helm/                                  # ADWMC/helm, 基于 earendil-works/pi
 **拍板账**:④执行 889k/2.5M（T01 772k+T06 117k,分账）;主账 3,099,028 已封档。
 
 **下一步:§7.3 终验 13/13（WG5.3）** → 全账验收。
+
+**🏁 终验达成（WG5.3,2026-09-25）**:§7.3 **13/13 全过**——逐项命令+证据见 docs/tests/2026-final-acceptance/REPORT.md（干净 clone+可信配方 CI/BUILD/CHECK/TEST=0/0/0/0、hash-scope 真机 0/3、clean/find 0/2+SARIF v2.1.0 真解析、六闸负向矩阵、#13 按拍板③口径+替代证据组）。**27/27 波门全绿,34/34 任务全完成**;待用户最终验收。
