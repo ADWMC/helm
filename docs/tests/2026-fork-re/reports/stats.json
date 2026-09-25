@@ -1,0 +1,78 @@
+{
+  "suite": "2026-fork-re",
+  "n": 3,
+  "gate": "WG4.3 R-gate n>=3",
+  "attempts": [
+    {
+      "attempt": 1,
+      "exit": 0,
+      "wallMs": 41680,
+      "activeMs": 41680,
+      "tokens": {
+        "input": 16927,
+        "output": 4773,
+        "cacheRead": 126144,
+        "cacheWrite": 0,
+        "reasoning": 2657,
+        "grand_total_with_cache": 150501
+      },
+      "flagFound": true,
+      "evidenceFiles": 5
+    },
+    {
+      "attempt": 2,
+      "exit": 0,
+      "wallMs": 19579,
+      "activeMs": 19579,
+      "tokens": {
+        "input": 16676,
+        "output": 2385,
+        "cacheRead": 70208,
+        "cacheWrite": 0,
+        "reasoning": 906,
+        "grand_total_with_cache": 90175
+      },
+      "flagFound": true,
+      "evidenceFiles": 6
+    },
+    {
+      "attempt": 3,
+      "exit": 0,
+      "wallMs": 15105,
+      "activeMs": 15105,
+      "tokens": {
+        "input": 10678,
+        "output": 1802,
+        "cacheRead": 63296,
+        "cacheWrite": 0,
+        "reasoning": 586,
+        "grand_total_with_cache": 76362
+      },
+      "flagFound": true,
+      "evidenceFiles": 5
+    }
+  ],
+  "tokens": {
+    "median": 90175,
+    "min": 76362,
+    "max": 150501
+  },
+  "wallMs": {
+    "median": 19579,
+    "min": 15105,
+    "max": 41680
+  },
+  "clock": "wallMs==activeMs for -p one-shot (dual-clock naming per STANDARD; model wait included)",
+  "columns": [
+    "input",
+    "output",
+    "cacheRead",
+    "cacheWrite",
+    "reasoning"
+  ],
+  "flag": "helm{re_ok}",
+  "finish": {
+    "ok": true,
+    "note": "compileFinish passed: exact-slice grounded + I19 coverage row present (completion.ts zero-change)"
+  }
+}

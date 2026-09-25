@@ -1,0 +1,23 @@
+All five steps completed and verified against the binary itself.
+
+**Evidence files** (`evidence/attempt-3/`):
+- `E-001-sha.txt` — `4e0706a268ab67e51b261e010759549d175c5419967662a8476deac1e7dadaac  crackme`
+- `E-002-elf.txt` — ELF64 LSB PIE, x86-64, entry 0x1090
+- `E-003-syms.txt` — local symbol `check` at 0x1179 (124 bytes), object `enc.0` (11 bytes) at 0x2040
+- `E-004-disasm.txt` — full `objdump -d`
+- `E-005-decode.txt` — decode trace
+
+**Credential-check routine** `check` (0x1179): requires input length 11 (`movq $0xb`), then loops:
+```
+movzbl (%rax),%eax        # input[i]
+xor    $0x5a,%eax         # <-- single-byte XOR key 0x5a
+lea    0xe76(%rip),%rcx   # 2040 <enc.0>
+cmp    %al,%dl            # == enc[i]
+```
+Obfuscated immediate bytes at `enc.0` (`.rodata` +0x40): `32 3f 36 37 21 28 3f 05 35 31 27`
+
+Decoding (each byte XOR 0x5a): `68 65 6c 6d 7b 72 65 5f 6f 6b 7d` → `helm{re_ok}`
+
+Dynamic confirmation: feeding it to the binary yields `ACCESS GRANTED` (exit 0); a wrong value yields `denied` (exit 2).
+
+CRED=helm{re_ok}

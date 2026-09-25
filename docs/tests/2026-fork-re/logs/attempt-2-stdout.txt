@@ -1,0 +1,27 @@
+All four required commands ran and outputs are saved under `evidence/attempt-2/` (plus two supporting artifacts).
+
+**Analysis**
+
+Credential-check routine: `check` @ `0x1179` (124 bytes, symbol in E-003). The compare loop at `0x11b0` does:
+
+```
+11be: 83 f0 5a        xor    $0x5a,%eax        ; obfuscated immediate = single-byte XOR key 0x5a
+11c3: 48 8d 0d ...    lea    0xe76(%rip),%rcx  ; # 2040 <enc.0>
+```
+
+`enc.0` @ `0x2040` (.rodata, 11 bytes — matches the `movq $0xb` length gate in `check`):
+
+```
+32 3f 36 37 21 28 3f 05 35 31 27
+```
+
+XOR each byte with `0x5a`:
+
+| 32→`h` | 3f→`e` | 36→`l` | 37→`m` | 21→`{` | 28→`r` | 3f→`e` | 05→`_` | 35→`o` | 31→`k` | 27→`}` |
+|---|---|---|---|---|---|---|---|---|---|---|
+
+Dynamic confirmation (fixture copy in `/tmp`, no network): input `helm{re_ok}` → `ACCESS GRANTED`, exit 0; `wrongpass` → `denied`, exit 2.
+
+Evidence: E-001 sha `4e0706a2…adaac`, E-002 ELF64/x86-64 PIE, E-003 syms, E-004 disasm, E-005 `.rodata` hex dump, E-006 decode trace.
+
+CRED=helm{re_ok}

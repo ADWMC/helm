@@ -1,0 +1,9 @@
+
+crackme:     file format elf64-x86-64
+
+Contents of section .rodata:
+ 2000 01000200 00000000 63726163 6b6d652d  ........crackme-
+ 2010 313a2065 6e746572 20637265 64656e74  1: enter credent
+ 2020 69616c3a 20000a00 41434345 53532047  ial: ...ACCESS G
+ 2030 52414e54 45440064 656e6965 64000000  RANTED.denied...
+ 2040 323f3637 21283f05 353127             2?67!(?.51'     

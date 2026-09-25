@@ -1,0 +1,9 @@
+Routine: check (0x1179) in .text; compare loop at 0x11b0..0x11ec.
+  11be: 83 f0 5a    xor    $0x5a,%eax        ; single-byte XOR key = 0x5a
+  11c3: lea enc.0(%rip) -> 0x2040 (.rodata)  ; 11 bytes (matches movq $0xb len)
+enc.0 @ 0x2040: 32 3f 36 37 21 28 3f 05 35 31 27
+decode (b ^ 0x5a):
+  32->68 'h', 3f->65 'e', 36->6c 'l', 37->6d 'm', 21->7b '{',
+  28->72 'r', 3f->65 'e', 05->5f '_', 35->6f 'o', 31->6b 'k', 27->7d '}'
+plaintext = helm{re_ok}   (len 11 == 0xb, matches check's length gate)
+dynamic verification: input "helm{re_ok}" -> ACCESS GRANTED (exit 0); "wrongpass" -> denied (exit 2)

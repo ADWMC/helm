@@ -1,0 +1,4 @@
+enc: 32 3f 36 37 21 28 3f 05 35 31 27
+key: 0x5a  len: 11
+plaintext: helm{re_ok}
+CRED=helm{re_ok}

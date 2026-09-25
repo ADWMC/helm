@@ -1,0 +1,78 @@
+{
+  "schema": "helm-pi-report/1",
+  "evidenceAudit": {
+    "acquisition": 1,
+    "utilization": 0,
+    "unsourcedOmissionJournals": 0,
+    "note": "acquisition vs utilization: a no-check is not a cannot-use; diagnostic-set acquisition is non-negotiable"
+  },
+  "engagement": {
+    "roe": {
+      "allowedTargets": [
+        "http://127.0.0.1:18081*"
+      ],
+      "outOfScope": [],
+      "highRisk": "deny",
+      "maxBudgetTokens": 100000
+    },
+    "attack": {
+      "playbook": null,
+      "techniques": [],
+      "techniqueCount": 0,
+      "source": "playbook attack field (mapped against findings manually until W4 targetKind)"
+    }
+  },
+  "generatedAt": "2026-09-25T05:57:30.181Z",
+  "run": {
+    "status": "open",
+    "revision": 5,
+    "goal": "crackme RE chain finish with coverage gate and 1 measured evidence slice",
+    "allowedTargets": [
+      "http://127.0.0.1:18081*"
+    ],
+    "highRisk": "deny"
+  },
+  "findings": 0,
+  "evidence_status": {
+    "exploited": 0,
+    "confirmed": 1,
+    "unconfirmed": 0
+  },
+  "steps": [
+    {
+      "id": "recon",
+      "kind": "recon",
+      "status": "done",
+      "target": "local:crackme"
+    }
+  ],
+  "observations": [
+    {
+      "id": "o1",
+      "stepId": "recon",
+      "receiptSeq": 1,
+      "status": "confirmed",
+      "hits": []
+    }
+  ],
+  "coverage": {
+    "requireCoverage": true,
+    "waived": false,
+    "entries": [
+      {
+        "id": "cov-re-1",
+        "surface": "re chain: no-network-termination (fixture has no sockets — checked via objdump imports)",
+        "outcome": "clean",
+        "createdAtRevision": 2
+      }
+    ]
+  },
+  "diagnostics": [],
+  "claims": [],
+  "directions": [],
+  "hints": [],
+  "deliverability": {
+    "structural_finish": "not completed",
+    "semantic_goal": "unproven — needs GoalVerifier (L4)"
+  }
+}

@@ -1,0 +1,20 @@
+All four steps executed locally (no network calls; the kernel's scope gate only target-gates network-bearing calls — `helmpi_validate_scope` reported `no_spec`, so no Spec was fabricated; only local file reads were used).
+
+**Evidence written to `evidence/attempt-1/`:**
+- `E-001-sha.txt` → `4e0706a268ab67e51b261e010759549d175c5419967662a8476deac1e7dadaac  crackme`
+- `E-002-elf.txt` → ELF64, x86-64, DYN (PIE), entry 0x1090
+- `E-003-syms.txt` → `check` FUNC LOCAL @0x1179 (size 124), `main` @0x11f5
+- `E-004-disasm.txt` → full `objdump -d`
+- `E-005-decode.txt` → decode trace (extra)
+
+**Locating the credential check:** `check()` at `0x1179`:
+- `0x1185: movq $0xb,-0x10(%rbp)` → length gate = 11 bytes
+- `0x11be: 83 f0 5a  xor $0x5a,%eax` → single-byte XOR key **0x5a** applied to each input char
+- `0x11c3: lea 0xe76(%rip),%rcx # 2040 <enc.0>` → obfuscated table in `.rodata` at `0x2040`
+- `0x11d4: cmp %al,%dl` → byte-wise compare, mismatch ⇒ return 0
+
+**Obfuscated bytes (`.rodata` @0x2040):** `32 3f 36 37 21 28 3f 05 35 31 27`
+
+**Decode (each byte XOR 0x5a):** `68 65 6c 6d 7b 72 65 5f 6f 6b 7d` → `h e l m { r e _ o k }`
+
+CRED=helm{re_ok}
