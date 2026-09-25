@@ -23,6 +23,7 @@ export function exportReportJson(ledger: Ledger): Record<string, unknown> {
 	const count = (s: string) => statuses.filter((x) => x.status === s).length;
 	return {
 		schema: "helm-pi-report/1",
+		evidenceAudit: buildEvidenceAudit(ledger, ws),
 		generatedAt: new Date().toISOString(),
 		run: {
 			status: ws.runStatus,
@@ -67,6 +68,23 @@ export function exportReportJson(ledger: Ledger): Record<string, unknown> {
 			structural_finish: ws.runStatus === "completed" ? "recorded in journal" : "not completed",
 			semantic_goal: "unproven — needs GoalVerifier (L4)",
 		},
+	};
+}
+
+/** W3-T01 信息面敌意假设 (§2.7 #11c): acquisition vs utilization — 没查≠查了不会; 诊断集获取不可协商. */
+function buildEvidenceAudit(ledger: Ledger, ws: Workspace): Record<string, unknown> {
+	let eviSkips = 0;
+	try {
+		eviSkips = ledger.journal().filter((r) => r.kind === "evi_skip").length;
+	} catch {
+		eviSkips = 0;
+	}
+	const claimsWithBasis = ws.claims.filter((c) => Array.isArray(c.evidenceRefs) && c.evidenceRefs.length > 0).length;
+	return {
+		acquisition: ws.observations.length,
+		utilization: claimsWithBasis,
+		unsourcedOmissionJournals: eviSkips,
+		note: "acquisition vs utilization: a no-check is not a cannot-use; diagnostic-set acquisition is non-negotiable",
 	};
 }
 

@@ -43,6 +43,7 @@ const SPEC_KEYS = new Set([
 	"highRisk",
 	"playbookId",
 	"allowExternal",
+	"diagnosticSet",
 	"requireCoverage",
 	"maxTokens",
 ]);
@@ -160,6 +161,12 @@ export function validateHelmSpec(raw: unknown): ValidationResult<Record<string, 
 	}
 	if ("requireCoverage" in raw && typeof raw.requireCoverage !== "boolean") {
 		failures.push({ path: "requireCoverage", message: "expected boolean" });
+	}
+	if (
+		"diagnosticSet" in raw &&
+		(!Array.isArray(raw.diagnosticSet) || raw.diagnosticSet.some((d) => typeof d !== "string"))
+	) {
+		failures.push({ path: "diagnosticSet", message: "expected array of strings" });
 	}
 	if ("maxTokens" in raw && typeof raw.maxTokens !== "number") {
 		failures.push({ path: "maxTokens", message: "expected number" });

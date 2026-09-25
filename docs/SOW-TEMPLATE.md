@@ -71,3 +71,32 @@
 `external_access.allow_external` → `Spec.allowExternal`（默认 fail-closed）·
 `coverage_required` → `Spec.requireCoverage`（I19）·
 `forbidden_actions.area/reason` → scope_denied Journal 的 `matched_by/reason`（I14）。
+
+---
+
+## Engagement 扩件（W3-T01，四件模板——填完并入 Spec 归档）
+
+> 对齐 `references/playbooks/*/yaml` 的 `attack: [T…]` 字段与 `references/attack-navigator.json`。
+> **Spec 特异性 lint L1–L6 门在 `helm run`：lint 不过=Spec 非法拒进**（§2.7.1）。
+
+### A. RoE（Rules of Engagement）
+- 授权边界（allowedTargets 精确列出; CIDR/glob 必须注明覆盖段）
+- 明令禁止项（outOfScope 追加 + 破限外行为红线：不碰第三方、不落持久化后门）
+- 升级/中止条件（budget 熔断、scope 越界=硬停）
+
+### B. ConOps（概念运行）
+- 阶段门引用（playbook phases 完成判据非路线图）
+- 诊断集（`spec.diagnosticSet` 必查属性集——**获取不可协商,没查≠查了不会**）
+- 双时钟与预算记账（wall/active、token 六列）
+
+### C. OPPLAN（作业计划）
+- 里程碑→playbook phase 映射（recon→test→exploit→finish）
+- 每阶段产物（evidence E-id、coverage 负空间记录 I19）
+- 回滚/降级路径（instead 路径、升级阶梯 Dark-Moon why+instead）
+
+### D. ATT&CK 映射
+- 目标域→技术 ID 清单（`attack: [T…]`,对齐 attack-navigator.json）
+- 覆盖率口径：mapped findings / attempted techniques（报告 acquisition/utilization 审计行同口径复用）
+
+### 信息面敌意假设（§2.7 #11c）
+对手可拆分/延迟/加价诊断面诱导提前收工：**报告必含 acquisition/utilization 审计行**（没查≠查了不会）;诊断集获取列为不可协商;审计字段契约见 `exportReportJson.evidenceAudit`。

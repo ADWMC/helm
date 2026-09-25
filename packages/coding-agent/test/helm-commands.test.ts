@@ -64,7 +64,13 @@ describe("helm product commands", () => {
 		fs.mkdirSync(path.dirname(specPath), { recursive: true });
 		fs.writeFileSync(
 			specPath,
-			JSON.stringify({ goal: "t", allowedTargets: ["http://127.0.0.1:8080"], highRisk: "deny" }),
+			JSON.stringify({
+				goal: "Find IDOR on /notes ids 1-3 and verify unit price fields on /cart",
+				allowedTargets: ["http://127.0.0.1:8080"],
+				highRisk: "deny",
+				maxTokens: 100000,
+				diagnosticSet: ["unit price", "notes id"],
+			}),
 			"utf8",
 		);
 		process.exitCode = 0;
@@ -109,5 +115,23 @@ describe("helm product commands", () => {
 		await expect(runHelmCommand(args, cwd)).resolves.toBe(false);
 		expect(args).toEqual(["--name", "x"]); // 'run' removed so it is not read as a prompt
 		expect(process.exitCode ?? 0).toBe(0);
+	});
+	it("W3-T01: lint 不过 = Spec 非法 — run refused (vague goal), no fall-through", async () => {
+		fs.mkdirSync(path.join(cwd, ".helm"), { recursive: true });
+		fs.writeFileSync(
+			path.join(cwd, ".helm", "spec.json"),
+			JSON.stringify({
+				goal: "看看这个网站安不安全",
+				allowedTargets: ["http://127.0.0.1:18081"],
+				highRisk: "deny",
+				maxTokens: 1000,
+			}),
+			"utf8",
+		);
+		const args = ["run"];
+		const res = await runHelmCommand(args, cwd);
+		expect(res).toBe(true); // handled = refused (did not fall through)
+		expect(process.exitCode).toBe(2);
+		expect(args).toEqual(["run"]); // subcommand NOT stripped when refused
 	});
 });

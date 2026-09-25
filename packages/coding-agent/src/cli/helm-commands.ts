@@ -20,6 +20,7 @@ import { resolveLocale, t } from "@adwmc/helm-kernel/i18n";
 import { Ledger } from "@adwmc/helm-kernel/ledger";
 import { openToolMemory } from "@adwmc/helm-kernel/memory";
 import { validateScopeQuery } from "@adwmc/helm-kernel/scope";
+import { lintHelmSpec } from "@adwmc/helm-kernel/spec-lint";
 
 const HELM_COMMANDS: ReadonlySet<string> = new Set([
 	"spec",
@@ -87,6 +88,14 @@ export async function runHelmCommand(args: string[], cwd: string = process.cwd()
 			}
 			console.log(t("cli.spec.init.written", { path: specPath }, resolveLocale(cwd)) + tpl);
 			console.log(t("cli.spec.init.hint", {}, resolveLocale(cwd)));
+			{
+				// W3-T01: 即时反馈 — show L1-L6 gaps of the fresh scaffold (non-blocking).
+				const hints = lintHelmSpec(scaffold as Parameters<typeof lintHelmSpec>[0]);
+				if (hints.length > 0) {
+					console.log("spec lint hints (fill before run):");
+					for (const f of hints) console.log(`  [${f.rule}] ${f.message}`);
+				}
+			}
 			process.exitCode = 0;
 			return true;
 		}
@@ -108,6 +117,13 @@ export async function runHelmCommand(args: string[], cwd: string = process.cwd()
 						console.error(
 							`invalid spec schema at ${path}: ${sv.failures.map((f) => `${f.path}: ${f.message}`).join(", ")}`,
 						);
+						process.exitCode = 2;
+						return true;
+					}
+					const lintV = lintHelmSpec(parsed as Parameters<typeof lintHelmSpec>[0]);
+					if (lintV.length > 0) {
+						console.error("spec lint failed (L1-L6):");
+						for (const f of lintV) console.error(`  [${f.rule}] ${f.message}`);
 						process.exitCode = 2;
 						return true;
 					}
@@ -209,6 +225,20 @@ export async function runHelmCommand(args: string[], cwd: string = process.cwd()
 		case "run":
 		case "resume": {
 			if (existsSync(specPath)) {
+				try {
+					const rawSpec = JSON.parse(readFileSync(specPath, "utf8"));
+					const lintR = lintHelmSpec(rawSpec as Parameters<typeof lintHelmSpec>[0]);
+					if (lintR.length > 0) {
+						console.error("spec lint failed — run refused (L1-L6):");
+						for (const f of lintR) console.error(`  [${f.rule}] ${f.message}`);
+						process.exitCode = 2;
+						return true;
+					}
+				} catch {
+					console.error(`unreadable spec at ${specPath} — run refused`);
+					process.exitCode = 2;
+					return true;
+				}
 				let goal = "";
 				try {
 					goal = String((JSON.parse(readFileSync(specPath, "utf8")) as { goal?: string }).goal ?? "");

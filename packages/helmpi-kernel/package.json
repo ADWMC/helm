@@ -4,6 +4,7 @@
   },
   "type": "module",
 	"exports": {
+		"./spec-lint": "./src/spec-lint.ts",
 		"./i18n": "./src/i18n/index.ts",
 		"./i18n/en.json": "./i18n/en.json",
 		"./i18n/zh-CN.json": "./i18n/zh-CN.json",
