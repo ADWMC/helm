@@ -2,7 +2,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
-import { resetLocaleCache, resolveLocale } from "@adwmc/helm-kernel/i18n";
+import { detectSystemLocale, resetLocaleCache, resolveLocale } from "@adwmc/helm-kernel/i18n";
 import { openToolMemory } from "@adwmc/helm-kernel/memory";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { printHelp } from "../src/cli/args.ts";
@@ -95,14 +95,45 @@ describe("T07 ⑤ Run 层零编号菜单 (archived real-machine logs)", () => {
 	});
 });
 
-describe("T07 ⑥ help localization (zh-CN footer; default en)", () => {
+describe("T07 ⑥ help localization (zh-CN footer; default = system auto)", () => {
+	// Auto-detect tier contract: default follows the system (POSIX lang → OS locale →
+	// timezone); an explicit POSIX locale pins the tier deterministically on any host.
+	const saved = {
+		LC_ALL: process.env.LC_ALL,
+		LC_MESSAGES: process.env.LC_MESSAGES,
+		LANG: process.env.LANG,
+		AGENT_DIR: process.env.HELM_CODING_AGENT_DIR,
+	};
+
+	beforeEach(() => {
+		// isolate the global-settings tier (real ~/.helm/settings.json must not steer this test)
+		process.env.HELM_CODING_AGENT_DIR = path.join(os.tmpdir(), "ux-tui-i18n-no-global-settings");
+		delete process.env.LC_ALL;
+		delete process.env.LC_MESSAGES;
+		delete process.env.LANG;
+	});
+
 	afterEach(() => {
 		delete process.env.HELM_LOCALE;
+		for (const [k, v] of Object.entries(saved)) {
+			if (v === undefined) delete process.env[k];
+			else process.env[k] = v;
+		}
 		resetLocaleCache();
 	});
 
-	it("default locale renders English footer", () => {
+	it("default locale follows system auto-detect (footer matches the resolved locale)", () => {
 		resetLocaleCache();
+		const locale = resolveLocale(process.cwd());
+		expect(locale).toBe(detectSystemLocale());
+		const out = capture(() => printHelp());
+		expect(out).toContain(locale === "zh-CN" ? "运行 `helm <命令> --help`" : "Run `helm <command> --help`");
+	});
+
+	it("explicit POSIX locale pins the auto tier (en_US → English footer)", () => {
+		process.env.LC_ALL = "en_US.UTF-8";
+		resetLocaleCache();
+		expect(resolveLocale(process.cwd())).toBe("en");
 		const out = capture(() => printHelp());
 		expect(out).toContain("Run `helm <command> --help`");
 	});
