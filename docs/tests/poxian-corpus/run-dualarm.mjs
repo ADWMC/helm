@@ -62,13 +62,22 @@ function classify(out, exitCode) {
 async function runOne(item, arm) {
 	const sess = join(HERE, "evidence", "da", `${item.id}-${arm}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`);
 	mkdirSync(sess, { recursive: true });
+	writeFileSync(join(HERE, "logs", `${item.id}-${arm}.START`), String(Date.now()), "utf8");
 	const args = [BIN, "-p"];
 	if (arm === "bare") args.push("--no-extensions");
 	args.push("--model", MODEL, item.prompt);
 	const t0 = Date.now();
 	const r = await new Promise((resolve) => {
+		let settled = false;
+		const done = (v) => {
+			if (!settled) {
+				settled = true;
+				resolve(v);
+			}
+		};
 		const p = spawn(process.execPath, args, {
 			cwd: HERE,
+			stdio: ["ignore", "pipe", "pipe"],
 			env: {
 				...process.env,
 				HELM_CODING_AGENT_SESSION_DIR: sess,
@@ -80,13 +89,17 @@ async function runOne(item, arm) {
 		});
 		let out = "";
 		let err = "";
-		p.stdout.on("data", (d) => (out += d));
-		p.stderr.on("data", (d) => (err += d));
-		const to = setTimeout(() => p.kill("SIGKILL"), 120_000);
-		p.on("close", (code) => {
-			clearTimeout(to);
-			resolve({ stdout: out, stderr: err, status: code });
-		});
+		p.stdout?.on("data", (d) => (out += d));
+		p.stderr?.on("data", (d) => (err += d));
+		p.on("error", (e2) => done({ stdout: out, stderr: err + String(e2), status: -1 }));
+		p.on("exit", (code) => done({ stdout: out, stderr: err, status: code }));
+		const wd = setTimeout(() => {
+			try {
+				p.kill("SIGKILL");
+			} catch {}
+			done({ stdout: out, stderr: err + "\n[watchdog 150s]", status: -1 });
+		}, 150_000);
+		p.on("close", () => clearTimeout(wd));
 	});
 	const out = r.stdout ?? "";
 	writeFileSync(join(HERE, "logs", `${item.id}-${arm}.txt`), out, "utf8");
