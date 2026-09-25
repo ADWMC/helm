@@ -41,7 +41,7 @@
 | W1 内核搬家+基建 | [W1-taskbook.md](W1-taskbook.md) | ✅ 完成（T01–T08,WG1.1–1.7 全绿,已 rebase 上游+原仓归档,§8.1 有记录） | WG1.1–1.7 全绿 |
 | W2 模型防御层接线 | [W2-taskbook.md](W2-taskbook.md) | ✅ 完成（T01–T08,WG2.1–2.3 全绿,suite allPass 5/5,§8.1 记录） | WG2.1–2.3 全绿 |
 | W3 渗透管线 | [W3-taskbook.md](W3-taskbook.md) | ✅ 完成（T01–T06;双臂预算内部分跑,断言①待拍板留痕,§8.1） | WG3.1–3.5 证据齐(四码0/0/0/0) |
-| W4 逆向域 | [W4-taskbook.md](W4-taskbook.md) | 未开始 | WG4.1–4.3 |
+| W4 逆向域 | [W4-taskbook.md](W4-taskbook.md) | ✅ 完成（T01–T05;crackme 3/3+MCP 真往返+targetKind+lint 四项,§8.1） | WG4.1–4.3 全绿(四码 0/0/0/0 @e12936cee) |
 | W5 评测与收官 | [W5-taskbook.md](W5-taskbook.md) | 未开始 | WG5.1–5.5 |
 
 ## 执行规则
