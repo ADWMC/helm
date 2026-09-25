@@ -792,7 +792,7 @@ helm/                                  # ADWMC/helm, 基于 earendil-works/pi
 **T06 真机双臂终局（留痕,证据 `5980aa28f`）**：修四连环保证臂效（**裸臂曾被强制内建劫持**→`HELM_KERNEL_BUILTIN=0` 评估旁路+重编;陈旧 ledger spec 劫持→lab spec 双位;close 挂孙进程;WSL 外杀→setsid 脱钩）。**预算:用 3,099,028/冻 300 万,超 99,028（并发在途记账,已停跑）**;覆盖=P1 的 A01–A36×2 臂（76 条 0 崩）;**断言② S1 连续 PASS（n=36,通过率 0.824,零 ask）**;**断言① 越权拦截 100%=未评估**（B 桶未触达,补跑需拍板;替代证据:G2 真机拦 16+注入 3/3+自检 0,口径不同已注明）;每题 n≥3 与 300 万拍板**数学冲突**（630 次≈500 万）,按预算内优先级降为 n=1 起跑,待拍板。
 **WG3.4 五套回归**：dispatch-smoke fork 版重跑 **L1/T1/T2/T3/S1 全过**（差量如实:task 不在 -p 面,19 工具=编程4+内核15,W4 备案）;bpath-e2e/ab-bpath-slim/wave1-regression/wave4-tools=helm-pi 时代归档证据照录,fork 侧重跑未完（时间约束,记录在案）。
 **波末 rebase**：upstream 无新提交（0 new）=空演练如实记。
-**波门**：round10 四码=CI0/BUILD0/CHECK0/TEST__T__（`__GATE_HEAD__`;期间 `agent-session-concurrent` 两发负载型 flake,隔离复跑 7/7=基线 flaky 同款）。
+**波门**：round10 四码=CI0/BUILD0/CHECK0/TEST0（`98853e8d5`;期间 `agent-session-concurrent` 两发负载型 flake,隔离复跑 7/7=基线 flaky 同款）。
 
 **下一步：Wave 4 逆向知识包**（`docs/tasks/W4-taskbook.md`,WG4.1–4.3;断言①补跑与 n≥3 口径=待拍板项②）。
 
