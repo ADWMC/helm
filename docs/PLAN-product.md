@@ -804,3 +804,20 @@ helm/                                  # ADWMC/helm, 基于 earendil-works/pi
 **WSL 路线（第二轮，失败，已弃）**：Kali 装原生 node（首轮 `REAL_APT_EXIT=100` 代理 502，`--fix-missing` 过）→ Debian node 无 TS 支持（`process.features.typescript=false`，`ERR_UNKNOWN_FILE_EXTENSION` 炸 build）→ 换官方 v24.21 再跑：`BUILD_EXIT=0 CHECK_EXIT=0 TEST_EXIT=1`，挂 3 workspace 22 文件 = 本地回环 `ECONNREFUSED`。**根因 = WSL2 内核 6.18.33.2-microsoft-standard-WSL2 回环监听激活竞态**：listen() 返回成功后 ~5–20ms 内同机 connect 必吃 RST，**跨语言复现**（python 立即连 0/20 过、node 1/5ms 挂 20ms 过、node 同进程必挂、跨进程过；`wsl --shutdown` 重启无效；tcpdump 观测下行为漂移=heisenbug；sysctl/nft/dmesg 全干净）。官方 node22 同挂 → 非 Node 版本回归。上游 ubuntu CI 无此内核竞态。
 
 **Windows 原生路线（第三轮，进行中）**：本机 Windows node v24.21.0（`typescript='strip'` ✓，无 Debian 裁剪问题）；回环立即连 5/5 TCP_OK **无竞态** ✓；junction `C:\njs` → `C:\Program Files\nodejs` 使 `process.execPath=C:\njs\node.exe` 无空格 → 解上游 shell:true 空格 bug（MKLINK_EXIT=0，零上游改动）；plain env 消解 EALLOWSCRIPTS（consumer install plain 复现已过）。**且上游 CI 本就跑裸 `npm test`（`ci.yml:42`），不用 test.sh** → WG0.1 权威命令对齐为 `npm ci && build && check && npm test`。
+
+---
+
+**✅ WAVE 4 逆向知识包（WG4.1–WG4.3 证据齐,2026-09,任务书 T01–T05 全完成）**
+
+**T01 RE 知识包**：`references/re/` 域+4 条可执行链（破壳熵/弱加密/固件/协议重放;open-reverselab 范式自研改写零搬运,信号可复现、链终落 E-id）+总索引四要素挂行;`npm run check` exit 0。
+**T02 真 MCP e2e**：内核 `McpBridge` ↔ **真 OGhidra FastMCP**（python3 stdio,无 SDK=P10）——initialize+tools/list+tools/call **roundtrip PASS**（`2026-mcp-e2e/evidence/e2e-report.json`）;ScopeGate 真配置三态（高危拒/越界拒/在册过）;fake 单测标注被 e2e 取代;**残余按 §7.2 续记**:Ghidra :8080 绑 GUI CodeBrowser,headless 数据查询延后。
+**T03 targetKind**：`url|host|sample_hash` 严格枚举;sample_hash=**精确比对**（glob 反拒 `hash_glob_denied`）;host=主机级归一;未知 kind fail-closed;G2 hash 型 token pre-exec 抽取→block+journal`{phase:pre-exec,at>0}`;测试 5+kernel 150/150。
+**T04 reverse playbook+lint**：reverse.yaml 悬空 ref→本波 RE pack、`function_claim_slices`(G5)与`coverage_records`(I19)交付物就位、**finish 门 completion.ts 零改动**;**新建 lint-playbooks 4项**当场抓两旧债（web-pentest 悬空 `web/index.md`→按缺失域规则清;parser `gate_out→gateOut` 改名勘误）;coverage 样本 `2026-fork-re/coverage-sample.json`。
+**T05 crackme 真机 suite**：自建 XOR fixture（授权自证,`crackme.c` 随库）→ **首跑 pass=true:flagAll 3/3 解码、evidAll≥4 E-id/轮、finish(coverage) 真过**（exact-slice+I19,completion.ts 零改动）、报告 md+json 双胞;stats:R-gate n=3,token median **90,175**(76,362–150,501),wall median **19,579ms**;MANIFEST 刷新;残余=单样本一层 XOR(泛化非波门要求)+`file` 缺走 readelf。
+
+**波末 rebase**：upstream 无新提交（0 new,连续两波空演练如实记）。
+**波门**：round10 四码=CI0/BUILD0/CHECK0/TEST0（`e12936cee`）。
+
+**提交链（W4,10 笔）**：T01 `b0f24365a`→T02 `687e575a0`→T03 `1c2840d2a`→T04 `05a878ebf`→T05 `0a572c0b7`+`33d035fdb`+`e12936cee`→本记录。
+
+**下一步：Wave 5 等价性与进化环**（`docs/tasks/W5-taskbook.md`,WG5.1–5.5;行为实验/HackSynth 用额需先获用户预算确认=拍板④待办）。
