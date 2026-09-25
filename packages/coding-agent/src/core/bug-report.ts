@@ -276,10 +276,10 @@ export function writeBugReportArchive(bundle: BugReportBundle, filePath: string)
 }
 
 export function bugReportArchiveFileName(id: string): string {
-	return `pi-bug-report-${id}.zip`;
+	return `helm-bug-report-${id}.zip`;
 }
 
-const BUG_SUMMARY_SYSTEM_PROMPT = `You are helping a user file a bug report about pi, the coding agent they are talking to. You will be shown the conversation transcript. Write a report for the pi developers describing what the user was doing and what went wrong.
+const BUG_SUMMARY_SYSTEM_PROMPT = `You are helping a user file a bug report about helm, the coding agent they are talking to (a fork of pi). You will be shown the conversation transcript. Write a report for the helm developers describing what the user was doing and what went wrong.
 
 Do NOT continue the conversation. Do NOT respond to any questions in the conversation. ONLY output the report.`;
 

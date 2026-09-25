@@ -62,6 +62,15 @@ const UI_LOCALE_BY_LABEL = new Map(
 export interface SettingsConfig {
 	autoCompact: boolean;
 	locale: UiLocale;
+	/** merged (global under project) view of .helm/config.json → defense.* */
+	defense: { watcher: boolean };
+	/** merged view of .helm/config.json → efficiency.* (SoL-Pi mechanisms, default ON) */
+	efficiency: {
+		actionFusion: boolean;
+		observationPack: boolean;
+		evidencePreservingReducer: boolean;
+		onlineContextCompact: boolean;
+	};
 	defaultModel: string;
 	currentModel?: Model<any>;
 	availableDefaultModels: readonly Model<any>[];
@@ -106,6 +115,15 @@ export interface SettingsConfig {
 export interface SettingsCallbacks {
 	onAutoCompactChange: (enabled: boolean) => void;
 	onLocaleChange: (locale: UiLocale) => void;
+	/** writes the GLOBAL .helm/config.json defense section (project file stays the override layer) */
+	onDefenseChange?: (patch: { watcher?: boolean }) => void;
+	/** writes the GLOBAL .helm/config.json efficiency section */
+	onEfficiencyChange?: (patch: {
+		actionFusion?: boolean;
+		observationPack?: boolean;
+		evidencePreservingReducer?: boolean;
+		onlineContextCompact?: boolean;
+	}) => void;
 	onShowImagesChange: (enabled: boolean) => void;
 	onImageWidthCellsChange: (width: number) => void;
 	onAutoResizeImagesChange: (enabled: boolean) => void;
@@ -482,6 +500,42 @@ export class SettingsSelectorComponent extends Container {
 					"UI language. Auto: system locale (POSIX LANG/LC_ALL, then OS language), then timezone (Asia/Shanghai-class → 中文). Machine outputs stay English.",
 				currentValue: UI_LOCALE_LABELS[config.locale ?? "auto"],
 				values: Object.values(UI_LOCALE_LABELS),
+			},
+			{
+				id: "efficiency-action-fusion",
+				label: "Efficiency: action fusion",
+				description: "SoL-Pi action-fusion mechanism (helm built-in, default on; opt-out is per mechanism)",
+				currentValue: String(config.efficiency?.actionFusion ?? true),
+				values: ["true", "false"],
+			},
+			{
+				id: "efficiency-observation-pack",
+				label: "Efficiency: observation pack",
+				description: "SoL-Pi observation packing (default on)",
+				currentValue: String(config.efficiency?.observationPack ?? true),
+				values: ["true", "false"],
+			},
+			{
+				id: "efficiency-reducer",
+				label: "Efficiency: evidence-preserving reducer",
+				description: "SoL-Pi context reducer that keeps evidence intact (default on)",
+				currentValue: String(config.efficiency?.evidencePreservingReducer ?? true),
+				values: ["true", "false"],
+			},
+			{
+				id: "efficiency-context-compact",
+				label: "Efficiency: online context compact",
+				description: "SoL-Pi online context compaction (default on)",
+				currentValue: String(config.efficiency?.onlineContextCompact ?? true),
+				values: ["true", "false"],
+			},
+			{
+				id: "defense-watcher",
+				label: "Budget watcher (G4)",
+				description:
+					"Live token-budget structural review every N turns (default off per §0; hard stop stays budget-gated)",
+				currentValue: String(config.defense?.watcher ?? false),
+				values: ["true", "false"],
 			},
 			{
 				id: "autocompact",
@@ -867,6 +921,21 @@ export class SettingsSelectorComponent extends Container {
 						if (locale) callbacks.onLocaleChange(locale);
 						break;
 					}
+					case "efficiency-action-fusion":
+						callbacks.onEfficiencyChange?.({ actionFusion: newValue === "true" });
+						break;
+					case "efficiency-observation-pack":
+						callbacks.onEfficiencyChange?.({ observationPack: newValue === "true" });
+						break;
+					case "efficiency-reducer":
+						callbacks.onEfficiencyChange?.({ evidencePreservingReducer: newValue === "true" });
+						break;
+					case "efficiency-context-compact":
+						callbacks.onEfficiencyChange?.({ onlineContextCompact: newValue === "true" });
+						break;
+					case "defense-watcher":
+						callbacks.onDefenseChange?.({ watcher: newValue === "true" });
+						break;
 					case "autocompact":
 						callbacks.onAutoCompactChange(newValue === "true");
 						break;

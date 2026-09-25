@@ -158,4 +158,43 @@ describe("SettingsSelectorComponent", () => {
 		list.handleInput("\r"); // English → 中文（简体）
 		expect(onLocaleChange.mock.calls.flat()).toEqual(["en", "zh-CN"]);
 	});
+
+	it("offers helm rows (efficiency ×4 + budget watcher) and reports their toggles", () => {
+		const onDefenseChange = vi.fn();
+		const onEfficiencyChange = vi.fn();
+		const config = {
+			locale: "auto",
+			defense: { watcher: false },
+			efficiency: {
+				actionFusion: true,
+				observationPack: true,
+				evidencePreservingReducer: true,
+				onlineContextCompact: true,
+			},
+			defaultModel: "not set",
+			availableDefaultModels: [],
+			modelThinkingLevels: {},
+			availableThemes: [],
+			warnings: {},
+		} as unknown as SettingsConfig;
+		const callbacks = { onDefenseChange, onEfficiencyChange, onCancel: () => {} } as unknown as SettingsCallbacks;
+		// the list caps visible rows — locate via search (same pattern as the cycle tests)
+		const searchCycle = (label: string, times: number) => {
+			const list = new SettingsSelectorComponent(config, callbacks).getSettingsList();
+			const visible = stripAnsi(list.render(200).join("\n"));
+			for (const character of label) list.handleInput(character);
+			expect(stripAnsi(list.render(200).join("\n"))).toContain(label);
+			for (let i = 0; i < times; i++) list.handleInput("\r");
+			return visible;
+		};
+		void searchCycle("Budget watcher (G4)", 1);
+		expect(onDefenseChange.mock.calls.flat()).toEqual([{ watcher: true }]);
+		void searchCycle("Efficiency: action fusion", 1);
+		expect(onEfficiencyChange.mock.calls.flat()).toEqual([{ actionFusion: false }]);
+		// both rows exist in the unfiltered list too (first page renders Language row)
+		const firstPage = stripAnsi(
+			new SettingsSelectorComponent(config, callbacks).getSettingsList().render(200).join("\n"),
+		);
+		expect(firstPage).toContain("Language / 语言");
+	});
 });

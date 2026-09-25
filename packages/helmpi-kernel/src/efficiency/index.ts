@@ -8,9 +8,8 @@
  * (config separation: their sol-pi.json is not read by the builtin path).
  */
 
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import type { ExtensionFactory } from "@adwmc/helm-coding-agent";
+import { readMergedSection } from "../config-store.ts";
 import { DEFAULT_CONFIG, type SolPiConfig } from "./sol-pi/config.ts";
 import { createSolPiExtension } from "./sol-pi/index.ts";
 
@@ -24,15 +23,9 @@ export interface EfficiencySwitches {
 	readonly cacheWriteReadRatio?: number;
 }
 
-/** Defensive read: missing/invalid file → {} → all defaults (ON). */
+/** Defensive read: missing/invalid files → {} → all defaults (ON). Global tier under project override. */
 export function readHelmEfficiency(cwd: string): EfficiencySwitches {
-	try {
-		const raw = readFileSync(join(cwd, ".helm", "config.json"), "utf8");
-		const cfg = JSON.parse(raw) as { efficiency?: EfficiencySwitches };
-		return cfg.efficiency ?? {};
-	} catch {
-		return {};
-	}
+	return readMergedSection(cwd, "efficiency") as EfficiencySwitches;
 }
 
 /** Upstream defaults (false) overridden by helm decision: each key defaults ON. */

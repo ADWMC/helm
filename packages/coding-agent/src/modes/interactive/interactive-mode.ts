@@ -91,6 +91,7 @@ import type {
 	WorkingIndicatorOptions,
 } from "../../core/extensions/index.ts";
 import { FooterDataProvider, type ReadonlyFooterDataProvider } from "../../core/footer-data-provider.ts";
+import { mergedHelmSection, writeGlobalHelmSection } from "../../core/helm-config.ts";
 import { configureHttpDispatcher, formatHttpIdleTimeoutMs } from "../../core/http-dispatcher.ts";
 import { type AppKeybinding, KeybindingsManager } from "../../core/keybindings.ts";
 import { createCompactionSummaryMessage, createCustomMessage } from "../../core/messages.ts";
@@ -995,7 +996,7 @@ export class InteractiveMode {
 			);
 			const onboarding = theme.fg(
 				"dim",
-				`Pi can explain its own features and look up its docs. Ask it how to use or extend Pi.`,
+				`helm can explain its own features and look up its docs. Ask it how to use or extend helm.`,
 			);
 			this.builtInHeader = new ExpandableText(
 				() => `${logo}\n${compactInstructions}\n${compactOnboarding}\n\n${onboarding}`,
@@ -1253,7 +1254,7 @@ export class InteractiveMode {
 		}
 
 		if (extendedKeysFormat === "xterm") {
-			return "tmux extended-keys-format is xterm. Pi works best with csi-u. Add `set -g extended-keys-format csi-u` to ~/.tmux.conf and restart tmux.";
+			return "tmux extended-keys-format is xterm. helm works best with csi-u. Add `set -g extended-keys-format csi-u` to ~/.tmux.conf and restart tmux.";
 		}
 
 		return undefined;
@@ -4753,6 +4754,13 @@ export class InteractiveMode {
 				{
 					autoCompact: this.session.autoCompactionEnabled,
 					locale: this.settingsManager.getLocale(),
+					defense: { watcher: mergedHelmSection("defense").watcher === true },
+					efficiency: {
+						actionFusion: mergedHelmSection("efficiency").actionFusion !== false,
+						observationPack: mergedHelmSection("efficiency").observationPack !== false,
+						evidencePreservingReducer: mergedHelmSection("efficiency").evidencePreservingReducer !== false,
+						onlineContextCompact: mergedHelmSection("efficiency").onlineContextCompact !== false,
+					},
 					defaultModel,
 					currentModel: this.session.model,
 					availableDefaultModels: this.session.modelRuntime.getAvailableSnapshot(),
@@ -4804,6 +4812,16 @@ export class InteractiveMode {
 						this.showStatus(
 							`Language: ${locale === "auto" ? "auto (system locale/timezone)" : locale} — applies to newly rendered text`,
 						);
+					},
+					onDefenseChange: (patch) => {
+						writeGlobalHelmSection("defense", patch);
+						this.showStatus(
+							`defense.watcher = ${mergedHelmSection("defense").watcher} → ~/.helm/config.json (project .helm/config.json overrides)`,
+						);
+					},
+					onEfficiencyChange: (patch) => {
+						writeGlobalHelmSection("efficiency", patch);
+						this.showStatus(`efficiency updated → ~/.helm/config.json (project .helm/config.json overrides)`);
 					},
 					onShowImagesChange: (enabled) => {
 						this.settingsManager.setShowImages(enabled);

@@ -17,8 +17,7 @@
  *   hallucination, journaled as `valuation_check` (three values asserted).
  */
 
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { readMergedSection } from "./config-store.ts";
 
 export interface UsageLike {
 	input?: number;
@@ -93,20 +92,14 @@ export interface G4ToolVerdict {
 }
 
 export function readDefenseConfig(cwd: string = process.cwd()): DefenseWatchConfig {
-	try {
-		const raw = JSON.parse(readFileSync(join(cwd, ".helm", "config.json"), "utf8")) as {
-			defense?: Partial<DefenseWatchConfig>;
-		};
-		const d = raw.defense ?? {};
-		return {
-			watcher: d.watcher ?? DEFAULT_WATCH.watcher,
-			watcherEveryTurns: d.watcherEveryTurns ?? DEFAULT_WATCH.watcherEveryTurns,
-			...(d.stepToolCap !== undefined ? { stepToolCap: d.stepToolCap } : {}),
-			...(d.sameToolLimit !== undefined ? { sameToolLimit: d.sameToolLimit } : {}),
-		};
-	} catch {
-		return DEFAULT_WATCH;
-	}
+	// global tier (<agentDir>/config.json) under project overrides — see config-store.ts
+	const d = readMergedSection(cwd, "defense") as Partial<DefenseWatchConfig>;
+	return {
+		watcher: d.watcher ?? DEFAULT_WATCH.watcher,
+		watcherEveryTurns: d.watcherEveryTurns ?? DEFAULT_WATCH.watcherEveryTurns,
+		...(d.stepToolCap !== undefined ? { stepToolCap: d.stepToolCap } : {}),
+		...(d.sameToolLimit !== undefined ? { sameToolLimit: d.sameToolLimit } : {}),
+	};
 }
 
 export interface G4Deps {
