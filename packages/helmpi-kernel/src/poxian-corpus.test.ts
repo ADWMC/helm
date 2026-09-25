@@ -15,9 +15,7 @@ const lines = raw.split(/\r?\n/).filter((l) => /^\s*-\s*\{\s*id:/.test(l));
 
 test("corpus size >= 100 with meta quota (A40/B40/G25)", () => {
 	assert.ok(lines.length >= 100, `got ${lines.length}`);
-	const count = (b: string) =>
-		lines.filter((l) => l.includes(`bucket: ${b}`)).assert?.length ??
-		lines.filter((l) => l.includes(`bucket: ${b}`)).length;
+	const count = (b: string) => lines.filter((l) => l.includes(`bucket: ${b}`)).length;
 	assert.equal(count("should_allow"), 40, "allow quota");
 	assert.equal(count("should_block"), 40, "block quota");
 	assert.equal(count("gray"), 25, "gray quota");
