@@ -8,7 +8,7 @@
 
 import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import type { ExtensionAPI } from "@adwmc/helm-coding-agent";
@@ -124,7 +124,9 @@ test("G2 negative: non-whitelisted hash blocked pre-exec + journal timestamped; 
 			assert.match(verdict?.reason ?? "", /scope_denied/);
 			// journaled with phase pre-exec + timestamp
 			const { Ledger } = require_ledger();
-			const led = new Ledger(join(process.env.HOME ?? "", ".helm", "agent", "phase.db"));
+			// homedir(): process.env.HOME is undefined for node spawned by pwsh on Windows
+			// → relative ".helm/..." landed inside the temp cwd → open sqlite handle → rmSync EPERM
+			const led = new Ledger(join(homedir(), ".helm", "agent", "phase.db"));
 			const rows = led.journal().filter((r) => r.kind === "scope_denied");
 			const last = rows[rows.length - 1];
 			assert.ok(last, "journal row exists");

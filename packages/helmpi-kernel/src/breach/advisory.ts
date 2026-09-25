@@ -4,6 +4,7 @@
  */
 
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 
 export type AdvisoryTier = "mandatory" | "recommended" | "hint";
@@ -34,7 +35,7 @@ export interface Reckoned {
 }
 
 export function defaultAdvisoryPath(): string {
-	const root = process.env.HELPI_HOME ?? join(process.env.HOME ?? "", ".helm-pi");
+	const root = process.env.HELPI_HOME ?? join(process.env.HOME ?? homedir(), ".helm-pi");
 	return join(root, "advisories.jsonl");
 }
 

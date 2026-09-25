@@ -11,6 +11,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
+import { fileURLToPath } from "node:url";
 import { createG4Monitor, DEFAULT_WATCH } from "./g4-live.ts";
 import { Ledger } from "./ledger.ts";
 import { blockIfCapped, checkSameTool, checkStepToolCap, type SuperviseConfig } from "./supervise.ts";
@@ -87,7 +88,8 @@ test("negative: supervise never hard-stops — hard stops remain scope/budget on
 
 test("L0/negative: only scope_denied and token_budget_exhausted produce block verdicts in kernel gates", async () => {
 	// structural pin: those are the ONLY kinds that pair journal+block in gate code paths
-	const src = (await import("node:fs")).readFileSync(new URL("./index.ts", import.meta.url).pathname, "utf8");
+	// fileURLToPath: URL.pathname yields `/C:/...` on win32 → readFileSync("C:\C:\...") (Windows portability)
+	const src = (await import("node:fs")).readFileSync(fileURLToPath(new URL("./index.ts", import.meta.url)), "utf8");
 	const blockReasons = [...src.matchAll(/reason: `([^`]+)`/g)].map((m) => m[1] ?? "");
 	const allowed = blockReasons.filter((r) => r.startsWith("scope_denied") || r.startsWith("tripwire"));
 	// tripwire is the CAI layer (W3-T03); no OTHER ad-hoc hard-block reasons exist

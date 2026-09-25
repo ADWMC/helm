@@ -10,6 +10,7 @@
 import { spawnSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, renameSync } from "node:fs";
+import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
@@ -130,7 +131,7 @@ export class ToolMemoryStore {
 
 	/** One-shot import from the legacy helm-pi JSONL store (data continuity). */
 	private migrateLegacyJsonl(): void {
-		const legacy = join(process.env.HOME ?? "", ".helm-pi", "tool-memory.jsonl");
+		const legacy = join(process.env.HOME ?? homedir(), ".helm-pi", "tool-memory.jsonl");
 		if (!existsSync(legacy)) return;
 		const count = (this.db.prepare("SELECT COUNT(*) AS n FROM tool_memory").get() as { n: number }).n;
 		if (count > 0) return;

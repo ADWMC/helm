@@ -14,6 +14,7 @@ import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
+import { fileURLToPath } from "node:url";
 import { exportReport } from "./export.ts";
 import { Ledger } from "./ledger.ts";
 import { parsePlaybookYaml } from "./playbook-yaml.ts";
@@ -34,7 +35,8 @@ test("lint-playbooks#2: phase refs resolve under references/ (dangling → fail)
 	for (const { file, pb } of parsed) {
 		for (const ph of pb.phases) {
 			for (const r of ph.refs ?? []) {
-				const target = join(new URL("./", REF_ROOT).pathname, r);
+				// fileURLToPath: URL.pathname is `/C:/...` on win32 → existsSync false (Windows portability)
+				const target = join(fileURLToPath(new URL("./", REF_ROOT)), r);
 				assert.ok(existsSync(target), `${file}/${ph.id}: dangling ref ${r}`);
 			}
 		}
