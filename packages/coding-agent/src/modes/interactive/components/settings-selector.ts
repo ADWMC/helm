@@ -1,5 +1,6 @@
 import type { ThinkingLevel } from "@adwmc/helm-agent-core";
 import { getSupportedThinkingLevels, type Model, type Transport } from "@adwmc/helm-ai";
+import { catalog, resolveLocale, t } from "@adwmc/helm-kernel/i18n";
 import {
 	type Component,
 	Container,
@@ -58,6 +59,23 @@ const UI_LOCALE_LABELS: Record<UiLocale, string> = {
 const UI_LOCALE_BY_LABEL = new Map(
 	Object.entries(UI_LOCALE_LABELS).map(([value, label]) => [label, value as UiLocale]),
 );
+
+/**
+ * Localize main-list rows AFTER construction (WG1.7 human-facing): label/desc
+ * come from the kernel catalog keys `settings.<id>.label|desc` when present,
+ * otherwise the literal English stays. VALUES are technical enums and stay
+ * English on purpose (callback round-trips match on value text).
+ */
+function localizeSettingItems(items: SettingItem[], params: Record<string, Record<string, string>> = {}): void {
+	const loc = resolveLocale();
+	const cat = catalog(loc);
+	for (const item of items) {
+		const labelKey = `settings.${item.id}.label`;
+		const descKey = `settings.${item.id}.desc`;
+		if (cat[labelKey]) item.label = t(labelKey, {}, loc);
+		if (item.description !== undefined && cat[descKey]) item.description = t(descKey, params[item.id] ?? {}, loc);
+	}
+}
 
 export interface SettingsConfig {
 	autoCompact: boolean;
@@ -907,6 +925,12 @@ export class SettingsSelectorComponent extends Container {
 			values: ["true", "false"],
 		});
 
+		// localize main-list labels/descriptions (must run after all splices above)
+		localizeSettingItems(items, {
+			"follow-up-mode": { key: followUpKey },
+			"model-thinking": { cycleKey: cycleThinkingKey },
+		});
+
 		// Add borders
 		this.addChild(new DynamicBorder());
 
@@ -1042,7 +1066,10 @@ export class SettingsSelectorComponent extends Container {
 				}
 			},
 			callbacks.onCancel,
-			{ enableSearch: true },
+			{
+				enableSearch: true,
+				hints: { search: t("settings.hint.search"), plain: t("settings.hint.plain") },
+			},
 		);
 
 		this.addChild(this.settingsList);

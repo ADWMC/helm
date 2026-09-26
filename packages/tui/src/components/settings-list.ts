@@ -33,6 +33,11 @@ export interface SettingsListTheme {
 
 export interface SettingsListOptions {
 	enableSearch?: boolean;
+	/**
+	 * Caller-localized hint lines (bottom bar). Absent → built-in English copy.
+	 * Keeps this package free of i18n dependencies — the caller owns locale.
+	 */
+	hints?: { search: string; plain: string };
 }
 
 export class SettingsList implements Component {
@@ -46,6 +51,7 @@ export class SettingsList implements Component {
 	private onCancel: () => void;
 	private searchInput?: Input;
 	private searchEnabled: boolean;
+	private hints?: { search: string; plain: string };
 
 	// Submenu state
 	private submenuComponent: Component | null = null;
@@ -67,6 +73,7 @@ export class SettingsList implements Component {
 		this.onChange = onChange;
 		this.onCancel = onCancel;
 		this.searchEnabled = options.enableSearch ?? false;
+		this.hints = options.hints;
 		if (this.searchEnabled) {
 			this.searchInput = new Input();
 		}
@@ -314,12 +321,18 @@ export class SettingsList implements Component {
 
 	private addHintLine(lines: string[], width: number): void {
 		lines.push("");
+		const copy =
+			this.hints ??
+			(this.searchEnabled
+				? {
+						search: "  Type to search · Enter/Space to change · Esc to cancel",
+						plain: "  Enter/Space to change · Esc to cancel",
+					}
+				: undefined);
 		lines.push(
 			truncateToWidth(
 				this.theme.hint(
-					this.searchEnabled
-						? "  Type to search · Enter/Space to change · Esc to cancel"
-						: "  Enter/Space to change · Esc to cancel",
+					copy ? (this.searchEnabled ? copy.search : copy.plain) : "  Enter/Space to change · Esc to cancel",
 				),
 				width,
 			),

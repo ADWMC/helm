@@ -1,5 +1,6 @@
+import { resetLocaleCache } from "@adwmc/helm-kernel/i18n";
 import { setKeybindings } from "@adwmc/helm-tui";
-import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { KeybindingsManager } from "../src/core/keybindings.ts";
 import {
 	type SettingsCallbacks,
@@ -12,9 +13,19 @@ import { createHarness, type Harness } from "./suite/harness.ts";
 
 describe("SettingsSelectorComponent", () => {
 	let harness: Harness | undefined;
+	const savedLocale = process.env.HELM_LOCALE;
 	beforeAll(() => {
 		initTheme("dark");
 		setKeybindings(new KeybindingsManager());
+		// labels are localized now — pin English for deterministic label assertions
+		process.env.HELM_LOCALE = "en";
+		resetLocaleCache();
+	});
+
+	afterAll(() => {
+		if (savedLocale === undefined) delete process.env.HELM_LOCALE;
+		else process.env.HELM_LOCALE = savedLocale;
+		resetLocaleCache();
 	});
 
 	afterEach(() => {
@@ -196,5 +207,43 @@ describe("SettingsSelectorComponent", () => {
 			new SettingsSelectorComponent(config, callbacks).getSettingsList().render(200).join("\n"),
 		);
 		expect(firstPage).toContain("Language / 语言");
+	});
+
+	it("renders the panel in Chinese under HELM_LOCALE=zh-CN (WG1.7 human-facing)", () => {
+		const config = {
+			locale: "zh-CN",
+			defense: { watcher: false },
+			efficiency: {
+				actionFusion: true,
+				observationPack: true,
+				evidencePreservingReducer: true,
+				onlineContextCompact: true,
+			},
+			defaultModel: "not set",
+			availableDefaultModels: [],
+			modelThinkingLevels: {},
+			availableThemes: [],
+			warnings: {},
+		} as unknown as SettingsConfig;
+		const callbacks = { onCancel: () => {} } as unknown as SettingsCallbacks;
+		const prev = process.env.HELM_LOCALE;
+		process.env.HELM_LOCALE = "zh-CN";
+		resetLocaleCache();
+		try {
+			const freshList = () => new SettingsSelectorComponent(config, callbacks).getSettingsList();
+			// search locates rows regardless of first-page visibility
+			const list1 = freshList();
+			for (const character of "自动压缩") list1.handleInput(character);
+			expect(stripAnsi(list1.render(200).join("\n")), "row label localized (autocompact)").toContain("自动压缩");
+			const list2 = freshList();
+			for (const character of "预算监视器") list2.handleInput(character);
+			const filtered = stripAnsi(list2.render(200).join("\n"));
+			expect(filtered).toContain("预算监视器（G4）");
+			expect(filtered, "description localized").toContain("结构性巡检");
+		} finally {
+			if (prev === undefined) delete process.env.HELM_LOCALE;
+			else process.env.HELM_LOCALE = prev;
+			resetLocaleCache();
+		}
 	});
 });

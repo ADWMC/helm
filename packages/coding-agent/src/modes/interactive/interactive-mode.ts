@@ -17,7 +17,7 @@ import {
 	type Model,
 	type Usage,
 } from "@adwmc/helm-ai/compat";
-import { resetLocaleCache } from "@adwmc/helm-kernel/i18n";
+import { resetLocaleCache, t } from "@adwmc/helm-kernel/i18n";
 import type {
 	AutocompleteItem,
 	AutocompleteProvider,
@@ -4810,18 +4810,16 @@ export class InteractiveMode {
 						this.settingsManager.setLocale(locale);
 						resetLocaleCache();
 						this.showStatus(
-							`Language: ${locale === "auto" ? "auto (system locale/timezone)" : locale} — applies to newly rendered text`,
+							t("status.language", { locale: locale === "auto" ? "auto (system locale/timezone)" : locale }),
 						);
 					},
 					onDefenseChange: (patch) => {
 						writeGlobalHelmSection("defense", patch);
-						this.showStatus(
-							`defense.watcher = ${mergedHelmSection("defense").watcher} → ~/.helm/config.json (project .helm/config.json overrides)`,
-						);
+						this.showStatus(t("status.defense", { watcher: String(mergedHelmSection("defense").watcher) }));
 					},
 					onEfficiencyChange: (patch) => {
 						writeGlobalHelmSection("efficiency", patch);
-						this.showStatus(`efficiency updated → ~/.helm/config.json (project .helm/config.json overrides)`);
+						this.showStatus(t("status.efficiency"));
 					},
 					onShowImagesChange: (enabled) => {
 						this.settingsManager.setShowImages(enabled);

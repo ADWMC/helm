@@ -705,9 +705,10 @@ export function hyperlink(text: string, url: string): string {
 function shortenImagePath(filename: string): string {
 	const home = homedir();
 	if (home && (filename === home || filename.startsWith(`${home}/`) || filename.startsWith(`${home}\\`))) {
-		return `~${filename.slice(home.length)}`;
+		// display form is posix-style on every platform (tests and OSC 8 both expect /)
+		return `~${filename.slice(home.length)}`.replaceAll("\\", "/");
 	}
-	return filename;
+	return filename.replaceAll("\\", "/");
 }
 
 /**
