@@ -1,0 +1,227 @@
+helm/packages/agent/
+├── benchmark
+│   ├── session
+│   │   ├── allocation-profile-worker.ts 2KB
+│   │   ├── allocation-profile.ts 2KB
+│   │   ├── benchmark.ts 6KB
+│   │   ├── loaded-footprint-worker.ts 1KB
+│   │   ├── loaded-footprint.ts 2KB
+│   │   ├── README.md [文档] 2KB
+│   │   ├── session-repo-targets.ts 649B
+│   │   ├── session-repo.bench.ts 2KB
+│   │   ├── storage-targets.ts 542B
+│   │   └── storage.bench.ts 984B
+│   └── tsconfig.json [配置] 273B
+├── docs
+│   ├── mobile-handoff
+│   │   └── README.md [文档] 5KB
+│   ├── pico
+│   │   ├── v3
+│   │   │   ├── hardening-handoff.md [文档] 32KB
+│   │   │   ├── plugins.md [文档] 33KB
+│   │   │   └── view-and-events.md [文档] 32KB
+│   │   ├── pico-handoff-v2.md [文档] 226KB
+│   │   ├── pico-rendering.md [文档] 13KB
+│   │   ├── pico-simple-blockers.md [文档] 2KB
+│   │   ├── pico-simple-handoff.md [文档] 152KB
+│   │   ├── pico-usage-guide.md [文档] 77KB
+│   │   ├── pico-usage-v2.md [文档] 39KB
+│   │   ├── pico-v3.md [文档] 149KB
+│   │   └── pico-work.md [文档] 45KB
+│   ├── work-packages
+│   │   ├── 00-runtime1-removal.md [文档] 5KB
+│   │   ├── 01-bound-values-lists.md [文档] 19KB
+│   │   ├── 02-atomic-run-acceptance.md [文档] 23KB
+│   │   ├── 03-remove-drive-deadlines.md [文档] 8KB
+│   │   ├── 04-mutation-publication.md [文档] 15KB
+│   │   ├── 05-direct-durable-drive.md [文档] 55KB
+│   │   ├── 06-session-branch-lane-separation.md [文档] 36KB
+│   │   ├── 07-sqlite-host-ownership-live-forks.md [文档] 19KB
+│   │   ├── 08-named-branch-streaming-forks.md [文档] 29KB
+│   │   └── 09-lane-snapshot-settled-tools.md [文档] 22KB
+│   ├── assistant-durability.md [文档] 19KB
+│   ├── harness.md [文档] 207KB
+│   ├── pico-v3.md [文档] 87KB
+│   ├── pico2.md [文档] 136KB
+│   ├── plugins.md [文档] 72KB
+│   ├── post-wp05-roadmap.md [文档] 24KB
+│   ├── rpc.md [文档] 20KB
+│   ├── runtime-simplification.md [文档] 18KB
+│   ├── telemetry-schema.md [文档] 13KB
+│   ├── telemetry.md [文档] 14KB
+│   ├── tool-durability.md [文档] 34KB
+│   └── values.md [文档] 34KB
+├── scripts
+│   └── generate-telemetry-docs.ts 5KB
+├── src
+│   ├── harness
+│   │   ├── compaction
+│   │   │   ├── branch-summarization.ts 9KB
+│   │   │   ├── compaction.ts 27KB
+│   │   │   └── utils.ts 4KB
+│   │   ├── env
+│   │   │   └── nodejs.ts 28KB
+│   │   ├── execution
+│   │   │   ├── assistant.ts 6KB
+│   │   │   ├── effect-gate.ts 2KB
+│   │   │   └── tools.ts 7KB
+│   │   ├── pico3
+│   │   │   ├── bash.ts 1KB
+│   │   │   ├── bounded.ts 3KB
+│   │   │   ├── chord.ts 7KB
+│   │   │   ├── context.ts 4KB
+│   │   │   ├── harness.ts 29KB
+│   │   │   ├── hooks.ts 1KB
+│   │   │   ├── index.ts [入口] 2KB
+│   │   │   ├── jsonl.ts 12KB
+│   │   │   ├── legacy-tracker.ts 1KB
+│   │   │   ├── membrane.ts 5KB
+│   │   │   ├── memory.ts 9KB
+│   │   │   ├── scheduler.ts 17KB
+│   │   │   ├── session.ts 57KB
+│   │   │   ├── system.ts 14KB
+│   │   │   ├── types.ts 38KB
+│   │   │   └── view.ts 16KB
+│   │   ├── runtime
+│   │   │   ├── drive.ts 4KB
+│   │   │   ├── harness.ts 14KB
+│   │   │   ├── index.ts [入口] 51B
+│   │   │   ├── lane.ts 66KB
+│   │   │   ├── progress.ts 3KB
+│   │   │   ├── reducer.ts 7KB
+│   │   │   ├── restore.ts 6KB
+│   │   │   ├── transcript.ts 4KB
+│   │   │   └── types.ts 5KB
+│   │   ├── session
+│   │   │   ├── commit.ts 3KB
+│   │   │   ├── context.ts 2KB
+│   │   │   ├── fork-policy.ts 3KB
+│   │   │   ├── fork.ts 4KB
+│   │   │   ├── in-memory-storage-state.ts 11KB
+│   │   │   ├── index.ts [入口] 1KB
+│   │   │   ├── memory.ts 15KB
+│   │   │   ├── mutation-line.ts 638B
+│   │   │   ├── session.ts 14KB
+│   │   │   ├── types.ts 17KB
+│   │   │   └── values.ts 6KB
+│   │   ├── tools
+│   │   │   ├── bash.ts 6KB
+│   │   │   ├── edit-diff.ts 16KB
+│   │   │   ├── edit.ts 6KB
+│   │   │   ├── file-mutation-queue.ts 2KB
+│   │   │   ├── image.ts 4KB
+│   │   │   ├── index.ts [入口] 544B
+│   │   │   ├── path-utils.ts 1KB
+│   │   │   ├── read.ts 6KB
+│   │   │   ├── tool-context.ts 190B
+│   │   │   └── write.ts 2KB
+│   │   ├── utils
+│   │   │   ├── adaptive-publisher.ts 3KB
+│   │   │   ├── output-capture.ts 8KB
+│   │   │   ├── shell-output.ts 3KB
+│   │   │   ├── truncate.ts 10KB
+│   │   │   └── usage.ts 1KB
+│   │   ├── agent-harness.ts 21KB
+│   │   ├── config.ts 1KB
+│   │   ├── context.ts 1KB
+│   │   ├── events.ts 10KB
+│   │   ├── hooks.ts 17KB
+│   │   ├── messages.ts 4KB
+│   │   ├── prompt-templates.ts 9KB
+│   │   ├── result.ts 4KB
+│   │   ├── skills.ts 13KB
+│   │   ├── system-prompt.ts 1KB
+│   │   ├── telemetry.ts 18KB
+│   │   └── types.ts 17KB
+│   ├── search
+│   │   └── index.ts [入口] 636B
+│   ├── agent-loop.ts 26KB
+│   ├── agent.ts 19KB
+│   ├── index.ts [入口] 4KB
+│   ├── node.ts 88B
+│   ├── proxy.ts 11KB
+│   ├── stream-fn.ts 683B
+│   └── types.ts 19KB
+└── test
+    └── harness
+        ├── pico3
+        │   ├── atomicity.test.ts [测试] 11KB
+        │   ├── authority.test.ts [测试] 18KB
+        │   ├── busy.test.ts [测试] 10KB
+        │   ├── chord.test.ts [测试] 4KB
+        │   ├── hardening.test.ts [测试] 6KB
+        │   ├── helpers.ts 14KB
+        │   ├── kinds.test.ts [测试] 31KB
+        │   ├── legacy-tracker.test.ts [测试] 1KB
+        │   ├── membrane.test.ts [测试] 6KB
+        │   ├── reads.test.ts [测试] 12KB
+        │   ├── recovery.test.ts [测试] 12KB
+        │   ├── retention.test.ts [测试] 2KB
+        │   ├── spec-context-capabilities.test.ts [测试] 9KB
+        │   ├── spec-plugins-lifecycle.test.ts [测试] 23KB
+        │   ├── spec-scheduler-process.test.ts [测试] 12KB
+        │   ├── spec-storage-history.test.ts [测试] 18KB
+        │   ├── spec-transactions.test.ts [测试] 11KB
+        │   ├── spec-view-events.test.ts [测试] 11KB
+        │   ├── subagent.test.ts [测试] 11KB
+        │   ├── tool-bounds.test.ts [测试] 5KB
+        │   ├── turn.test.ts [测试] 18KB
+        │   ├── types.compile.ts 833B
+        │   ├── view.test.ts [测试] 11KB
+        │   ├── waiters.test.ts [测试] 3KB
+        │   └── watch.test.ts [测试] 7KB
+        ├── runtime
+        │   ├── accept.test.ts [测试] 24KB
+        │   ├── drive-generation.test.ts [测试] 29KB
+        │   ├── drive-public.test.ts [测试] 22KB
+        │   ├── drive-reconcile.test.ts [测试] 24KB
+        │   ├── drive-retry-deferred.test.ts [测试] 22KB
+        │   ├── drive-retry.test.ts [测试] 359B
+        │   ├── drive-structural.test.ts [测试] 51KB
+        │   ├── drive-terminal.test.ts [测试] 9KB
+        │   ├── drive-tools.test.ts [测试] 29KB
+        │   ├── harness.test.ts [测试] 14KB
+        │   ├── lane.test.ts [测试] 13KB
+        │   ├── progress.test.ts [测试] 11KB
+        │   ├── reducer.test.ts [测试] 9KB
+        │   ├── restore.test.ts [测试] 15KB
+        │   ├── test-utils.ts 1KB
+        │   └── watch.test.ts [测试] 20KB
+        ├── adaptive-publisher.test.ts [测试] 2KB
+        ├── branch-summarization.test.ts [测试] 3KB
+        ├── branch.test.ts [测试] 4KB
+        ├── compaction.test.ts [测试] 27KB
+        ├── context.test.ts [测试] 1KB
+        ├── execution-assistant.test.ts [测试] 10KB
+        ├── execution-primitives.test.ts [测试] 22KB
+        ├── execution-tools.test.ts [测试] 9KB
+        ├── gating-storage.test.ts [测试] 4KB
+        ├── instrumented-storage.test.ts [测试] 8KB
+        ├── jsonl-io.test.ts [测试] 4KB
+        ├── jsonl-session-repo-conformance.test.ts [测试] 3KB
+        ├── jsonl-session-repo.test.ts [测试] 9KB
+        ├── jsonl-storage-conformance.test.ts [测试] 1KB
+        ├── jsonl-storage.test.ts [测试] 10KB
+        ├── jsonl-v3-migration.test.ts [测试] 66KB
+        ├── jsonl-v3-stream.test.ts [测试] 6KB
+        ├── memory-conformance.test.ts [测试] 3KB
+        ├── memory-session-repo.test.ts [测试] 3KB
+        ├── memory-storage.test.ts [测试] 1KB
+        ├── mutation-line.test.ts [测试] 2KB
+        ├── nodejs-env.test.ts [测试] 26KB
+        ├── output-capture.test.ts [测试] 5KB
+        ├── prompt-templates.test.ts [测试] 4KB
+        ├── resource-formatting.test.ts [测试] 997B
+        ├── session-context.test.ts [测试] 8KB
+        ├── session-create-branch.test.ts [测试] 3KB
+        ├── session-test-utils.ts 570B
+        ├── skills.test.ts [测试] 5KB
+        ├── storage-backed-session.test.ts [测试] 17KB
+        ├── system-prompt.test.ts [测试] 2KB
+        ├── telemetry.test.ts [测试] 7KB
+        ├── text-line-reader.test.ts [测试] 5KB
+        ├── tools.test.ts [测试] 24KB
+        └── truncate.test.ts [测试] 6KB
+...（已截断：省略 16 个文件；可用 repo_map({path: "..."}) 或 glob/grep 做定向查看）
+树中 200 个文件，23 个目录
+── 巡天（repo_map）

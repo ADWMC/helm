@@ -1,0 +1,82 @@
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\test\suite\harness.ts:165:		transformContext: async (messages: AgentMessage[]) => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\test\suite\agent-session-compaction.test.ts:340:		const transformContext = vi.fn(async (messages: AgentMessage[]) => messages);
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\test\suite\agent-session-compaction.test.ts:341:		harness.session.agent.transformContext = transformContext;
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\test\suite\agent-session-compaction.test.ts:354:		expect(transformContext).not.toHaveBeenCalled();
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\test\suite\agent-session-boundaries.test.ts:493:		harness.session.agent.prepareRequest = () => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\src\core\agent-session.ts:530:		this.agent.beforeToolCall = async ({ toolCall, args }) => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\src\core\agent-session.ts:551:		this.agent.afterToolCall = async ({ toolCall, args, result, isError }) => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\src\core\agent-session.ts:609:		const previousPrepareRequest = this.agent.prepareRequest;
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\src\core\agent-session.ts:610:		this.agent.prepareRequest = async (request, signal) => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\src\core\agent-session.ts:676:		const previousFinishTurn = this.agent.finishTurn;
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\src\core\agent-session.ts:677:		this.agent.finishTurn = async (turn, signal) => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\src\core\agent-session.ts:689:			this.agent.prepareNextTurnWithContext ??
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\src\core\agent-session.ts:690:			(this.agent.prepareNextTurn
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\src\core\agent-session.ts:691:				? async (_turn: PrepareNextTurnContext, signal?: AbortSignal) => await this.agent.prepareNextTurn?.(signal)
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\src\core\agent-session.ts:693:		this.agent.prepareNextTurnWithContext = async (turn, signal) => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\src\core\agent-session.ts:1434:		const previousTransformContext = this.agent.transformContext;
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\src\core\agent-session.ts:1435:		this.agent.transformContext = async (messages, signal) => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\src\core\model-runtime.ts:624:	private async prepareRequest<
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\src\core\model-runtime.ts:673:			const prepared = await this.prepareRequest(
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\src\core\model-runtime.ts:693:			const prepared = await this.prepareRequest(model, options);
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\src\core\model-runtime.ts:709:			const prepared = await this.prepareRequest(model, options);
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\src\core\model-runtime.ts:731:		const prepared = await this.prepareRequest(model, options);
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\src\core\model-runtime.ts:745:			const prepared = await this.prepareRequest(model, options);
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\src\core\model-runtime.ts:762:			const prepared = await this.prepareRequest(model, options);
+C:\Users\Administrator\Documents\GitHub\helm\packages\coding-agent\src\core\sdk.ts:405:		transformContext: async (messages) => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\src\types.ts:61: * Result returned from `beforeToolCall`.
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\src\types.ts:77: * Partial override returned from `afterToolCall`.
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\src\types.ts:102:/** Context passed to `beforeToolCall`. */
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\src\types.ts:114:/** Context passed to `afterToolCall`. */
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\src\types.ts:122:	/** The executed tool result before any `afterToolCall` overrides are applied. */
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\src\types.ts:232:	 * transformContext: async (messages) => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\src\types.ts:240:	transformContext?: (messages: AgentMessage[], signal?: AbortSignal) => Promise<AgentMessage[]>;
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\src\types.ts:260:	finishTurn?: FinishTurn;
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\src\types.ts:267:	prepareRequest?: PrepareRequest;
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\src\types.ts:274:	prepareNextTurn?: (
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\src\types.ts:281:	 * Called after the current assistant turn finishes executing its tool calls, unless `finishTurn` ends the run.
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\src\types.ts:322:	beforeToolCall?: (context: BeforeToolCallContext, signal?: AbortSignal) => Promise<BeforeToolCallResult | undefined>;
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\src\types.ts:337:	afterToolCall?: (context: AfterToolCallContext, signal?: AbortSignal) => Promise<AfterToolCallResult | undefined>;
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\src\agent-loop.ts:185:				const nextTurnSnapshot = await config.prepareNextTurn?.(lastCompletedTurn);
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\src\agent-loop.ts:218:			const requestUpdate = await config.prepareRequest?.(
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\src\agent-loop.ts:251:				await config.finishTurn?.(lastCompletedTurn, signal);
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\src\agent-loop.ts:285:			const decision = await config.finishTurn?.(lastCompletedTurn, signal);
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\src\agent-loop.ts:389:	if (config.transformContext) {
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\src\agent-loop.ts:390:		messages = await config.transformContext(messages, signal);
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\src\agent-loop.ts:722:		if (config.beforeToolCall) {
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\src\agent-loop.ts:723:			const beforeResult = await config.beforeToolCall(
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\src\agent-loop.ts:827:	if (config.afterToolCall) {
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\src\agent-loop.ts:829:			const afterResult = await config.afterToolCall(
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent.test.ts:874:	it("keeps legacy prepareNextTurn signal callback behavior", async () => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent.test.ts:887:			prepareNextTurn: async (signal) => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent.test.ts:915:	it("forwards finishTurn through AgentOptions with the active abort signal", async () => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent.test.ts:929:			finishTurn: (context, signal) => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent.test.ts:1086:		"keeps queues on a %s response even when finishTurn requests continuation",
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent.test.ts:1091:				finishTurn: () => ({ action: "continue" }),
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent.test.ts:1123:	it("keeps queues when finishTurn ends the run", async () => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent.test.ts:1127:			finishTurn: () => ({ action: "end" }),
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\harness\execution-assistant.test.ts:108:				transformContext: async (context) => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent-loop.test.ts:260:	it("should apply transformContext before convertToLlm", async () => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent-loop.test.ts:278:			transformContext: async (messages) => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent-loop.test.ts:306:		// transformContext should have been called first, keeping only last 2
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent-loop.test.ts:357:			afterToolCall: async ({ result }) => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent-loop.test.ts:480:	it("should execute mutated beforeToolCall args without revalidation", async () => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent-loop.test.ts:507:			beforeToolCall: async ({ args }) => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent-loop.test.ts:1060:	it("runs finishTurn after tool-result messages and before turn_end", async () => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent-loop.test.ts:1079:			finishTurn: ({ context, toolResults }) => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent-loop.test.ts:1080:				ordering.push("finishTurn");
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent-loop.test.ts:1111:		expect(ordering.slice(-3)).toEqual(["message_end:toolResult", "finishTurn", "turn_end"]);
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent-loop.test.ts:1115:		"runs finishTurn for a %s assistant before turn_end without changing the hard exit",
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent-loop.test.ts:1127:					finishTurn: ({ message }) => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent-loop.test.ts:1129:						ordering.push("finishTurn");
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent-loop.test.ts:1162:			expect(ordering).toEqual(["finishTurn", "turn_end"]);
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent-loop.test.ts:1183:		let prepareNextTurnCalls = 0;
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent-loop.test.ts:1187:			finishTurn: () => ({ action: "end" }),
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent-loop.test.ts:1188:			prepareNextTurn: () => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent-loop.test.ts:1189:				prepareNextTurnCalls++;
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent-loop.test.ts:1222:		expect(prepareNextTurnCalls).toBe(0);
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent-loop.test.ts:1234:				finishTurn: () => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent-loop.test.ts:1275:			finishTurn: () => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent-loop.test.ts:1309:			finishTurn: () => {
+C:\Users\Administrator\Documents\GitHub\helm\packages\agent\test\agent-loop.test.ts:1371:			prepareRequest: ({ context }) => {
+...（已截断）
+── 寻迹（grep）

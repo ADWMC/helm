@@ -1,0 +1,154 @@
+Delivery Gate: GREEN
+Task: 20260926205ec11b74d3
+
+Owned files (0):
+  (none)
+
+Co-owned files (0):
+  (none)
+
+Historical owned files (2):
+  docs\REDESIGN.md
+  packages\helmpi-kernel\src\runtime\recovery.ts
+
+External files (135):
+  README.md
+  docs/PLAN-best-of-breed.md
+  docs/PLAN-evolution.md
+  docs/PLAN-product.md
+  docs/README.md
+  (+130 more, 95 junk/gitignored)
+
+Verifications: 4
+  Latest: 222 pass 0 fail 0 skip — cd packages/helmpi-kernel && node --test --test-concurrency=1 src/*.test.ts src/memory/*.test.ts src/guard/*.test.ts src/runtime/*.test.ts 2>&1 | grep -E "^(ℹ tests|ℹ pass|ℹ fail)"; git log -1 --forma
+
+Ownership caveats:
+  No current owned dirty files. External dirty files are present and excluded from delivery scope.
+
+Attribution: No owned files modified. 135 external dirty file(s) present but excluded from delivery scope.
+
+<atomic-commit-reminder>
+提交前只确认本次一个逻辑单元：
+1. 是否只包含当前任务文件？
+2. 是否混入外部/他人改动？
+3. 测试与 typecheck 是否对应本逻辑单元？
+4. commit message 是否描述一个原子变更？
+</atomic-commit-reminder>
+
+🔓 Adopted 31 external file(s) into owned set:
+   packages/agent/src/agent-loop.ts
+   packages/agent/src/agent.ts
+   packages/agent/src/types.ts
+   packages/agent/test/agent-loop-hooks.test.ts
+   packages/coding-agent/src/core/agent-session.ts
+   packages/coding-agent/src/core/extensions/runner.ts
+   packages/coding-agent/src/core/extensions/types.ts
+   packages/helmpi-kernel/fixtures/auth-gate.json
+   packages/helmpi-kernel/fixtures/fixture-evidence.txt
+   packages/helmpi-kernel/fixtures/mock-site/routes.json
+   packages/helmpi-kernel/package.json
+   packages/helmpi-kernel/scripts/hx-fixture.mjs
+   packages/helmpi-kernel/src/domain/types.ts
+   packages/helmpi-kernel/src/export.ts
+   packages/helmpi-kernel/src/index.ts
+   packages/helmpi-kernel/src/ledger.ts
+   packages/helmpi-kernel/src/prompt-lib.ts
+   packages/helmpi-kernel/src/runtime/contracts.test.ts
+   packages/helmpi-kernel/src/runtime/contracts.ts
+   packages/helmpi-kernel/src/runtime/cvm.test.ts
+   packages/helmpi-kernel/src/runtime/cvm.ts
+   packages/helmpi-kernel/src/runtime/gateway.test.ts
+   packages/helmpi-kernel/src/runtime/gateway.ts
+   packages/helmpi-kernel/src/runtime/hx-cases.test.ts
+   packages/helmpi-kernel/src/runtime/recovery.test.ts
+   packages/helmpi-kernel/src/runtime/recovery.ts
+   packages/helmpi-kernel/src/runtime/review-gate.test.ts
+   packages/helmpi-kernel/src/runtime/review-gate.ts
+   packages/helmpi-kernel/src/runtime/wiring.test.ts
+   packages/helmpi-kernel/src/status.ts
+   packages/helmpi-kernel/src/w3-t04.test.ts
+
+  ⚠️ These files were modified by another session. Verify the changes are correct before committing.
+
+⚠️ wrote-but-never-read (YELLOW, non-blocking):
+   evidence_events (field, added in packages/helmpi-kernel/src/export.ts) — 0 read-side consumers found. Wire a reader on the production path or remove it.
+   refusal_recovery (field, added in packages/helmpi-kernel/src/export.ts) — 0 read-side consumers found. Wire a reader on the production path or remove it.
+
+  ⚠️ Cohesion gate overridden with force=true. Verify this is truly one logical unit.
+
+✅ Scoped commit created with message: "feat(agent,coding-agent,kernel): wire 破甲/CVM/ToolGateway/ReviewGate into Pi agent loop lifecycle
+
+- agent: afterStream hook (observe-only, fires between stream settle and tool dispatch)
+- coding-agent: after_stream extension event dispatched from the hook
+- kernel/runtime: ToolGateway (scope→capability→budget→tripwire→sandbox→receipt, single execution entry), CVM Sensorium/snapshot/projection, 破甲恢复状态机 (helmd/helmx candidates, 1+1 per-step persisted budget), ReviewGate (no-evidence refusal + confirmation_loop), five-position wiring (pre-turn/after-stream/before-tool/after-tool/finish) + structured journal
+- tests: 拒绝恢复/越权拦截/证据缺失拒收/CVM 恢复 four categories + wiring integration + HX-01..06 fixture suite (scripts/hx-fixture.mjs, mock SSE, repeat-3 replay)"
+   Files: packages/agent/src/agent-loop.ts, packages/agent/src/agent.ts, packages/agent/src/types.ts, packages/agent/test/agent-loop-hooks.test.ts, packages/coding-agent/src/core/agent-session.ts, packages/coding-agent/src/core/extensions/runner.ts, packages/coding-agent/src/core/extensions/types.ts, packages/helmpi-kernel/package.json, packages/helmpi-kernel/src/domain/types.ts, packages/helmpi-kernel/src/export.ts, packages/helmpi-kernel/src/index.ts, packages/helmpi-kernel/src/ledger.ts, packages/helmpi-kernel/src/prompt-lib.ts, packages/helmpi-kernel/src/status.ts, packages/helmpi-kernel/src/w3-t04.test.ts, packages/helmpi-kernel/src/runtime/contracts.ts, packages/helmpi-kernel/src/runtime/contracts.test.ts, packages/helmpi-kernel/src/runtime/gateway.ts, packages/helmpi-kernel/src/runtime/gateway.test.ts, packages/helmpi-kernel/src/runtime/cvm.ts, packages/helmpi-kernel/src/runtime/cvm.test.ts, packages/helmpi-kernel/src/runtime/recovery.ts, packages/helmpi-kernel/src/runtime/recovery.test.ts, packages/helmpi-kernel/src/runtime/review-gate.ts, packages/helmpi-kernel/src/runtime/review-gate.test.ts, packages/helmpi-kernel/src/runtime/wiring.test.ts, packages/helmpi-kernel/src/runtime/hx-cases.test.ts, packages/helmpi-kernel/fixtures/auth-gate.json, packages/helmpi-kernel/fixtures/mock-site/routes.json, packages/helmpi-kernel/fixtures/fixture-evidence.txt, packages/helmpi-kernel/scripts/hx-fixture.mjs
+   [main 123ad6ef9] feat(agent,coding-agent,kernel): wire 破甲/CVM/ToolGateway/ReviewGate into Pi agent loop lifecycle
+ 31 files changed, 4149 insertions(+), 97 deletions(-)
+ create mode 100644 packages/agent/test/agent-loop-hooks.test.ts
+ create mode 100644 packages/helmpi-kernel/fixtures/auth-gate.json
+ create mode 100644 packages/helmpi-kernel/fixtures/fixture-evidence.txt
+ create mode 100644 packages/helmpi-kernel/fixtures/mock-site/routes.json
+ create mode 100644 packages/helmpi-kernel/scripts/hx-fixture.mjs
+ create mode 100644 packages/helmpi-kernel/src/runtime/contracts.test.ts
+ create mode 100644 packages/helmpi-kernel/src/runtime/contracts.ts
+ create mode 100644 packages/helmpi-kernel/src/runtime/cvm.test.ts
+ create mode 100644 packages/helmpi-kernel/src/runtime/cvm.ts
+ create mode 100644 packages/helmpi-kernel/src/runtime/gateway.test.ts
+ create mode 100644 packages/helmpi-kernel/src/runtime/gateway.ts
+ create mode 100644 packages/helmpi-kernel/src/runtime/hx-cases.test.ts
+ create mode 100644 packages/helmpi-kernel/src/runtime/recovery.test.ts
+ create mode 100644 packages/helmpi-kernel/src/runtime/recovery.ts
+ create mode 100644 packages/helmpi-kernel/src/runtime/review-gate.test.ts
+ create mode 100644 packages/helmpi-kernel/src/runtime/review-gate.ts
+ create mode 100644 packages/helmpi-kernel/src/runtime/wiring.test.ts
+warning: in the working copy of 'packages/helmpi-kernel/fixtures/auth-gate.json', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'packages/helmpi-kernel/fixtures/fixture-evidence.txt', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'packages/helmpi-kernel/fixtures/mock-site/routes.json', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'packages/helmpi-kernel/scripts/hx-fixture.mjs', CRLF will be replaced by LF the next time Git touches it
+   VERIFIED: HEAD moved 8ee59857a → 123ad6ef9. The commit is real — do NOT re-attempt it.
+
+--- actual changes (git show --stat) ---
+123ad6ef9 (HEAD -> main)
+
+ packages/agent/src/agent-loop.ts                   |   4 +
+ packages/agent/src/agent.ts                        |   3 +
+ packages/agent/src/types.ts                        |  18 +
+ packages/agent/test/agent-loop-hooks.test.ts       | 217 +++++++
+ packages/coding-agent/src/core/agent-session.ts    |   8 +
+ .../coding-agent/src/core/extensions/runner.ts     |  20 +
+ packages/coding-agent/src/core/extensions/types.ts |  12 +
+ packages/helmpi-kernel/fixtures/auth-gate.json     |  22 +
+ .../helmpi-kernel/fixtures/fixture-evidence.txt    |   6 +
+ .../helmpi-kernel/fixtures/mock-site/routes.json   |   9 +
+ packages/helmpi-kernel/package.json                |   2 +-
+ packages/helmpi-kernel/scripts/hx-fixture.mjs      | 660 +++++++++++++++++++++
+ packages/helmpi-kernel/src/domain/types.ts         |   2 +
+ packages/helmpi-kernel/src/export.ts               |  86 +++
+ packages/helmpi-kernel/src/index.ts                | 461 +++++++++++---
+ packages/helmpi-kernel/src/ledger.ts               |  16 +-
+ packages/helmpi-kernel/src/prompt-lib.ts           |   6 +
+ .../helmpi-kernel/src/runtime/contracts.test.ts    | 147 +++++
+ packages/helmpi-kernel/src/runtime/contracts.ts    | 376 ++++++++++++
+ packages/helmpi-kernel/src/runtime/cvm.test.ts     | 120 ++++
+ packages/helmpi-kernel/src/runtime/cvm.ts          | 152 +++++
+ packages/helmpi-kernel/src/runtime/gateway.test.ts | 199 +++++++
+ packages/helmpi-kernel/src/runtime/gateway.ts      | 347 +++++++++++
+ .../helmpi-kernel/src/runtime/hx-cases.test.ts     |  29 +
+ .../helmpi-kernel/src/runtime/recovery.test.ts     | 159 +++++
+ packages/helmpi-kernel/src/runtime/recovery.ts     | 435 ++++++++++++++
+ .../helmpi-kernel/src/runtime/review-gate.test.ts  | 149 +++++
+ packages/helmpi-kernel/src/runtime/review-gate.ts  | 242 ++++++++
+ packages/helmpi-kernel/src/runtime/wiring.test.ts  | 293 +++++++++
+ packages/helmpi-kernel/src/status.ts               |  23 +
+ packages/helmpi-kernel/src/w3-t04.test.ts          |  23 +-
+ 31 files changed, 4149 insertions(+), 97 deletions(-)
+
+⏭ 本次提交的审查已并入批量终审：已累积 1 个提交、31 个文件（长任务省 token 的策略）。
+   现在就想看审查意见 → 敲 /review（单验证员）或 /review max（五人编队）
+   不操作也可以 → 收尾时会自动合并成一次终审，无需额外动作
+
+交付后自检（提交后 10 秒内看一眼）：
+  1. 刚才的提交文件列表是否符合「本次改动的文件」——是的话继续，有陌生的立刻 revert
+  2. 项目目录下有没有不该出现的新文件（git status 里的 ?? 行）——有的话加 gitignore 或清理
+── 试炼（deliver_task）
