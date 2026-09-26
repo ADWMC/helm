@@ -14,6 +14,7 @@ import {
 import { runAgentLoop, runAgentLoopContinue } from "./agent-loop.ts";
 import { getDefaultStreamFn } from "./stream-fn.ts";
 import type {
+	AfterStreamContext,
 	AfterToolCallContext,
 	AfterToolCallResult,
 	AgentContext,
@@ -206,6 +207,7 @@ export class Agent {
 		context: AfterToolCallContext,
 		signal?: AbortSignal,
 	) => Promise<AfterToolCallResult | undefined>;
+	public afterStream?: (context: AfterStreamContext, signal?: AbortSignal) => Promise<void>;
 	public finishTurn?: FinishTurn;
 	public prepareRequest?: PrepareRequest;
 	public prepareNextTurn?: (
@@ -479,6 +481,7 @@ export class Agent {
 			toolExecution: this.toolExecution,
 			beforeToolCall: this.beforeToolCall,
 			afterToolCall: this.afterToolCall,
+			afterStream: this.afterStream,
 			finishTurn: this.finishTurn,
 			prepareRequest: this.prepareRequest,
 			prepareNextTurn:

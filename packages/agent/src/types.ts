@@ -99,6 +99,14 @@ export interface AfterToolCallResult {
 	terminate?: boolean;
 }
 
+/** Context passed to `afterStream`. */
+export interface AfterStreamContext {
+	/** The settled assistant message — final stream output, never rewritten here. */
+	message: AssistantMessage;
+	/** The run context at stream settle time. */
+	context: AgentContext;
+}
+
 /** Context passed to `beforeToolCall`. */
 export interface BeforeToolCallContext {
 	/** The assistant message that requested the tool call. */
@@ -335,6 +343,16 @@ export interface AgentLoopConfig extends SimpleStreamOptions {
 	 * The hook receives the agent abort signal and is responsible for honoring it.
 	 */
 	afterToolCall?: (context: AfterToolCallContext, signal?: AbortSignal) => Promise<AfterToolCallResult | undefined>;
+
+	/**
+	 * Called right after an assistant message settles (stream completed and the
+	 * final message is in context), before any tool call from that message is
+	 * dispatched. Observe-only: the hook cannot rewrite the transcript, block
+	 * tool calls, or alter results — use `beforeToolCall`/`afterToolCall` for
+	 * enforcement and mutation. Intended for refusal classification and
+	 * structured audit events.
+	 */
+	afterStream?: (context: AfterStreamContext, signal?: AbortSignal) => Promise<void>;
 }
 
 /**

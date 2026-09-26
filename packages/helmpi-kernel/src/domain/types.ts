@@ -48,6 +48,8 @@ export interface Claim {
 	readonly confidence?: Confidence;
 	readonly creator: string;
 	readonly createdAt: number;
+	/** Session run that owns this claim — finish gates only review their own run. */
+	readonly runId?: string;
 }
 
 export interface Direction {

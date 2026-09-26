@@ -79,7 +79,8 @@ CREATE TABLE IF NOT EXISTS claims (
   evidence_refs TEXT NOT NULL,
   confidence TEXT,
   creator TEXT NOT NULL,
-  created_at INTEGER NOT NULL
+  created_at INTEGER NOT NULL,
+  run_id TEXT
 );
 CREATE TABLE IF NOT EXISTS directions (
   id TEXT PRIMARY KEY,
@@ -179,6 +180,12 @@ export class Ledger {
 		try {
 			// Legacy run_state (pre-token schema) upgrade.
 			this.db.exec("ALTER TABLE run_state ADD COLUMN tokens_used INTEGER NOT NULL DEFAULT 0");
+		} catch {
+			/* column already exists */
+		}
+		try {
+			// Legacy claims (pre-run-id schema) upgrade.
+			this.db.exec("ALTER TABLE claims ADD COLUMN run_id TEXT");
 		} catch {
 			/* column already exists */
 		}
@@ -387,8 +394,8 @@ export class Ledger {
 	addClaim(claim: Claim): void {
 		this.db
 			.prepare(
-				`INSERT INTO claims(id,role,description,evidence_refs,confidence,creator,created_at)
-         VALUES(?,?,?,?,?,?,?)`,
+				`INSERT INTO claims(id,role,description,evidence_refs,confidence,creator,created_at,run_id)
+         VALUES(?,?,?,?,?,?,?,?)`,
 			)
 			.run(
 				claim.id,
@@ -398,6 +405,7 @@ export class Ledger {
 				claim.confidence ?? null,
 				claim.creator,
 				claim.createdAt,
+				claim.runId ?? null,
 			);
 		this.bump("claim", claim);
 	}
@@ -411,6 +419,7 @@ export class Ledger {
 			confidence: string | null;
 			creator: string;
 			created_at: number;
+			run_id: string | null;
 		}[];
 		return rows.map((r) => ({
 			id: r.id,
@@ -420,6 +429,7 @@ export class Ledger {
 			...(r.confidence ? { confidence: r.confidence as Claim["confidence"] } : {}),
 			creator: r.creator,
 			createdAt: r.created_at,
+			...(r.run_id ? { runId: r.run_id } : {}),
 		})) as Claim[];
 	}
 

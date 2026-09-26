@@ -86,14 +86,25 @@ test("negative: supervise never hard-stops — hard stops remain scope/budget on
 	assert.ok(DEFAULT_WATCH.watcher === false);
 });
 
-test("L0/negative: only scope_denied and token_budget_exhausted produce block verdicts in kernel gates", async () => {
-	// structural pin: those are the ONLY kinds that pair journal+block in gate code paths
+test("L0/negative: hard blocks live only in the Tool Gateway (scope/tripwire/capability/sandbox)", async () => {
+	// structural pin: gate code paths (index.ts + runtime/gateway.ts) may only
+	// hard-block for scope/tripwire/capability/sandbox reasons (budget uses the
+	// plain token_budget_exhausted string from G4); supervise never hard-stops.
+	// W2-T01/W3-T03 denials moved into the unified Tool Gateway (REDESIGN §10.6).
 	// fileURLToPath: URL.pathname yields `/C:/...` on win32 → readFileSync("C:\C:\...") (Windows portability)
-	const src = (await import("node:fs")).readFileSync(fileURLToPath(new URL("./index.ts", import.meta.url)), "utf8");
+	const fs = await import("node:fs");
+	const read = (rel: string) => fs.readFileSync(fileURLToPath(new URL(rel, import.meta.url)), "utf8");
+	const src = `${read("./index.ts")}\n${read("./runtime/gateway.ts")}`;
 	const blockReasons = [...src.matchAll(/reason: `([^`]+)`/g)].map((m) => m[1] ?? "");
-	const allowed = blockReasons.filter((r) => r.startsWith("scope_denied") || r.startsWith("tripwire"));
-	// tripwire is the CAI layer (W3-T03); no OTHER ad-hoc hard-block reasons exist
-	assert.ok(allowed.length >= 1, "scope hard block present");
+	const hardStop = /^(scope_denied|tripwire|capability_denied|sandbox_denied)/;
+	assert.ok(
+		blockReasons.some((r) => hardStop.test(r)),
+		"gateway hard blocks present",
+	);
+	assert.ok(
+		blockReasons.every((r) => hardStop.test(r)),
+		`no ad-hoc hard-block reasons: ${blockReasons.join(" | ")}`,
+	);
 	assert.ok(!blockReasons.some((r) => r.includes("step_tool_cap")), "step cap must not hard-block");
 	assert.ok(!blockReasons.some((r) => r.includes("same_tool")), "same-tool must not hard-block");
 });

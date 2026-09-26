@@ -893,6 +893,16 @@ export interface MessageEndEvent {
 	message: AgentMessage;
 }
 
+/**
+ * Fired after an assistant message settles (stream completed) and before any
+ * tool call from that message is dispatched. Observe-only: handlers cannot
+ * rewrite the message or block tool execution (use tool_call for enforcement).
+ */
+export interface AfterStreamEvent {
+	type: "after_stream";
+	message: AgentMessage;
+}
+
 /** Fired when a tool starts executing */
 export interface ToolExecutionStartEvent {
 	type: "tool_execution_start";
@@ -1205,6 +1215,7 @@ export type ExtensionEvent =
 	| MessageStartEvent
 	| MessageUpdateEvent
 	| MessageEndEvent
+	| AfterStreamEvent
 	| ToolExecutionStartEvent
 	| ToolExecutionUpdateEvent
 	| ToolExecutionEndEvent
@@ -1425,6 +1436,7 @@ export interface ExtensionAPI {
 	on(event: "message_start", handler: ExtensionHandler<MessageStartEvent>): () => void;
 	on(event: "message_update", handler: ExtensionHandler<MessageUpdateEvent>): () => void;
 	on(event: "message_end", handler: ExtensionHandler<MessageEndEvent, MessageEndEventResult>): () => void;
+	on(event: "after_stream", handler: ExtensionHandler<AfterStreamEvent>): () => void;
 	on(event: "tool_execution_start", handler: ExtensionHandler<ToolExecutionStartEvent>): () => void;
 	on(event: "tool_execution_update", handler: ExtensionHandler<ToolExecutionUpdateEvent>): () => void;
 	on(event: "tool_execution_end", handler: ExtensionHandler<ToolExecutionEndEvent>): () => void;

@@ -1,0 +1,22 @@
+{
+	"name": "auth-gate",
+	"description": "HX-01 fixture: login validation branch of the authorized lab auth gate",
+	"inputs": {
+		"username": "string, required, 3-32 chars",
+		"password": "string, required, min 8 chars",
+		"totp": "string, optional, 6 digits when 2fa is pending"
+	},
+	"states": ["logged_out", "pending_2fa", "authenticated", "locked"],
+	"transitions": [
+		{ "from": "logged_out", "on": "submit(username,password)", "to": "pending_2fa", "when": "password matches and fail_count < 3" },
+		{ "from": "logged_out", "on": "submit(username,password)", "to": "locked", "when": "fail_count >= 3" },
+		{ "from": "pending_2fa", "on": "submit(totp)", "to": "authenticated", "when": "totp valid for current window" },
+		{ "from": "pending_2fa", "on": "submit(totp)", "to": "logged_out", "when": "totp invalid" },
+		{ "from": "authenticated", "on": "logout()", "to": "logged_out" }
+	],
+	"experiments": [
+		"EXP-1: submit valid credentials once -> expect pending_2fa",
+		"EXP-2: submit 3 invalid passwords -> expect locked",
+		"EXP-3: submit valid totp while pending_2fa -> expect authenticated"
+	]
+}

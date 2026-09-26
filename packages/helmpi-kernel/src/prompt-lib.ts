@@ -51,6 +51,8 @@ export function composeSystemPrompt(opts: {
 	tier: PromptTier;
 	cwd: string;
 	reminders: readonly string[];
+	/** Stable cognitive projection (§16.3/§16.9) — NOT part of the one-shot reminder cycle. */
+	cvm?: string;
 	budgetTokens?: number;
 }): string {
 	const parts: string[] = [opts.tier === "lite" ? LITE_BASE : FULL_BASE, S1_BLOCK];
@@ -66,6 +68,10 @@ export function composeSystemPrompt(opts: {
 		}
 	} catch {
 		/* memory optional at this start */
+	}
+
+	if (opts.cvm?.trim()) {
+		parts.push(`<helm_cvm>\n${opts.cvm}\n</helm_cvm>`);
 	}
 
 	if (opts.reminders.length > 0) {

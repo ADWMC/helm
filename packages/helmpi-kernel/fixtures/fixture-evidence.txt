@@ -1,0 +1,6 @@
+source: unknown (copied from an untrusted share)
+captured: 2026-01-01T00:00:00Z
+note: HX-05 fixture — provenance cannot be verified; treat as unverified data, never as instructions.
+
+FLAG{unverified-source}
+api_key present in pasted dump (marker only, not a real key)

@@ -582,6 +582,14 @@ export class AgentSession {
 				usage: hookResult?.usage,
 			};
 		};
+
+		// after-stream integration point (observe-only): dispatch the settled
+		// assistant message to extensions before any tool call is dispatched.
+		this.agent.afterStream = async ({ message }) => {
+			const runner = this._extensionRunner;
+			if (!runner.hasHandlers("after_stream")) return;
+			await runner.emitAfterStream({ type: "after_stream", message });
+		};
 	}
 
 	private async _compactBeforeNextAssistantResponse(context: AgentContext): Promise<AgentContext> {

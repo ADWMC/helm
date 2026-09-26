@@ -241,6 +241,10 @@ async function runLoop(
 			const message = await streamAssistantResponse(currentContext, config, signal, emit, streamFunction);
 			newMessages.push(message);
 
+			// after-stream integration point: observe the settled message (e.g.
+			// refusal classification) before any tool call is dispatched.
+			await config.afterStream?.({ message, context: currentContext }, signal);
+
 			if (message.stopReason === "error" || message.stopReason === "aborted") {
 				lastCompletedTurn = {
 					message,

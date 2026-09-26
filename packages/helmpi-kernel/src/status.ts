@@ -87,6 +87,29 @@ export function runStatusLines(cwd: string = process.cwd()): string[] {
 				const p = JSON.parse(r.payloadJson ?? "{}") as { why?: string };
 				if (p.why) lines.push(`instead: ${p.why}`);
 			}
+			// Runtime readout: tool calls (receipts), evidence, refusal recovery,
+			// and the last Review Gate verdict — read-only, journal is the source.
+			const receiptRows = rows.filter((x) => x.kind === "receipt_written");
+			const evidenceRows = rows.filter((x) => x.kind === "evidence_added");
+			lines.push(`tools: receipts=${receiptRows.length} evidence=${evidenceRows.length}`);
+			const recoveryRows = rows.filter((x) => x.kind === "refusal_detected" || x.kind.startsWith("recovery_"));
+			if (recoveryRows.length > 0) {
+				const last = recoveryRows[recoveryRows.length - 1];
+				lines.push(`recovery: events=${recoveryRows.length} last=${last.kind}`);
+			}
+			const reviewRows = rows.filter((x) => x.kind === "review_gate");
+			if (reviewRows.length > 0) {
+				const last = reviewRows[reviewRows.length - 1];
+				const p = JSON.parse(last.payloadJson ?? "{}") as {
+					scope?: string;
+					pass?: boolean;
+					claimId?: string;
+					status?: string;
+				};
+				lines.push(
+					`review: ${p.scope === "finish" ? `finish pass=${String(p.pass)}` : `${p.claimId ?? "?"} ${p.status ?? "?"}`}`,
+				);
+			}
 			pl.close();
 		} catch {
 			/* phase journal unreadable → skip */

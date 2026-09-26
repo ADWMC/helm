@@ -66,6 +66,26 @@ export function exportReportJson(ledger: Ledger): Record<string, unknown> {
 		// Diagnostics are NOT evidence (I6) — surfaced for operators, never as basis.
 		diagnostics: ledger.diagnostics(20),
 		claims: ws.claims,
+		receipts: ledger
+			.journal()
+			.filter((x) => x.kind === "receipt_written")
+			.slice(-20)
+			.map((x) => JSON.parse(x.payloadJson)),
+		evidence_events: ledger
+			.journal()
+			.filter((x) => x.kind === "evidence_added")
+			.slice(-20)
+			.map((x) => JSON.parse(x.payloadJson)),
+		refusal_recovery: ledger
+			.journal()
+			.filter((x) => x.kind === "refusal_detected" || x.kind.startsWith("recovery_"))
+			.slice(-15)
+			.map((x) => ({ kind: x.kind, ...JSON.parse(x.payloadJson) })),
+		review_gate: ledger
+			.journal()
+			.filter((x) => x.kind === "review_gate")
+			.slice(-15)
+			.map((x) => JSON.parse(x.payloadJson)),
 		directions: ws.directions,
 		hints: ws.hints,
 		deliverability: {
@@ -187,6 +207,72 @@ export function exportReport(ledger: Ledger): string {
 		"",
 		`## Claims`,
 		...(ws.claims.length === 0 ? ["_(none)_"] : ws.claims.map((c) => `- [${c.role}] ${c.id}: ${c.description}`)),
+		"",
+		`## Receipts (after-tool, last 15)`,
+		...(() => {
+			const rows = ledger
+				.journal()
+				.filter((x) => x.kind === "receipt_written")
+				.slice(-15)
+				.map((x) => JSON.parse(x.payloadJson) as Record<string, unknown>);
+			return rows.length === 0
+				? ["_(none)_"]
+				: rows.map(
+						(p) =>
+							`- seq=${String(p.seq)} ${String(p.tool)}${p.target ? ` → ${String(p.target)}` : ""} exit=${String(p.exitCode)}${p.timedOut ? " (timed out)" : ""} [${String(p.source)}]`,
+					);
+		})(),
+		"",
+		`## Evidence events (exact slices, last 15)`,
+		...(() => {
+			const rows = ledger
+				.journal()
+				.filter((x) => x.kind === "evidence_added")
+				.slice(-15)
+				.map((x) => JSON.parse(x.payloadJson) as Record<string, unknown>);
+			return rows.length === 0
+				? ["_(none)_"]
+				: rows.map((p) => {
+						const excerpt = String(p.excerpt ?? "")
+							.replace(/\s+/g, " ")
+							.slice(0, 80);
+						return `- ${String(p.id)} seq=${String(p.receiptSeq)} **${String(p.status)}** — \`${excerpt}\``;
+					});
+		})(),
+		"",
+		`## Refusal recovery`,
+		...(() => {
+			const rows = ledger
+				.journal()
+				.filter((x) => x.kind === "refusal_detected" || x.kind.startsWith("recovery_"))
+				.slice(-15);
+			return rows.length === 0
+				? ["_(none)_"]
+				: rows.map((r) => {
+						const p = JSON.parse(r.payloadJson) as Record<string, unknown>;
+						const detail = p.source
+							? `${String(p.source)}${p.kind ? `/${String(p.kind)}` : ""}`
+							: (p.stance ?? "");
+						return `- ${r.kind}${detail ? `: ${String(detail)}` : ""}`;
+					});
+		})(),
+		"",
+		`## Review Gate`,
+		...(() => {
+			const rows = ledger
+				.journal()
+				.filter((x) => x.kind === "review_gate")
+				.slice(-15)
+				.map((x) => JSON.parse(x.payloadJson) as Record<string, unknown>);
+			return rows.length === 0
+				? ["_(none)_"]
+				: rows.map((p) => {
+						if (p.scope === "finish") {
+							return `- finish: pass=${String(p.pass)} claims=${String(p.claimCount)} unverified=${(p.unverified as string[] | undefined)?.join(", ") || "(none)"}`;
+						}
+						return `- ${String(p.claimId)}: ${String(p.status)} (${String(p.verdict)}) — ${String(p.reason)}`;
+					});
+		})(),
 		"",
 		`## Directions`,
 		...(ws.directions.length === 0

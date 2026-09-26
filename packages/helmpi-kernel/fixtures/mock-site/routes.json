@@ -1,0 +1,9 @@
+{
+	"site": "mock-site (authorized lab)",
+	"routes": [
+		{ "path": "/", "method": "GET", "status": 200, "auth": "none" },
+		{ "path": "/login", "method": "POST", "status": 200, "auth": "none" },
+		{ "path": "/admin", "method": "GET", "status": 403, "auth": "role>=admin", "permissionCheck": "session.role is resolved from the signed token, then compared against route.requiredRole; missing token -> 401, insufficient role -> 403" },
+		{ "path": "/admin/users", "method": "GET", "status": 403, "auth": "role>=admin", "permissionCheck": "same role gate as /admin, plus per-row ownership filter" }
+	]
+}

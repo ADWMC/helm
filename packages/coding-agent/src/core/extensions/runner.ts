@@ -25,6 +25,7 @@ import {
 	normalizeBuildSystemPromptOptions,
 } from "../system-prompt.ts";
 import type {
+	AfterStreamEvent,
 	AgentBeforeSettleEvent,
 	BeforeAgentStartEvent,
 	BeforeAgentStartEventResult,
@@ -182,6 +183,7 @@ type RunnerEmitEvent = Exclude<
 	| BeforeProviderHeadersEvent
 	| BeforeAgentStartEvent
 	| MessageEndEvent
+	| AfterStreamEvent
 	| ResourcesDiscoverEvent
 	| InputEvent
 	| TurnEndEvent
@@ -1077,6 +1079,24 @@ export class ExtensionRunner {
 		}
 
 		return modified ? currentMessage : undefined;
+	}
+
+	async emitAfterStream(event: AfterStreamEvent): Promise<void> {
+		const ctx = this.createContext();
+		for (const { ext, handlers } of snapshotEventHandlers(this.extensions, "after_stream")) {
+			for (const handler of handlers) {
+				try {
+					await handler(event, ctx);
+				} catch (err) {
+					this.emitError({
+						extensionPath: ext.path,
+						event: "after_stream",
+						error: err instanceof Error ? err.message : String(err),
+						stack: err instanceof Error ? err.stack : undefined,
+					});
+				}
+			}
+		}
 	}
 
 	async emitToolResult(event: ToolResultEvent): Promise<ToolResultEventResult | undefined> {
