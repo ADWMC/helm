@@ -1,5 +1,8 @@
 # helm-pi 最佳方案（Best-of-Breed）v1
 
+> **历史归档（非活动方案）**：本文保留竞品取舍和早期选型证据。实施以
+> [`REDESIGN.md`](REDESIGN.md) 为准；本文中的 P0/P1/P2、旧包布局和任务顺序不再构成开发任务。
+
 > **原则**：每个问题只取一个最佳做法，**不**把六家流程缝成一团。  
 > 来源：`process-methodology-comparison.md` · `mature-projects-comparison.md`  
 > 状态：P0 本迭代实现；P1/P2 可排期。
@@ -120,4 +123,3 @@ Spec/SOW ──► ScopeGate（PG）
 ## 8. 仍属 P2（本迭代不做）
 
 - 并行 Direction、`/helmpi agent`、Console 图 UI
-

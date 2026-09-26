@@ -1,6 +1,11 @@
-# helm-pi 文档地图
+# helm 文档地图
 
 按角色进入；**规范单源**，历史调研只读。
+
+## 当前产品定位
+
+helm 是基于 Pi 二改的自主渗透与逆向 Agent。唯一活动设计基线是
+[`REDESIGN.md`](REDESIGN.md)；其余方案文档只保留决策、调研和历史验收证据，不能直接转成开发任务。
 
 | 文档 | 角色 | 何时读 |
 |------|------|--------|
@@ -29,9 +34,9 @@
 
 **流程×方法论对比**：[process-methodology-comparison.md](process-methodology-comparison.md)
 
-**最佳方案（选型+P0）**：[PLAN-best-of-breed.md](PLAN-best-of-breed.md)
+**历史方案（只读）**：[PLAN-best-of-breed.md](PLAN-best-of-breed.md)
 
-**演进方案（子代理分发 ADR + 14 仓吸收波次，待批准）**：[PLAN-evolution.md](PLAN-evolution.md)
+**历史演进方案（只读）**：[PLAN-evolution.md](PLAN-evolution.md)
 
 **工具记忆**：[TOOL-MEMORY.md](TOOL-MEMORY.md)
 

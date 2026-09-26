@@ -1,5 +1,8 @@
 # helm-pi 演进方案（PLAN-evolution）
 
+> **历史归档（非活动方案）**：本文记录 ADR 和参考仓吸收过程。实施、验收和生命周期以
+> [`REDESIGN.md`](REDESIGN.md) 为准；本文不再产生新开发任务。
+
 > **定位**：架构转向 ADR + 14 个参考仓的吸收波次清单。**规范单源不变**：不变量 → [INVARIANTS.md](INVARIANTS.md)；测试门禁 → [tests/STANDARD.md](tests/STANDARD.md)；流程 → [methodology.md](methodology.md)；架构 → [../DESIGN.md](../DESIGN.md)。
 > **依据**：14 个参考仓精读（6 份报告，论断全部带 `路径:行号`）+ 本仓 token 实测（2026-mimo-vulncms-ab 套件）。
 > **状态**：**ADR-001 已批准 —— 决议为 B 预案（单代理瘦身）起步**（依据步 0 真机冒烟，见 §5 定案）；A′ 分发降为备选（A″ 进程级，前置验证另立）。实施时不变量改动一律**先改** [INVARIANTS.md](INVARIANTS.md) 单源；每步以 §4 验收为准。
