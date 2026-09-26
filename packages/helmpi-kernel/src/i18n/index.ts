@@ -155,6 +155,39 @@ export function catalog(locale: Locale): Record<string, string> {
 	return CATALOGS[locale];
 }
 
+/** Anything with a stable id whose display strings can come from the catalog. */
+export interface LocalizableItem {
+	id: string;
+	label?: string;
+	description?: string;
+}
+
+/**
+ * Data-face protocol (one of the three i18n wiring patterns — see docs/i18n
+ * design): rewrite `label`/`description` from catalog keys
+ * `"<ns>.<id>.label"` / `"<ns>.<id>.desc"` for the CURRENT locale. Missing
+ * keys keep the literal (English) source text, so new entries never render a
+ * raw key. `params[id]` supplies {{placeholders}} for that item's description.
+ */
+export function localizeRegistry(
+	items: LocalizableItem[],
+	ns: string,
+	params: Record<string, Record<string, string>> = {},
+): void {
+	const loc = resolveLocale();
+	const cat = catalog(loc);
+	for (const item of items) {
+		if (item.label !== undefined) {
+			const k = `${ns}.${item.id}.label`;
+			if (cat[k]) item.label = t(k, {}, loc);
+		}
+		if (item.description !== undefined) {
+			const k = `${ns}.${item.id}.desc`;
+			if (cat[k]) item.description = t(k, params[item.id] ?? {}, loc);
+		}
+	}
+}
+
 /** East-Asian Wide/Fullwidth ranges → 2 columns (pragmatic subset, §1.6 ④). */
 export function charWidth(ch: string): 1 | 2 {
 	const cp = ch.codePointAt(0) ?? 0;

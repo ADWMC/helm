@@ -137,6 +137,8 @@ export async function runHelmCommand(args: string[], cwd: string = process.cwd()
 			}
 			const decision = validateScopeQuery(spec as never, target);
 			console.log(JSON.stringify(decision, null, 2));
+			// human hint on stderr — stdout stays the machine JSON contract
+			if (!decision.allow) console.error(t("cli.scope.deny", {}, resolveLocale(cwd)));
 			// fail-closed: deny → non-zero (WG1.2 exit semantics)
 			process.exitCode = decision.allow ? 0 : 3;
 			return true;
@@ -175,13 +177,17 @@ export async function runHelmCommand(args: string[], cwd: string = process.cwd()
 			const jsonOut = `${out.replace(/\.md$/i, "")}.json`;
 			writeFileSync(jsonOut, JSON.stringify(json, null, 2), "utf8");
 			const findings = Number(json.findings ?? 0);
-			const lines = [`wrote ${out}`, `wrote ${jsonOut}`];
+			const reportLocale = resolveLocale(cwd);
+			const lines = [
+				t("cli.report.wrote", { path: out }, reportLocale),
+				t("cli.report.wrote", { path: jsonOut }, reportLocale),
+			];
 			if (args.includes("--sarif")) {
 				const sarifOut = `${out.replace(/\.md$/i, "")}.sarif`;
 				writeFileSync(sarifOut, JSON.stringify(exportSarif(ledger), null, 2), "utf8");
-				lines.push(`wrote ${sarifOut}`);
+				lines.push(t("cli.report.wrote", { path: sarifOut }, reportLocale));
 			}
-			lines.push(`findings=${findings}`);
+			lines.push(t("cli.report.findings", { count: findings }, reportLocale));
 			console.log(lines.join("\n"));
 			// strix exit semantics: 0 = clean · 2 = findings present
 			process.exitCode = reportExitCode(findings);
@@ -192,9 +198,7 @@ export async function runHelmCommand(args: string[], cwd: string = process.cwd()
 		case "attack-coverage": {
 			// Honest empty state: findings do not carry ATT&CK mappings yet —
 			// mapped data lands with the W3 engagement package (references/attack-navigator.json).
-			console.log(
-				"attack-coverage: no ATT&CK-mapped findings yet (mapping lands with W3 engagement; navigator reference: references/attack-navigator.json)",
-			);
+			console.log(t("attack.pending", {}, resolveLocale(cwd)));
 			process.exitCode = 0;
 			return true;
 		}
@@ -271,15 +275,13 @@ export async function runHelmCommand(args: string[], cwd: string = process.cwd()
 					console.error(`warning: unreadable spec at ${specPath}`);
 				}
 				if (goal.trim()) {
-					console.log(`spec loaded: ${specPath} (goal: ${goal})`);
+					console.log(t("cli.run.specLoaded", { path: specPath, goal }, resolveLocale(cwd)));
 				} else {
 					// Full L1–L6 lint lands with W3; here we only flag the obvious.
-					console.log(
-						`warning: spec at ${specPath} has an empty goal (run helm spec init / fill it; strict lint arrives with W3)`,
-					);
+					console.log(t("cli.run.emptyGoal", { path: specPath }, resolveLocale(cwd)));
 				}
 			} else {
-				console.log("no .helm/spec.json — starting a plain session (engagement runs are spec-driven)");
+				console.log(t("cli.run.noSpec", {}, resolveLocale(cwd)));
 			}
 			// Strip our subcommand so the host does not treat it as a prompt, then
 			// fall through to the normal interactive/resume flow.

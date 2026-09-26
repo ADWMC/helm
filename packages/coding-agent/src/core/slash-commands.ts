@@ -1,3 +1,4 @@
+import { localizeRegistry } from "@adwmc/helm-kernel/i18n";
 import { APP_NAME } from "../config.ts";
 import type { SourceInfo } from "./source-info.ts";
 
@@ -42,3 +43,20 @@ export const BUILTIN_SLASH_COMMANDS: ReadonlyArray<BuiltinSlashCommand> = [
 	{ name: "reload", description: "Reload keybindings, extensions, skills, prompts, themes, and context files" },
 	{ name: "quit", description: `Quit ${APP_NAME}` },
 ];
+
+/**
+ * Data-face i18n (WG1.7 extension): descriptions localized per current locale
+ * from `slash.<name>.desc` catalog keys. Command names and argumentHint stay
+ * technical English on purpose (they are typed verbatim by users). Missing
+ * keys fall back to the English literal above.
+ */
+export function localizedBuiltinSlashCommands(): BuiltinSlashCommand[] {
+	const items = BUILTIN_SLASH_COMMANDS.map((command) => ({ id: command.name, description: command.description }));
+	localizeRegistry(items, "slash", { quit: { app: APP_NAME } });
+	const descById = new Map(items.map((item) => [item.id, item.description]));
+	return BUILTIN_SLASH_COMMANDS.map((command) => ({
+		name: command.name,
+		description: descById.get(command.name) ?? command.description,
+		...(command.argumentHint && { argumentHint: command.argumentHint }),
+	}));
+}

@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "_protocol": {
+    "t": "print-site t(key, params) call",
+    "registry": "data-face localizeRegistry(items, ns) by id ↔ <ns>.<id>.label|desc",
+    "injected": "caller passes a localized value into a dependency-free package (e.g. tui hints)",
+    "exempt": "machine/technical surface — frozen English, reason required"
+  },
+  "surfaces": [
+    { "id": "cli-help-footer", "paths": ["packages/coding-agent/src/cli/args.ts"], "protocol": "t", "status": "partial", "note": "footer localized; help body/option text still English (P2)" },
+    { "id": "cli-commands", "paths": ["packages/coding-agent/src/cli/helm-commands.ts"], "protocol": "t", "status": "partial", "note": "spec init/scope deny/report/run/doctor/attack messages wired; usage + schema-error literals remain (P2)" },
+    { "id": "settings-panel", "paths": ["packages/coding-agent/src/modes/interactive/components/settings-selector.ts"], "protocol": "registry", "status": "partial", "note": "39 main-list rows label+desc wired; submenus (theme/model pickers, THINKING_DESCRIPTIONS) pending P2" },
+    { "id": "settings-hint", "paths": ["packages/tui/src/components/settings-list.ts"], "protocol": "injected", "status": "wired", "note": "hints passed by settings-selector; tui default stays English, zero kernel dependency" },
+    { "id": "slash-builtin", "paths": ["packages/coding-agent/src/core/slash-commands.ts"], "protocol": "registry", "status": "wired", "note": "24 builtin command descriptions; names + argumentHint are typed verbatim → technical English" },
+    { "id": "status-lines", "paths": ["packages/coding-agent/src/modes/interactive/interactive-mode.ts"], "protocol": "t", "status": "partial", "note": "3 settings callbacks via t(); inline status/onboarding/tmux strings pending P1" },
+    { "id": "first-time-setup", "paths": ["packages/coding-agent/src/modes/interactive/components/first-time-setup.ts"], "protocol": "pending", "status": "pending", "note": "P1 — first-run theme/analytics prompts" },
+    { "id": "earendil-banner", "paths": ["packages/coding-agent/src/modes/interactive/components/earendil-announcement.ts"], "protocol": "pending", "status": "pending", "note": "P1 — announcement headline/body" },
+    { "id": "bug-report-copy", "paths": ["packages/coding-agent/src/modes/interactive/bug-report.ts", "packages/coding-agent/src/core/bug-report.ts"], "protocol": "pending", "status": "pending", "note": "P1 — disclaimer/transcript note/summary prompt" },
+    { "id": "tree-selector-hint", "paths": ["packages/coding-agent/src/modes/interactive/components/tree-selector.ts"], "protocol": "pending", "status": "pending", "note": "P1 — 'Type to search:' hint" },
+    { "id": "interactive-prompts", "paths": ["packages/coding-agent/src/modes/interactive/interactive-mode.ts"], "protocol": "pending", "status": "pending", "note": "P2 — onboarding line, tmux hint, session-cwd prompts, slash descriptions of dynamic commands" },
+    { "id": "kernel-machine", "paths": ["packages/helmpi-kernel/src/export.ts", "packages/helmpi-kernel/src/ledger.ts", "packages/helmpi-kernel/src/loop.ts", "packages/helmpi-kernel/src/supervise.ts", "packages/helmpi-kernel/src/playbook.ts", "packages/helmpi-kernel/src/domain/types.ts", "packages/helmpi-kernel/src/memory/tool-memory.ts"], "protocol": "exempt", "status": "exempt", "reason": "WG1.7 frozen-English machine contract: journal event names, report keys, SARIF, exit codes — downstream parsers depend on them" },
+    { "id": "kernel-g1-prompts", "paths": ["packages/helmpi-kernel/src/prompt-lib.ts"], "protocol": "exempt", "status": "exempt", "reason": "G1 system prompts are evaluation surfaces — frozen English for cross-run comparability (拍板口径)" },
+    { "id": "enum-values-and-command-names", "paths": [], "protocol": "exempt", "status": "exempt", "reason": "values (sse/true/false/thinking levels) round-trip through callbacks by exact string; command names + argumentHint are typed verbatim by users" },
+    { "id": "extension-sourced-descriptions", "paths": [], "protocol": "exempt", "status": "exempt", "reason": "user/extension-provided text is external content — helm does not translate third-party strings" }
+  ]
+}

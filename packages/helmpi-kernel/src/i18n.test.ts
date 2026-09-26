@@ -17,6 +17,7 @@ import {
 	charWidth,
 	detectSystemLocale,
 	localeFromTimeZone,
+	localizeRegistry,
 	padToWidth,
 	placeholders,
 	resetLocaleCache,
@@ -220,6 +221,34 @@ test("WG1.7-6: global settings (TUI /settings) sits between env and auto-detect"
 				/* ignore */
 			}
 		}
+		resetLocaleCache();
+	}
+});
+
+test("WG1.7-7: localizeRegistry — data-face protocol (translate by ns/id, literal fallback, params)", () => {
+	const saved = process.env.HELM_LOCALE;
+	try {
+		process.env.HELM_LOCALE = "zh-CN";
+		resetLocaleCache();
+		const items = [
+			{ id: "terminal-progress", label: "Terminal progress", description: "English source" },
+			{ id: "unknown-row", label: "Keep me", description: "Literal stays" },
+			{ id: "quit", description: "Quit helm" },
+		];
+		localizeRegistry(items, "settings", {});
+		assert.equal(items[0]!.label, "终端进度", "known row label translated");
+		assert.equal(items[1]!.label, "Keep me", "missing key keeps the literal (never a raw key)");
+		assert.equal(items[1]!.description, "Literal stays");
+		// label key absent (slash-style items only carry descriptions) → no label injection
+		localizeRegistry(items, "slash", { quit: { app: "helm" } });
+		assert.equal(items[2]!.description, "退出 helm", "{{app}} param substituted");
+		// params flow into the row's own description
+		const mt = [{ id: "model-thinking", label: "x", description: "y" }];
+		localizeRegistry(mt, "settings", { "model-thinking": { cycleKey: "Ctrl+T" } });
+		assert.ok(mt[0]!.description.includes("Ctrl+T"), "placeholder params injected per item");
+	} finally {
+		if (saved === undefined) delete process.env.HELM_LOCALE;
+		else process.env.HELM_LOCALE = saved;
 		resetLocaleCache();
 	}
 });
