@@ -1,8 +1,15 @@
-# helm — 授权渗透/逆向执行体（Pi harness fork）
+# helm — 基于 Pi 二改的自主渗透与逆向 Agent
 
-> **helm** = 基于 [earendil-works/pi](https://github.com/earendil-works/pi) 的自主渗透与逆向执行体:
+> **产品定位**：helm 是基于 [earendil-works/pi](https://github.com/earendil-works/pi) 二改的自主渗透与逆向 Agent，
+> 面向已授权目标提供自主探索、工具执行、证据闭环和可复核报告。破甲层负责让范围内任务不中断，
+> 模型防御层负责阻止越权、注入、迎合和无证据完成；两者都运行在同一个 Pi Agent Loop 中。
+>
+> **helm** = 基于 Pi 二改的授权渗透/逆向执行体:
 > Spec 驱动、host 层强制 scope（fail-closed）、证据切片 finish 门、双账本 ledger/journal、
 > md+json+SARIF 三读出、exit 语义机读。**仅用于已授权目标**（Spec=授权书,`helm spec init` 起步）。
+
+当前活动设计基线是 [`docs/REDESIGN.md`](docs/REDESIGN.md)。旧方案保留作决策和测试证据，
+不作为实施任务来源。
 
 ## Quickstart
 
