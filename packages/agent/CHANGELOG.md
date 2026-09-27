@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added `afterStream`, an observe-only lifecycle hook that runs after an assistant message settles (stream completed, final message in context) and before any tool call from that message is dispatched. It cannot rewrite the transcript or block tool execution — use `beforeToolCall`/`afterToolCall` for enforcement. Intended for refusal classification and structured audit events.
+
 ## [0.87.1] - 2026-09-22
 
 ## [0.87.0] - 2026-09-21
