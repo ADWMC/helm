@@ -23,6 +23,27 @@ Read it left to right:
 - `npx -y defuddle@0.19.4` — pinned version. `-y` skips the install prompt, which matters because the agent cannot answer it. The version is pinned so a later release of defuddle cannot silently change what your evidence means.
 - `parse --markdown` — extract the article body and emit markdown.
 
+## First decide whether the payload is HTML at all
+
+defuddle is an HTML extractor. Feeding it plain text or raw markdown fails with `No content could be extracted from stdin`, because there is no DOM to extract from. Check before you pipe:
+
+```bash
+curl -sIL --max-time 20 "URL" | grep -i '^content-type'      # bash
+```
+
+```powershell
+curl.exe -sIL --max-time 20 "URL" | Select-String '^Content-Type'   # PowerShell
+```
+
+- `text/html` — use defuddle. That is the case it is built for.
+- `text/plain`, `application/json`, `text/markdown` — **do not** use defuddle. Fetch it directly and let the content through:
+
+```bash
+curl -sL --max-time 30 -A "Mozilla/5.0" "URL"
+```
+
+This matters most for raw file hosts. A `raw.githubusercontent.com` URL returns `text/plain` markdown, so piping it into defuddle burns a step and produces an error for content you already had. Microsoft's cmdlet documentation is served exactly this way, and the raw markdown is far smaller than the rendered page — it is the preferred source, just not through defuddle.
+
 ## Output modes
 
 Pick the narrowest one that answers the question. Context is the budget.
@@ -56,13 +77,19 @@ npx -y defuddle@0.19.4 parse --markdown ./page.html
 
 ## Failures
 
-Both failure modes exit non-zero, which the Gateway records as a failed receipt:
+Every failure mode exits non-zero, which the Gateway records as a failed receipt. There are two distinct messages and they mean different things:
+
+```
+Error: No content could be extracted from stdin
+```
+
+The payload was not HTML — plain text, JSON, or markdown. **Do not retry with defuddle.** Fetch the URL directly and let the content through; see the content-type check above.
 
 ```
 Error: Cannot destructure property 'firstElementChild' of 'documentElement' as it is null.
 ```
 
-That message means **the input was not HTML** — usually an empty body, a DNS failure, or a plain-text response. Diagnose before retrying:
+The body was empty or unparseable HTML — a DNS failure, a connection reset, or a non-200. Diagnose the request before touching defuddle again:
 
 ```bash
 curl -sSL --max-time 30 -o /dev/null -w "%{http_code} %{url_effective}\n" "URL"
@@ -82,6 +109,7 @@ When a site returns 403, add a realistic user agent and retry once. When it retu
 ## Choosing between this and the other tools
 
 - Content already on disk → `read`.
-- A URL whose page you need as text → this skill.
-- A URL you only need a status code from → plain `curl -o /dev/null -w "%{http_code}"`, no defuddle.
+- A `text/html` URL whose article text you need → this skill.
+- A `text/plain`, JSON or markdown URL (raw file hosts, APIs, docs sources) → plain `curl`, no defuddle.
+- A URL you only need a status code from → `curl -o /dev/null -w "%{http_code}"`, no body.
 - Search across many sites → not this skill. helm has no search tool and this skill does not add one; a search engine would need its own scope decision.
