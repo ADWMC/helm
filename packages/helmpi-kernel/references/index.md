@@ -32,7 +32,7 @@
 - [native/index.md](native/index.md) — **Native 二进制域入口**（PE/ELF/Mach-O、脱壳、反混淆、PWN、Hook、Patch、固件、密码分析）· Use when: 样本是二进制/固件 · **不用于**: 纯源码审计（→web/protocol） · kw: native pe elf macho packer pwn hook
 - [web/index.md](web/index.md) — **Web 安全域入口**（API 授权、注入、SSO/OAuth/JWT/SAML、缓存、文件上传、请求走私）· Use when: HTTP 面 · **不用于**: 二进制（→native） · kw: web api injection oauth saml
 - [android/index.md](android/index.md) — **Android 逆向域入口**（APK 脱壳、Frida、MITM、Root 模块）· Use when: APK/移动端 · **不用于**: 纯 native .so（→native） · kw: apk android frida mitm
-- [ai-security/index.md](ai-security/index.md) — **AI 安全域入口**（Prompt 注入、越狱、H-CoT、模型防御画像、载体构造）· Use when: LLM/Agent 安全 · **不用于**: 传统 Web 注入（→web） · kw: prompt injection jailbreak llm agent
+- [ai-security/index.md](ai-security/index.md) — **AI 安全域入口**（Prompt 注入、越狱、H-CoT、模型防御画像、载体构造、**意图澄清 / 上下文优化 / 记忆管理**）· Use when: LLM/Agent 安全 · **不用于**: 传统 Web 注入（→web） · kw: prompt injection jailbreak llm agent intent clarification context memory
 - [malware/index.md](malware/index.md) — **恶意代码域入口**（静态分析 playbook、隐写）· Use when: 样本研判/IOC · **不用于**: 加壳脱壳实操（→native） · kw: malware ioc static playbook
 - [protocol/index.md](protocol/index.md) — **网络协议域入口**（协议逆向、命名解析投毒、常见服务未授权、依赖混淆）· Use when: pcap/私有协议/服务面 · **不用于**: Web 应用层（→web） · kw: protocol pcap websocket smuggling
 - [evidence/index.md](evidence/index.md) — **证据与报告域入口**（Case 管理、finding schema、报告模板）· Use when: 要落地证据或报告 · kw: evidence case report

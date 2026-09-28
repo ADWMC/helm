@@ -85,3 +85,6 @@ goal: 修helm 破甲层的归一化死代码 + runner 判据自污染，复验 6
 - [11:46:07] FINDING — helm-d references 按 SkillOpt 评分移植：106 文档入库，索引重建为可验证投影 (E-017)
 - [12:19:40] FINDING — 两角色/一次一任务 lease 已实现；真缺口是 prompt 未陈述阶段契约（S3a 已补） (E-017)
 - [12:25:13] FINDING — 修 sol-pi 两个失败：一个是 Windows 上 O_NOFOLLOW 静默失效的真安全回归，一个是纯平台差异 (E-017)
+- [14:55:25] tool_memory → E-018 — [LEDGER] arxiv-skill 已绑定：C:\Users\Administrator\.dsh\helmd-tools\arxiv-skill
+- [14:55:30] tool_memory → E-019 — [LEDGER] arxiv-skill 追加坑（证据:E-018）。
+- [14:55:59] FINDING — arXiv 检索落地 3 篇 agent 知识文档，并修正 2 条自拟缺口判断 (E-018, E-019)
