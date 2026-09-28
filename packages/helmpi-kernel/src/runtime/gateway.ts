@@ -54,6 +54,14 @@ export interface GatewayDeps {
 	readonly clock?: () => number;
 	/** Sandbox boundary probe (workdir-only + no egress). Default applies helm sandbox semantics. */
 	readonly sandboxPolicy?: (request: GatewayRequest, target: string | null) => { allow: boolean; reason?: string };
+	/**
+	 * Convergence probe (K1, observation only). Returns the CVM strategy verdict
+	 * for the current turn, or null when no snapshot exists. This NEVER denies:
+	 * a non-`continue` verdict is journaled as `convergence_probe` and the call
+	 * proceeds. It exists to measure whether a convergence gate would ever fire
+	 * before one is added to the frozen gate order.
+	 */
+	readonly readStrategy?: () => "recover" | "verify" | "challenge" | "pause" | "continue" | null;
 }
 
 /** Network-bearing argument names and command shapes (mirrors the G2 probe). */
@@ -228,6 +236,28 @@ export class ToolGateway {
 				});
 				return { kind: "denied", gate: "sandbox", reason };
 			}
+		}
+
+		// 6. convergence probe (K1) — OBSERVATION ONLY, never denies. The five
+		// gates above have all resolved to allow at this point. CVM computes a
+		// RunStrategy every turn (cvm.ts:80) but nothing consumed it: it was
+		// journaled on recovery and interpolated into a rationale string, and
+		// projectCognitive stopped emitting it after PH03 measured the model
+		// reading `strategy=recover` and hardening its refusal. Journaling what a
+		// gate WOULD have done is the measurement that decides whether to add one
+		// to the frozen order above — a deny is cheap to add and hard to un-add.
+		const strategy = this.deps.readStrategy?.() ?? null;
+		if (strategy !== null && strategy !== "continue") {
+			journal(JOURNAL_KEYS.convergenceProbe, {
+				tool: request.toolName,
+				target,
+				toolClass: request.toolClass,
+				wouldDeny: strategy === "challenge" || strategy === "pause",
+				strategy,
+				phase: "pre-exec",
+				source: request.source,
+				...(request.recoveryId ? { recoveryId: request.recoveryId } : {}),
+			});
 		}
 
 		return { kind: "allow" };

@@ -247,6 +247,10 @@ export default function helmPiExtension(pi: ExtensionAPI): void {
 				const rows = led.receipts();
 				return rows.length === 0 ? 1 : Math.max(...rows.map((r) => r.seq)) + 1;
 			}),
+		// K1 convergence probe: observation only. The verdict comes from the CVM
+		// snapshot the observation handler persisted last turn; a missing snapshot
+		// returns null and the probe stays silent.
+		readStrategy: () => restoreCvmSnapshot(cvmStore)?.strategy ?? null,
 	});
 	const recovery = new RecoveryOrchestrator({
 		store: cvmStore,

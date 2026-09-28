@@ -22,7 +22,7 @@ interface Recorder {
 	receipts: ReceiptEvent[];
 }
 
-function makeGateway(opts: { spec?: Spec | null; budgetBlock?: boolean }): {
+function makeGateway(opts: { spec?: Spec | null; budgetBlock?: boolean; strategy?: string | null }): {
 	gateway: ToolGateway;
 	rec: Recorder;
 	runs: string[];
@@ -36,6 +36,9 @@ function makeGateway(opts: { spec?: Spec | null; budgetBlock?: boolean }): {
 		recordReceipt: (r) => rec.receipts.push(r),
 		nextReceiptSeq: () => rec.receipts.length + 1,
 		clock: () => 1000,
+		...(opts.strategy === undefined
+			? {}
+			: { readStrategy: () => opts.strategy as "continue" | "challenge" | "pause" | "recover" | "verify" | null }),
 	});
 	return { gateway, rec, runs };
 }
@@ -196,4 +199,47 @@ test("gateway: evidence events parse back through the frozen contract", async ()
 	gateway.settle(request({ args: { command: "id" } }), { stdout: "uid=0(root)", stderr: "", exitCode: 0 });
 	const ev = rec.journal.find((e) => e.kind === "evidence_added")?.payload as unknown as EvidenceEvent;
 	assert.equal(ev.status, "exploited");
+});
+
+// K1: the convergence probe is observation-only. These two tests pin the
+// property that makes it safe to ship before the measurement exists.
+test("gateway: convergence probe journals a non-continue strategy but NEVER denies", async () => {
+	const { gateway, rec, runs } = makeGateway({ strategy: "challenge" });
+	const decision = gateway.decide(request());
+	assert.equal(decision.kind, "allow", "probe must not deny");
+	const res = await gateway.execute(request(), async () => {
+		runs.push("ran");
+		return { stdout: "ok", stderr: "", exitCode: 0 };
+	});
+	assert.equal(res.kind, "receipt", "the call still executed and settled");
+	assert.equal(runs.length, 1, "runner must still execute");
+	const probe = rec.journal.filter((e) => e.kind === "convergence_probe");
+	assert.equal(probe.length, 2, "one probe row per decide() call: the explicit one, plus the one inside execute()");
+	for (const row of probe) {
+		assert.equal(row.payload.strategy, "challenge");
+		assert.equal(row.payload.wouldDeny, true, "challenge is a would-deny verdict");
+		assert.equal(row.payload.phase, "pre-exec");
+	}
+});
+
+test("gateway: convergence probe stays silent on continue and when no snapshot exists", async () => {
+	const cont = makeGateway({ strategy: "continue" });
+	cont.gateway.decide(request());
+	assert.equal(cont.rec.journal.filter((e) => e.kind === "convergence_probe").length, 0, "continue emits nothing");
+
+	const none = makeGateway({ strategy: null });
+	none.gateway.decide(request());
+	assert.equal(none.rec.journal.filter((e) => e.kind === "convergence_probe").length, 0, "no snapshot emits nothing");
+
+	const absent = makeGateway({});
+	absent.gateway.decide(request());
+	assert.equal(absent.rec.journal.filter((e) => e.kind === "convergence_probe").length, 0, "absent dep emits nothing");
+});
+
+test("gateway: a denial short-circuits before the probe, so the probe never masks a real gate", async () => {
+	const { gateway, rec } = makeGateway({ spec: { ...SPEC, allowedTargets: ["fixture-01"] }, strategy: "challenge" });
+	const res = await gateway.execute(request(), async () => ({ stdout: "", stderr: "", exitCode: 0 }));
+	assert.equal(res.kind, "denied");
+	assert.equal(res.kind === "denied" && res.gate, "scope");
+	assert.equal(rec.journal.filter((e) => e.kind === "convergence_probe").length, 0, "scope denial wins, no probe row");
 });

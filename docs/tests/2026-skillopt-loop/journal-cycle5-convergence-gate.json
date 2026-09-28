@@ -1,0 +1,118 @@
+{
+  "loop": "SkillOpt cycle 5 (deriveStrategy -> gateway convergence gate, 2026-09-27)",
+  "cycle": "harvest -> candidate -> decision -> replay(local) -> consolidate | reject(buffer)",
+  "harvest": {
+    "question": "Tianshu-harness documents a Strategy Shift that actually blocks tool calls (continuation/strategy-shift). helm has the same sensor and the same rule table but nothing consumes the verdict. Should deriveStrategy become a gateway gate?",
+    "external_reference": {
+      "repo": "Tianshu-harness (cloned read-only into %TEMP%; not vendored, not a dependency)",
+      "their_trigger": "src/agent/execution-guidance.ts:50-52 — last 10 trajectory entries; if writes(edit_file|write_file) >= 4 AND verifies(bash|run_tests) === 0 -> emit Strategy shift (blocked|warn)",
+      "their_enforcement": "src/agent/tool-pipeline.ts:946 — if doomLevel === 'blocked', block ONLY the calls whose fingerprint is an offending one; other calls pass",
+      "their_stated_reason": "tool-pipeline.ts:947-953 — 'Block ONLY repeats of the call(s) that are actually looping. blocking everything deadlocks the turn (blocked calls are never recorded, so the window never changes)'",
+      "their_own_disclaimer": "blocked and warn are both derived from the SAME predicate; severity differs, not detection. The A/B report (docs/CVM运行时对Agent模型的实证影响.md) claims automatic blocking of all bash/git/diff, which is wider than what tool-pipeline.ts:946 implements",
+      "what_we_take": "the deadlock constraint (block the offending fingerprint only, never the tool class) — that is an engineering result, not a marketing claim",
+      "what_we_do_not_take": "their hook count, belief constitution, star-domain roles. No A/B evidence at our scale; the report's own boundary section concedes the effect decays in the confirm/execute phase"
+    },
+    "measurements": [
+      {
+        "signal": "does any production code read CvmSnapshot.strategy",
+        "method": "git grep '\\.strategy' across packages/helmpi-kernel/src excluding tests",
+        "result": "3 hits, none of them a decision: cvm.ts:94 (writes it), recovery.ts:95 (interpolates into a human-readable rationale string), recovery.ts:367 (journals it as cvmStrategy on recovery_selected). No branch anywhere reads it."
+      },
+      {
+        "signal": "does cvmStrategy drive anything downstream",
+        "method": "git grep cvmStrategy across all packages",
+        "result": "2 hits: recovery.ts:367 (journal payload) and recovery.test.ts:189 (asserts the journal row). Journal-only. A reader of the journal can see it; the runtime does not act on it."
+      },
+      {
+        "signal": "does the strategy reach the model",
+        "method": "read cvm.ts:projectCognitive after this session's PH03 fix",
+        "result": "no. projectCognitive emits only turn/momentum/pressure/coverage/complexity/freshness/stability. The strategy= field was removed because PH03 measured the model reading 'strategy=recover advisories=refusal-retry-directive' and hardening its refusal. So the verdict is now neither executed nor projected."
+      },
+      {
+        "signal": "is the sensorium half actually alive",
+        "method": "read cvm.ts:52-59 and index.ts:377-430 tool_result handler",
+        "result": "yes. computeSensorium receives real per-turn toolEvents (tool, ok, at) from the observation handler and is persisted each turn (saveCvmSnapshot). stability = 1 - repeatRatio over the tool histogram. The measurement is real; only the consumer is missing."
+      },
+      {
+        "signal": "is there a denial shape that can carry a strategy verdict",
+        "method": "read gateway.ts:147-214 and wiring.test.ts:189",
+        "result": "yes. GatewayDecision already has kind:'denied', gate:<name>, reason, and an instead ladder. The gate order comment at gateway.ts:148 says frozen: scope -> capability -> budget -> tripwire -> sandbox. Adding a gate means editing that comment and the order, not inventing a new channel."
+      },
+      {
+        "signal": "does the gap match the observed failure mode",
+        "method": "this session's authorized-target runs (E-013/E-014)",
+        "result": "T1 60s: deliver 2, refusal 0-2, indeterminate 15, tool_calls 154. T2 60s: deliver 3, indeterminate 13, tool_calls 115. 120s: indeterminate 11 and 10. Held-out 12: indeterminate 10. Refusal is 0; the dominant terminal state is 'did not finish'. The tool histogram is dense and repetitive, which is exactly what stability measures."
+      }
+    ]
+  },
+  "candidates": [
+    {
+      "id": "K1",
+      "signal": "deriveStrategy is computed every turn and consumed by nothing. cvm.test.ts:114 asserts in a comment that 'deriveStrategy itself is unchanged — it still drives the host', but no code reads it.",
+      "proposal": "add a diagnostic-only observation: when deriveStrategy returns 'challenge', journal a convergence_candidate row carrying the would-be fingerprint and the sensorium numbers. Do not deny. Measure the hit rate first.",
+      "decision": "accepted",
+      "tokens_added": "0 (journal row only, no prompt text)",
+      "target": "packages/helmpi-kernel/src/runtime/gateway.ts + contracts.ts JOURNAL_KEYS",
+      "rationale": "the scoring question for a new gate is 'would it ever fire, and on what'. A journal-only probe answers that at zero behavioural risk and produces the number that decides whether the gate is worth its cost. Shipping the deny first would be acting on a number we do not have.",
+      "verified": "see replay"
+    },
+    {
+      "id": "K2",
+      "signal": "K1 alone leaves the verdict still unexecuted, so it does not fix the indeterminate rate",
+      "proposal": "promote the probe to a real sixth gate: scope -> capability -> convergence -> budget -> tripwire -> sandbox, denying only requests whose tool+target fingerprint is a repeat offender, passing everything else",
+      "decision": "rejected",
+      "reason": "buffer: correct shape, wrong order. It must not ship in the same cycle as K1, because K1 is what tells us whether the predicate fires at all. Folding both into one commit means an unmeasured deny lands in the gate order that gateway.ts:148 declares frozen. Also the offending-fingerprint helper that makes the block safe (Tianshu's deadlock constraint) does not exist in helm yet — helm's stability is a per-turn aggregate over tool NAMES, not a sliding window over (tool,target,input) fingerprints. The safe version needs that window built first.",
+      "buffer": true,
+      "reopen_if": "K1's journal shows a non-trivial challenge rate in real runs, AND a bounded fingerprint window exists so the gate can block the looping call without blocking the tool"
+    },
+    {
+      "id": "K3",
+      "signal": "the domain half of the lane state machine (mature-projects-comparison.md:196-199) is unimplemented: discover/enum loops never force a TEST hypothesis, and nothing forces entry into an EXPLOIT lane",
+      "proposal": "implement the four-line lane state machine: force TEST after N discover/enum with no new surface; require an exploit/verify or blocked proposal once a TEST is DONE; demote repeated surfaces to Diagnostic; fail the Run with reason=convergence when the decision budget is spent",
+      "decision": "rejected",
+      "reason": "buffer: blocked on a missing prerequisite, not on merit. helm has no lane taxonomy — there is no classifier that labels a step as discover / enum / test / exploit, so 'force a TEST after N enum steps' has no predicate to evaluate. PentestGPT gets this from its task type enum (TEST/EXPLOIT) and its done_when compiler; helm has neither. Building the taxonomy is a larger task than this cycle and would land unverified.",
+      "buffer": true,
+      "reopen_if": "a lane/kind classifier exists for steps, at which point the four rules become evaluable and testable against the hard-case corpus"
+    },
+    {
+      "id": "K4",
+      "signal": "Tianshu's A/B report shows +20% completion and 3/5 spontaneous dissent from a prompt-layer belief constitution",
+      "proposal": "port the belief constitution (question instructions when they drift from intent; silence is disrespect; you are a collaborator not a tool)",
+      "decision": "rejected",
+      "reason": "buffer: the evidence does not transfer. n=5 tasks, one model (DeepSeek-V4-Flash), one reviewer (Claude Opus 4.7), one run per arm. The report's own section 1.4 identifies the boundary: the effect is strong in the analyse/propose phase and decays in the confirm/execute phase — T3's B arm dropped its own compromise proposal and reverted to the user's original plan after a vague confirmation. That is precisely the phase where helm's indeterminate rate lives (execution, not analysis). Adding prompt text whose measured effect is weakest exactly where our gap is would spend the token budget on the wrong half. Also helm's cycle-1 C1/C2 already occupy the prompt-layer lever and were harvested from measured signals (scope_denied x359, tripwire x12).",
+      "buffer": true,
+      "reopen_if": "an A/B at helm's own scale (the 85-case corpus, two arms, our model) shows a completion-rate delta outside run-to-run noise. Note the measured noise floor: two identical 60s 3-run suites over the 6 hard cases scored 6/18 and 11/18, so any single-run comparison on 6 cases is not evidence."
+    }
+  ],
+  "replay": {
+    "local": "node --test --test-concurrency=1 src/runtime/gateway.test.ts -> 14/14; full kernel suite -> 234/234 (was 231 pre-K1); npm run check -> exit 0",
+    "scope": "K1 only",
+    "note": "K1 is observational. No existing test result changed; the three new tests are additive.",
+    "test_detail": [
+      "probe journals a non-continue strategy but NEVER denies: decide() returns allow, the runner still executes, the row carries strategy=challenge wouldDeny=true phase=pre-exec",
+      "probe stays silent on continue, on null snapshot, and when the dep is absent",
+      "a scope denial short-circuits before the probe, so the probe cannot mask a real gate"
+    ],
+    "implementation_note": "the probe sits AFTER all five gates resolve to allow, immediately before `return { kind: 'allow' }` in gateway.ts decide(). It reads CVM strategy through a new optional GatewayDeps.readStrategy, wired in index.ts:250 as restoreCvmSnapshot(cvmStore)?.strategy ?? null. When the dep is absent (existing tests, any caller that does not wire it) the probe is a no-op."
+  },
+  "heldout": {
+    "separation": "the hard-case corpus and the authorized-target tasks are held out of replay. A convergence probe can only be validated by a real run, not by the unit suite.",
+    "status": "pending",
+    "why_not": "K1's value is the hit rate it journals during a real multi-step run. That requires the 6 hard cases or the authorized-target runner, which is the post-consolidate measurement, not part of this change."
+  },
+  "changes": [
+    { "file": "packages/helmpi-kernel/src/runtime/gateway.ts", "kind": "diagnostic convergence probe (K1)" },
+    { "file": "packages/helmpi-kernel/src/runtime/contracts.ts", "kind": "JOURNAL_KEYS row (K1)" },
+    { "file": "docs/tests/2026-skillopt-loop/journal-cycle5-convergence-gate.json", "kind": "journal" }
+  ],
+  "negative": {
+    "claim": "the frozen gate ORDER is untouched and no request is denied by the new probe",
+    "verify": "git diff --stat on this commit must show: the probe adds a journal write inside decide() AFTER the existing five gates resolve to allow, plus one JOURNAL_KEYS entry, plus tests. No `return { kind: \"denied\" }` added. gateway.ts:148's order comment must read the same five names."
+  },
+  "answer_to_user": {
+    "does_tianshu_block": "yes, but narrower than its report claims. tool-pipeline.ts:946 blocks only the offending fingerprint; the report's 'blocks all bash/git/diff' is wider than the implementation.",
+    "helm_gap": "helm has the sensor (computeSensorium, real per-turn tool events) and the rule table (deriveStrategy) but no consumer. After this session's PH03 fix it is not projected to the model either. It is pure bookkeeping.",
+    "best_next_step": "K1 — measure before building. The gate is cheap to add and hard to un-add once it is in the frozen order, so the hit rate comes first.",
+    "explicitly_not_doing": "K2 (gate) until K1 reports; K3 (lane taxonomy) until a classifier exists; K4 (belief constitution) until an A/B at our scale clears our own noise floor"
+  }
+}

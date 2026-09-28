@@ -159,6 +159,7 @@ export const JOURNAL_KEYS = {
 	evidenceAdded: "evidence_added",
 	reviewGate: "review_gate",
 	cvmSnapshot: "cvm_snapshot",
+	convergenceProbe: "convergence_probe",
 } as const;
 
 export type JournalKey = (typeof JOURNAL_KEYS)[keyof typeof JOURNAL_KEYS];
