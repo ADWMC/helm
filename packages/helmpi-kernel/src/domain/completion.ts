@@ -143,6 +143,16 @@ export function assertDoneHasObservation(stepId: string, observations: readonly 
 	}
 }
 
+/**
+ * Consecutive same-kind steps allowed before a run fails as convergence_exhausted.
+ *
+ * Single source for the default. The prompt states this as a contract the model
+ * can plan against and the loop enforces it; separate literals would let the
+ * prompt promise a boundary the loop does not apply. Lives in the domain layer
+ * because both the prompt and the loop need it and neither owns the other.
+ */
+export const DEFAULT_SAME_KIND_LIMIT = 5;
+
 export function convergenceBlocked(sameKindStreak: number, limit: number): boolean {
 	return limit > 0 && sameKindStreak >= limit;
 }

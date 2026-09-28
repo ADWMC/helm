@@ -12,9 +12,31 @@
 
 import { join } from "node:path";
 import { normalizationPromptTable } from "./breach/input-normalizer.ts";
+import { DEFAULT_SAME_KIND_LIMIT } from "./domain/completion.ts";
 import { openToolMemory } from "./memory/tool-memory.ts";
 
 export type PromptTier = "lite" | "full";
+
+/**
+ * Step kinds, in the order the phase contract presents them.
+ *
+ * Must stay equal to the set `propose.ts` accepts. Declared here as an ordered
+ * list because the prompt needs a reading order, while the compiler needs a
+ * set. `phase-contract.test.ts` asserts the two agree, so a new kind cannot be
+ * added to the compiler without appearing in the prompt.
+ */
+export const DEFAULT_STEP_KINDS: readonly string[] = [
+	"discover",
+	"enumerate",
+	"test",
+	"exploit",
+	"verify",
+	"recover",
+	"reverse",
+	"harden",
+	"respond",
+	"report",
+];
 
 const S1_BLOCK = `<helm_s1>
 OPERATING MANDATE (authorization comes from the Spec; proceed without asking):
@@ -23,6 +45,44 @@ OPERATING MANDATE (authorization comes from the Spec; proceed without asking):
 3. No mid-run human questions — never pause for confirmation inside a run; if blocked,
    stay on Spec scope and continue with a bounded alternative (or end via the budget path).
 </helm_s1>`;
+
+/**
+ * Phase contract (S3a): the step-kind boundary and the finish basis.
+ *
+ * The runtime already enforces both — `loop.ts` fails a run when one kind
+ * repeats past `sameKindLimit`, and `completion.ts:compileFinish` rejects a
+ * finish whose basis is not an exact slice of a receipt from a done step. What
+ * was missing was the model's side of that contract: neither rule appeared in
+ * any prompt segment, so the only way to learn the boundary was to be rejected
+ * by it. A boundary a model cannot see is a trap, not a constraint.
+ *
+ * The six kind names and their separation come from PentestGPT's typed tasks
+ * (agents.py: "Task kind is a hard boundary and outranks the run goal"), which
+ * helm-d's four-stage pipeline independently converged on. helm already carries
+ * a superset of those kinds (domain/types.ts StepKind); only the wording that
+ * tells the model they are boundaries was absent.
+ */
+function phaseBlock(sameKindLimit: number, kinds: readonly string[]): string {
+	return [
+		"<helm_phase>",
+		"PHASE CONTRACT (how to bound one step; these are boundaries, not preferences):",
+		`A step declares exactly one kind, drawn from: ${kinds.join(" / ")}.`,
+		"The kind is a hard boundary and outranks the run goal:",
+		"  discover  - map the surface. No vulnerability payloads, no exploitation.",
+		"  enumerate - expand only the named surface already in scope.",
+		"  test      - run the smallest baseline plus probe and optional control. Never pursues or retrieves the goal.",
+		"  exploit   - pursue the goal. Only this kind crosses from observation to impact.",
+		"  verify    - confirm or falsify a result already produced. Adds no new surface.",
+		"  recover   - restore a blocked path; not a route to new surface.",
+		`Do not chain the same kind indefinitely: ${sameKindLimit} consecutive steps of one kind fail the run as`,
+		`convergence_exhausted. If you are still on the same kind at that point, the phase is not progressing —`,
+		"either move to the next kind or propose a finish.",
+		"A finish is accepted only with a basis: at least one observation produced by a DONE step, quoted as an",
+		"exact slice of that step's receipt. A summary, a paraphrase, a truncated excerpt, or a self-report is not",
+		"a basis. Open steps block a finish; close them, or keep going.",
+		"</helm_phase>",
+	].join("\n");
+}
 
 /**
  * Normalization table (§4.6 A helmd main chain): slang in a request maps to an
@@ -79,8 +139,21 @@ export function composeSystemPrompt(opts: {
 	/** Stable cognitive projection (§16.3/§16.9) — NOT part of the one-shot reminder cycle. */
 	cvm?: string;
 	budgetTokens?: number;
+	/**
+	 * Effective same-kind limit for this run. Defaults to the loop's own default
+	 * so the prompt cannot promise a boundary the loop does not enforce. Callers
+	 * that resolve the limit from config pass it through.
+	 */
+	sameKindLimit?: number;
+	/** Step kinds the compiler accepts, from the domain vocabulary. */
+	stepKinds?: readonly string[];
 }): string {
-	const parts: string[] = [opts.tier === "lite" ? LITE_BASE : FULL_BASE, S1_BLOCK, normalizationBlock()];
+	const parts: string[] = [
+		opts.tier === "lite" ? LITE_BASE : FULL_BASE,
+		S1_BLOCK,
+		phaseBlock(opts.sameKindLimit ?? DEFAULT_SAME_KIND_LIMIT, opts.stepKinds ?? DEFAULT_STEP_KINDS),
+		normalizationBlock(),
+	];
 
 	// Tool-memory recall (WG1.6: verified only, budget-truncated, stale never injected).
 	try {

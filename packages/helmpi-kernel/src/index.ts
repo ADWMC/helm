@@ -17,6 +17,7 @@ import { createStreamGuard, ingest as streamIngest, settle as streamSettle } fro
 import { washText } from "./breach/tool-wash.ts";
 import type { AnalysisMode } from "./config.ts";
 import { loadConfig } from "./config.ts";
+import { DEFAULT_SAME_KIND_LIMIT } from "./domain/completion.ts";
 import { validateScopeQuery } from "./domain/scope.ts";
 import type { Spec } from "./domain/types.ts";
 import { ACTIVATION_WORD } from "./domain/types.ts";
@@ -1019,6 +1020,7 @@ export default function helmPiExtension(pi: ExtensionAPI): void {
 					cwd: opts.cwd ?? process.cwd(),
 					reminders: pendingReminders.splice(0, pendingReminders.length),
 					...(projection ? { cvm: projection } : {}),
+					sameKindLimit: Number(process.env.HELPI_SAME_KIND ?? DEFAULT_SAME_KIND_LIMIT),
 				});
 			} catch {
 				/* composition best-effort: keep host prompt */

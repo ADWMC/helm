@@ -5,6 +5,7 @@
 import { randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { DEFAULT_SAME_KIND_LIMIT } from "./domain/completion.ts";
 import type { Spec } from "./domain/types.ts";
 import { exportReport, exportReportJson, reportExitCode } from "./export.ts";
 import type { ProposeDecision } from "./ledger.ts";
@@ -193,7 +194,7 @@ async function main(): Promise<void> {
 		}
 		const result = await runLoop(ledger, {
 			maxDecisions: Number(flag(args, "--max-decisions") ?? 20),
-			sameKindLimit: Number(flag(args, "--same-kind") ?? 5),
+			sameKindLimit: Number(flag(args, "--same-kind") ?? DEFAULT_SAME_KIND_LIMIT),
 			executor: new FileEchoExecutor(new Map([["*", "ok\n"]])),
 			proposer: () => {
 				if (queue.length > 0) return queue.shift()!;

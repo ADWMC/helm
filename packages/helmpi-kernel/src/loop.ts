@@ -2,7 +2,7 @@
 
 import { randomUUID } from "node:crypto";
 import { DEFAULT_CONFIG } from "./config.ts";
-import { assertDoneHasObservation } from "./domain/completion.ts";
+import { assertDoneHasObservation, convergenceBlocked, DEFAULT_SAME_KIND_LIMIT } from "./domain/completion.ts";
 import { applyOutcomeRules, groundExcerpt, observationFromGrounding } from "./domain/evidence.ts";
 import type { Receipt, Step } from "./domain/types.ts";
 import type { Ledger, ProposeDecision } from "./ledger.ts";
@@ -58,7 +58,7 @@ export async function runLoop(ledger: Ledger, opts: LoopOptions): Promise<LoopRe
 	}
 	const maxDecisions = opts.maxDecisions ?? 20;
 	const maxAttempts = opts.maxAttemptsPerStep ?? 2;
-	const sameKindLimit = opts.sameKindLimit ?? 5;
+	const sameKindLimit = opts.sameKindLimit ?? DEFAULT_SAME_KIND_LIMIT;
 	const superviseCfg: SuperviseConfig = opts.supervise ?? {
 		enabled: DEFAULT_CONFIG.supervise.enabled,
 		sameToolLimit: DEFAULT_CONFIG.supervise.sameToolLimit,
@@ -181,7 +181,7 @@ export async function runLoop(ledger: Ledger, opts: LoopOptions): Promise<LoopRe
 
 		if (decision.newStep) {
 			const streak = kindStreak.get(decision.newStep.kind) ?? 0;
-			if (streak >= sameKindLimit) {
+			if (convergenceBlocked(streak, sameKindLimit)) {
 				ledger.addDiagnostic("convergence", `same kind ${decision.newStep.kind} hit limit ${sameKindLimit}`);
 				ledger.setRunStatus("failed", "convergence");
 				return {
