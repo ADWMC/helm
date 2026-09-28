@@ -18,8 +18,31 @@ export const PLACEHOLDER_EXCERPT_BYTES = 1024;
 
 const CHARS_PER_TOKEN = 4;
 const OBSERVATION_ID_PATTERN = /^obs_[a-f0-9]{24}$/u;
-const READ_OBJECT_FLAGS = constants.O_RDONLY | constants.O_NOFOLLOW;
-const CREATE_OBJECT_FLAGS = constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW;
+const READ_OBJECT_FLAGS = constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0);
+const CREATE_OBJECT_FLAGS = constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | (constants.O_NOFOLLOW ?? 0);
+
+/**
+ * Refuse to follow a symlink at `path`.
+ *
+ * O_NOFOLLOW is the primary guard on POSIX, where opening a symlink fails with
+ * ELOOP. Windows does not implement the flag — `constants.O_NOFOLLOW` is
+ * undefined there, so the OR collapses to the plain open flags and the guard
+ * silently disappears. That is a real loss of protection, not a test artifact:
+ * an object path replaced by a symlink would be read through on Windows.
+ *
+ * This check restores the same refusal on every platform. It is a pre-open
+ * lstat rather than part of the open, so it is subject to the usual TOCTOU window;
+ * it exists to make the failure mode identical where the kernel flag is absent,
+ * not to replace the flag where it is present.
+ */
+async function assertNotSymlink(path: string): Promise<void> {
+	const info = await lstat(path);
+	if (info.isSymbolicLink()) {
+		const error = new Error(`Refusing to follow symlink at ${path}`);
+		(error as NodeJS.ErrnoException).code = "ELOOP";
+		throw error;
+	}
+}
 
 /**
  * Receipts from the evidence-preserving reducer are already a reduction of a
@@ -134,6 +157,10 @@ export async function ensureStored(observation: Observation): Promise<void> {
 		await handle.writeFile(observation.text, { encoding: "utf8" });
 	} catch (error) {
 		if (!(error instanceof Error) || !("code" in error) || error.code !== "EEXIST") throw error;
+		// A pre-existing symlink reaches this branch via EEXIST from O_EXCL. The
+		// lstat check inside the directory guard above covers the directory, not
+		// this file, so it must be re-checked here before reading through it.
+		await assertNotSymlink(observation.filePath);
 		const existingHandle = await open(observation.filePath, READ_OBJECT_FLAGS);
 		try {
 			const existing = await existingHandle.stat();
@@ -215,7 +242,10 @@ export async function readRecallChunk(
 	offset: number,
 	limits: { readonly maxBytes: number; readonly maxLines: number },
 ): Promise<RecallChunk> {
-	const handle = await open(path, READ_OBJECT_FLAGS);
+	const handle = await (async () => {
+		await assertNotSymlink(path);
+		return open(path, READ_OBJECT_FLAGS);
+	})();
 	try {
 		const fileStats = await handle.stat();
 		if (!fileStats.isFile()) throw new Error("Stored observation is not a regular file");

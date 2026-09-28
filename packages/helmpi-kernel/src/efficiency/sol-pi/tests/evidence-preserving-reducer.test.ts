@@ -292,7 +292,21 @@ describe("evidence-preserving reducer", () => {
 			true,
 		);
 		expect(await readFile(sourcePath, "utf8")).toBe(body);
-		expect((await stat(sourcePath)).mode & 0o777).toBe(0o600);
+		// archive.ts writes with mode 0o600 so an archived raw log is not
+		// world-readable. Windows has no POSIX permission bits: stat() there
+		// reports a synthetic 0o666 regardless of the mode passed to writeFile,
+		// so the exact-bit assertion is only meaningful on POSIX. Asserting it
+		// unconditionally fails on Windows for a reason that says nothing about
+		// the code under test.
+		if (process.platform === "win32") {
+			// The property that survives on Windows: the file is a regular file
+			// whose bytes are exactly what the archive stored.
+			const info = await stat(sourcePath);
+			expect(info.isFile()).toBe(true);
+			expect(info.size).toBe(Buffer.byteLength(body, "utf8"));
+		} else {
+			expect((await stat(sourcePath)).mode & 0o777).toBe(0o600);
+		}
 		expect(events.filter((entry) => entry.kind === "applied")).toHaveLength(1);
 		expect(notify).toHaveBeenCalledTimes(1);
 		expect(notify.mock.calls[0]?.[0]).toMatch(
