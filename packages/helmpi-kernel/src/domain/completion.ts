@@ -1,6 +1,7 @@
 /** Completion compiler — I4, I8, I10, kind boundaries. Pure. */
 
 import { groundExcerpt } from "./evidence.ts";
+import { checkFraming } from "./framing.ts";
 import { assertStepTarget } from "./scope.ts";
 import type { Observation, Receipt, Spec, Step, StepKind, Workspace } from "./types.ts";
 
@@ -19,6 +20,7 @@ export type CompileErrorCode =
 	| "convergence_exhausted"
 	| "finish_without_coverage"
 	| "evidence_not_grounded"
+	| "finish_misframed"
 	| "empty_done_when";
 
 export class CompileError extends Error {
@@ -134,6 +136,42 @@ export function compileFinish(ws: Workspace, decision: FinishDecision, receipts?
 			);
 		}
 	}
+	// Framing integrity: the checks above prove the run finished something. This
+	// one asks whether it finished the thing that was asked for. Runs that satisfy
+	// every completeness check can still deliver a coherent artifact for a
+	// different task, and nothing else in the pipeline would notice (arXiv:2605.09698).
+	//
+	// Only a total miss is rejected. The check is a lexical proxy, so an
+	// "indeterminate" verdict — no goal terms to compare, or no resolvable basis
+	// steps — passes through rather than blocking real work.
+	const framing = checkFraming({
+		goal: ws.spec.goal,
+		steps: ws.steps,
+		observations: ws.observations,
+		basisIds: decision.finishBasisIds,
+	});
+	if (framing.verdict === "misframed") {
+		throw new CompileError(
+			"finish_misframed",
+			`finish basis answers a different question; goal terms absent from the completed work: ${framing.missing.join(", ")}`,
+		);
+	}
+}
+
+/**
+ * Framing verdict for a finish that compileFinish accepted, so callers can
+ * journal the indeterminate case. compileFinish deliberately does not throw on
+ * indeterminate — the proxy is lexical and would block legitimate work — but an
+ * unverified framing should still be visible in the run record rather than
+ * silently equivalent to a verified one.
+ */
+export function framingVerdictFor(ws: Workspace, basisIds: readonly string[]): ReturnType<typeof checkFraming> {
+	return checkFraming({
+		goal: ws.spec.goal,
+		steps: ws.steps,
+		observations: ws.observations,
+		basisIds,
+	});
 }
 
 export function assertDoneHasObservation(stepId: string, observations: readonly Observation[]): void {

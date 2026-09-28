@@ -26,9 +26,10 @@ function baseSpec(): Spec {
 	};
 }
 
-function ledgerWithSpec(dir: string): Ledger {
+function ledgerWithSpec(dir: string, goal?: string): Ledger {
 	const led = new Ledger(join(dir, "ledger.db"));
-	led.setSpec(baseSpec());
+	const spec = baseSpec();
+	led.setSpec(goal === undefined ? spec : { ...spec, goal });
 	led.setRunStatus("running");
 	return led;
 }
@@ -472,6 +473,56 @@ test("run loop: discover step done with grounded doneWhen then finish", async ()
 		const step = ws.steps.find((s) => s.id === "d1");
 		assert.equal(step?.status, "done");
 		assert.ok(ws.observations.length >= 1);
+		led.close();
+	} finally {
+		rmSync(dir, { recursive: true, force: true });
+	}
+});
+
+test("run loop: a finish the framing gate cannot judge is recorded, not silent", async () => {
+	// A real-run probe found the framing gate passing without leaving any trace
+	// that it had run, which made an unverified framing indistinguishable from a
+	// checked one. The goal here is deliberately too thin for the lexical proxy
+	// ("scan the host" leaves under MIN_GOAL_TERMS), so the verdict must be
+	// indeterminate and must land in diagnostics.
+	const dir = tmp();
+	try {
+		const led = ledgerWithSpec(dir, "scan the host");
+		const doneWhen = "services: 80,443";
+		const queue = [
+			{
+				finish: false as const,
+				summary: "start discover",
+				newStep: {
+					id: "d1",
+					kind: "discover" as const,
+					target: "http://127.0.0.1:8080",
+					objective: "map http surface",
+					doneWhen,
+				},
+				nextStepId: "d1",
+			},
+			{ finish: true as const, summary: "done", finishBasisIds: ["obs-d1-x"] },
+		];
+		const result = await runLoop(led, {
+			maxDecisions: 10,
+			executor: new FileEchoExecutor(new Map([["*", `scan\n${doneWhen}\n`]])),
+			proposer: () => {
+				const d = queue.shift();
+				if (!d) throw new Error("queue empty");
+				if (d.finish && d.finishBasisIds[0] === "obs-d1-x") {
+					const obs = led.observations()[0];
+					if (obs) d.finishBasisIds = [obs.id];
+				}
+				return d;
+			},
+		});
+		assert.equal(result.status, "completed");
+		const diags = led.diagnostics(20);
+		assert.ok(
+			diags.some((d) => d.kind === "framing" && d.message.includes("indeterminate")),
+			`expected an indeterminate framing diagnostic, got: ${JSON.stringify(diags)}`,
+		);
 		led.close();
 	} finally {
 		rmSync(dir, { recursive: true, force: true });

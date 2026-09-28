@@ -80,6 +80,12 @@ function phaseBlock(sameKindLimit: number, kinds: readonly string[]): string {
 		"A finish is accepted only with a basis: at least one observation produced by a DONE step, quoted as an",
 		"exact slice of that step's receipt. A summary, a paraphrase, a truncated excerpt, or a self-report is not",
 		"a basis. Open steps block a finish; close them, or keep going.",
+		"FRAMING: a finish is also rejected when the basis answers a different question than the run goal. If the",
+		"goal asks for one property but every done step measured an unrelated one, the run is misframed even",
+		"though each step completed and grounded. Check the goal against what your steps actually produced",
+		"before finishing; a step whose wording never mentions the goal's subject is the signal.",
+		'A step worded as bare activity ("map http surface") is not evidence of drift and will not be treated as',
+		"such — but a step naming its own subject that the goal never mentions is.",
 		"</helm_phase>",
 	].join("\n");
 }

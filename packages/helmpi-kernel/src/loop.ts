@@ -2,7 +2,12 @@
 
 import { randomUUID } from "node:crypto";
 import { DEFAULT_CONFIG } from "./config.ts";
-import { assertDoneHasObservation, convergenceBlocked, DEFAULT_SAME_KIND_LIMIT } from "./domain/completion.ts";
+import {
+	assertDoneHasObservation,
+	convergenceBlocked,
+	DEFAULT_SAME_KIND_LIMIT,
+	framingVerdictFor,
+} from "./domain/completion.ts";
 import { applyOutcomeRules, groundExcerpt, observationFromGrounding } from "./domain/evidence.ts";
 import type { Receipt, Step } from "./domain/types.ts";
 import type { Ledger, ProposeDecision } from "./ledger.ts";
@@ -172,6 +177,18 @@ export async function runLoop(ledger: Ledger, opts: LoopOptions): Promise<LoopRe
 			applyProposal(ledger, decision, {
 				...(opts.playbook ? { playbook: opts.playbook } : {}),
 			});
+			// compileFinish throws on a misframed basis, so a finish that reaches
+			// here was either verified aligned or left unjudged by the lexical
+			// proxy. Recording the latter keeps an unverified framing from looking
+			// identical to a checked one in the run record — the real-run probe
+			// found the gate passing silently, with no trace that it had run.
+			const framing = framingVerdictFor(ledger.workspace(), decision.finishBasisIds);
+			if (framing.verdict !== "aligned") {
+				ledger.addDiagnostic(
+					"framing",
+					`${framing.verdict}: not decidable from goal terms (${framing.goalTerms.length} extracted)`,
+				);
+			}
 			return {
 				status: ledger.runStatus(),
 				decisions,

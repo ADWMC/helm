@@ -10,7 +10,7 @@ import type { Receipt } from "../domain/types.ts";
 import type { EvidenceEvent } from "./contracts.ts";
 import { type ClaimInput, ReviewGate } from "./review-gate.ts";
 
-function setup(opts: { receipts?: Receipt[]; evidence?: EvidenceEvent[] } = {}) {
+function setup(opts: { receipts?: Receipt[]; evidence?: EvidenceEvent[]; goal?: string } = {}) {
 	const journal: Array<{ kind: string; payload: Record<string, unknown> }> = [];
 	const receipts = opts.receipts ?? [
 		{ seq: 1, stdout: "uid=0(root)\nlogin ok", stderr: "", exitCode: 0 },
@@ -28,6 +28,7 @@ function setup(opts: { receipts?: Receipt[]; evidence?: EvidenceEvent[] } = {}) 
 	];
 	const gate = new ReviewGate({
 		journal: (kind, payload) => journal.push({ kind, payload }),
+		...(opts.goal === undefined ? {} : { goal: () => opts.goal as string }),
 		receipts: () => receipts,
 		evidence: () => evidence,
 		clock: () => 5000,
@@ -146,4 +147,72 @@ test("review-gate: an id echoed in a tool response is not evidence (I5 exact sli
 	const review = gate.reviewClaim(claim({ evidenceRefs: ["E-001"] }));
 	assert.equal(review.status, "unverified", "echoed id string can never ground a claim");
 	assert.equal(review.reason, "evidence_not_grounded");
+});
+
+/*
+ * Framing integrity on the finish gate (arXiv:2605.09698). These live here, not
+ * only in framing.test.ts, because `finishGate` is the gate a real `helm` run
+ * actually reaches — the autonomous loop's compileFinish is a separate entry
+ * (`helmpi run`). A check that only exists on the unreached path is not deployed.
+ */
+
+test("finish gate: grounded claims that answer another question do not pass", () => {
+	// Every claim is receipt-backed, so the evidence gate alone would pass. The
+	// claims are about password policy while the goal asks about authentication
+	// strength: the delivery is coherent and about the wrong thing.
+	const { gate, journal } = setup({
+		goal: "evaluate the authentication strength of the target site",
+		receipts: [
+			{ seq: 1, stdout: "password policy: min length 8", stderr: "", exitCode: 0 },
+			{ seq: 2, stdout: "complexity rules: none enforced", stderr: "", exitCode: 0 },
+		],
+		evidence: [
+			{
+				id: "EV-1-1",
+				receiptSeq: 1,
+				excerpt: "password policy: min length 8",
+				status: "exploited",
+				sourceStep: null,
+				at: 1,
+			},
+			{
+				id: "EV-2-1",
+				receiptSeq: 2,
+				excerpt: "complexity rules: none enforced",
+				status: "exploited",
+				sourceStep: null,
+				at: 1,
+			},
+		],
+	});
+	const res = gate.finishGate([
+		claim({ id: "C1", statement: "password policy requires a minimum length of 8", evidenceRefs: ["EV-1-1"] }),
+		claim({ id: "C2", statement: "complexity rules are not enforced anywhere", evidenceRefs: ["EV-2-1"] }),
+	]);
+	assert.equal(res.framing.verdict, "misframed");
+	assert.equal(res.pass, false, "a misframed finish must not pass even with grounded claims");
+	assert.ok(res.framing.missing.length > 0);
+	const finish = journal.filter((e) => e.kind === "review_gate" && e.payload.scope === "finish");
+	assert.equal(finish.at(-1)?.payload.framing, "misframed", "the verdict must be on the record");
+});
+
+test("finish gate: claims that answer the goal pass unchanged", () => {
+	const { gate } = setup({
+		goal: "evaluate the authentication strength of the target site",
+		receipts: [{ seq: 1, stdout: "uid=0(root)\nlogin ok", stderr: "", exitCode: 0 }],
+	});
+	const res = gate.finishGate([
+		claim({ id: "C1", statement: "authentication strength on the target site is weak", evidenceRefs: ["EV-1-1"] }),
+	]);
+	assert.equal(res.framing.verdict, "aligned");
+	assert.equal(res.pass, true);
+});
+
+test("finish gate: no goal configured yields indeterminate, which must not block", () => {
+	// Callers that do not supply a goal must behave exactly as before this check
+	// existed; blocking them would be a regression, not a safeguard.
+	const { gate } = setup();
+	const res = gate.finishGate([claim({ evidenceRefs: ["EV-1-1"] })]);
+	assert.equal(res.framing.verdict, "indeterminate");
+	assert.equal(res.pass, true);
 });

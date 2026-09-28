@@ -276,6 +276,10 @@ export default function helmPiExtension(pi: ExtensionAPI): void {
 		new ReviewGate({
 			journal: journalEvent,
 			receipts: () => withLedger((led) => led.receipts()),
+			// Framing compares the finish claims against the Spec goal; the Spec is
+			// the same one the ScopeGate loads, so both sides of the comparison
+			// come from a source the model cannot rewrite mid-run.
+			goal: () => loadSessionSpec()?.goal ?? "",
 			evidence: () =>
 				withLedger((led) =>
 					led
@@ -991,6 +995,12 @@ export default function helmPiExtension(pi: ExtensionAPI): void {
 						const result = reviewGate().finishGate(claims);
 						if (result.pass) {
 							withLedger((led) => led.setRunStatus("completed", "review_gate: all claims verified"));
+						} else if (result.framing.verdict === "misframed") {
+							// Distinct from the evidence message: the claims may be
+							// perfectly grounded and still be about another question.
+							pendingReminders.push(
+								`finish gate (framing): the claims answer a different question than the Spec goal — goal terms absent from every claim: ${result.framing.missing.join(", ")}. Re-frame the work or restate the Spec.`,
+							);
 						} else {
 							pendingReminders.push(
 								`finish gate: claims ${result.unverified.join(", ")} lack receipt-backed evidence — cite exact receipt slices or keep them unverified in the report.`,

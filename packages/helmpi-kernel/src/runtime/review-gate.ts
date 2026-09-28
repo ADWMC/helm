@@ -9,6 +9,7 @@
  */
 
 import { classifyEvidence, groundExcerpt } from "../domain/evidence.ts";
+import { checkFraming, type FramingResult } from "../domain/framing.ts";
 import type { Receipt } from "../domain/types.ts";
 import type { EvidenceEvent } from "./contracts.ts";
 import { JOURNAL_KEYS } from "./contracts.ts";
@@ -44,12 +45,25 @@ export interface ReviewDeps {
 	 */
 	readonly resolveExternalRef?: (ref: string) => string | null;
 	readonly clock?: () => number;
+	/**
+	 * The Spec goal, for framing integrity. Optional so existing callers keep
+	 * working; when absent the framing check reports `indeterminate` (no goal to
+	 * compare against) rather than assuming alignment.
+	 */
+	readonly goal?: () => string;
 }
 
 export interface FinishGateResult {
 	readonly pass: boolean;
 	readonly reviews: readonly ClaimReview[];
 	readonly unverified: readonly string[];
+	/**
+	 * Framing verdict for this finish (arXiv:2605.09698). `misframed` means the
+	 * claims name a subject the Spec goal never mentions — the run finished
+	 * something, but not the thing that was asked for, and every other check in
+	 * this gate would still pass.
+	 */
+	readonly framing: FramingResult;
 }
 
 const MAX_SLICE_FOR_VERIFICATION = 4000;
@@ -230,13 +244,52 @@ export class ReviewGate {
 			.filter((r) => r.status === "unverified" || r.status === "blocked")
 			.map((r) => r.claimId);
 		const pass = claims.length > 0 && unverified.length === 0;
+
+		// Framing integrity, on the path a real run actually takes. Every other
+		// check here asks whether the claims are proven; none asks whether they
+		// are about the question that was posed. A run can satisfy all of them
+		// while delivering a coherent answer to a different question.
+		//
+		// The comparison uses the claim statements as the basis: those are what
+		// the run asserts it established, so they are what must match the goal.
+		const framing = checkFraming({
+			goal: this.deps.goal?.() ?? "",
+			steps: claims.map((c) => ({
+				id: c.id,
+				kind: "report" as const,
+				target: c.target ?? "",
+				objective: c.statement,
+				doneWhen: c.statement,
+				basisIds: [],
+				dependsOn: [],
+				status: "done" as const,
+				createdRevision: 0,
+			})),
+			observations: claims.map((c, i) => ({
+				id: c.id,
+				stepId: c.id,
+				attemptId: c.id,
+				excerpt: c.statement,
+				receiptSeq: i,
+				createdAtRevision: 0,
+			})),
+			basisIds: claims.map((c) => c.id),
+		});
+
 		this.deps.journal(JOURNAL_KEYS.reviewGate, {
 			scope: "finish",
 			pass,
 			claimCount: claims.length,
 			unverified,
+			framing: framing.verdict,
+			framingMissing: framing.missing,
 			at: this.now(),
 		});
-		return { pass, reviews, unverified };
+		return {
+			pass: pass && framing.verdict !== "misframed",
+			reviews,
+			unverified,
+			framing,
+		};
 	}
 }

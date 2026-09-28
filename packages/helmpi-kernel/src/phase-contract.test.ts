@@ -103,3 +103,25 @@ test("the convergence outcome is named so it is recognisable", () => {
 	const text = prompt();
 	assert.match(text, /convergence_exhausted/);
 });
+
+test("the framing rule is stated, matching the framing detector", () => {
+	const text = prompt();
+	// compileFinish throws finish_misframed on a total subject miss; the prompt
+	// has to name the concept so the model can avoid it rather than discover it
+	// by rejection.
+	assert.match(text, /FRAMING:/);
+	assert.match(text, /answers a different question than the run goal/);
+	// The carve-out matters as much as the rule: stating the rule without it would
+	// make the model treat every terse step as drift.
+	assert.match(text, /bare activity/);
+});
+
+test("the framing clause names no threshold the detector does not apply", () => {
+	// Guards the class of bug this repo has hit before: a prompt promising a
+	// boundary the runtime does not enforce, or vice versa. The detector fires on
+	// a named-subject miss, never on a coverage ratio, so the prompt must not
+	// imply one.
+	const text = prompt();
+	assert.doesNotMatch(text, /coverage (ratio|threshold|percentage)/i);
+	assert.doesNotMatch(text, /indeterminate/);
+});
