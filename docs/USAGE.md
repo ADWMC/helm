@@ -1,7 +1,7 @@
 # helm-pi 使用手册
 
 > 一站式：怎么装、怎么开、工具/命令怎么用、三种强度、靶场怎么练。  
-> 架构见 [../DESIGN.md](../DESIGN.md) · 方法论 [methodology.md](methodology.md) · 标准 [tests/STANDARD.md](tests/STANDARD.md)
+> 架构见 [REDESIGN.md](REDESIGN.md) · 方法论 [methodology.md](methodology.md) · 标准 [tests/STANDARD.md](tests/STANDARD.md)
 
 ---
 
@@ -177,21 +177,14 @@ node dist/cli.js run --dir .\run1 --proposer-file decisions.jsonl
 
 ## 6. 靶场（本地授权）
 
-见 **[../labs/README.md](../labs/README.md)**：
+> **已移除。** 本节曾指向仓库根目录的 `labs/`，包含 18080–18084 五个靶场与
+> `labs/*/server.py` 批量启动示例。该目录不在本仓库中。目前唯一保留的靶场是
+> 单次测试自带的 [tests/2026-mimo-vulncms-ab/lab/server.py](tests/2026-mimo-vulncms-ab/lab/server.py)
+> （VulnCMS 对照实验用），随该测试套件一起维护，不是通用靶场。
+>
+> 需要靶场时在 Spec 里指定自己的本地目标；helm 不附带靶场。
 
-| 端口 | 练什么 |
-|------|--------|
-| 18080 | SQLi |
-| 18081 | web-pentest / IDOR |
-| 18082 | ctf 完成链 |
-| 18083 | reverse |
-| 18084 | blue-ir |
-
-```powershell
-Get-ChildItem labs/*/server.py | ForEach-Object { Start-Process python $_.FullName -WindowStyle Hidden }
-```
-
-Scope 示例：`127.0.0.1:18081` only。
+Scope 示例：`127.0.0.1:PORT` only（`PORT` 填你实际起的服务端口）。
 
 ---
 
@@ -281,8 +274,8 @@ Run.finish → 无 open Step + finish_basis ⊆ done 的 Obs
 
 | 文档 | 用途 |
 |------|------|
-| [../DESIGN.md](../DESIGN.md) | 架构与不变量 |
+| [REDESIGN.md](REDESIGN.md) | 架构与不变量（当前基线） |
+| [INVARIANTS.md](INVARIANTS.md) | 不变量编号单源 |
 | [methodology.md](methodology.md) | 入口 E1–E12、七纪律、playbook |
 | [TOOL-MEMORY.md](TOOL-MEMORY.md) | 工具记忆 |
-| [../labs/README.md](../labs/README.md) | 靶场 |
 | [tests/](tests/README.md) | 测试标准与套件 |

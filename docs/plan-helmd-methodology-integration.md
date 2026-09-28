@@ -1,13 +1,47 @@
 # 方案：helm-d 方法论集成
 
-> **状态**：草案 v1，待评审
-> **日期**：2026-09-28
+> **状态**：**部分执行完毕** —— 见下方"执行状态"，§0/§1 的若干判断已被实测推翻，保留原文作为推理留痕
+> **日期**：2026-09-28（执行状态更新于同日晚）
 > **目标**：把 helm-d 的方法论知识接进 helm，并确定 agent 编排形态
 > **约束**：不改 helm-x / helm-d；所有改动落在 helm
 
 ---
 
-## 0. 结论先行
+## 执行状态（2026-09-28 更新）
+
+| 步骤 | 状态 | 结果 |
+|---|---|---|
+| **S1** references 知识体 | **已完成** | 106 篇入选，references 从 13 文件 / ~20 KB → **122 文件 / 811.7 KB**；8 个领域目录全部建立；根索引重写为真实链接；新增索引完整性门（4 测试，已做变异验证） |
+| **S2** pentest-kit 接入 | **未开始** | 无变化 |
+| **S3** `finishTurn` 阶段边界 | **前提被推翻，改为已交付的等价物** | 见下 |
+
+### S3 的判断修正（重要）
+
+原文把 S3 描述为"`finishTurn` 加阶段边界（两角色）"，并列为待做。**读代码后该前提不成立**：
+
+| 组件 | 实际位置 | 状态 |
+|---|---|---|
+| 一次一任务 lease | `propose.ts:150-153` | **早已存在** |
+| 阶段边界 | `StepKind` 10 类 + `loop.ts:182-192` `kindStreak` | **早已存在** |
+| `done_when` / `finish_basis` | `completion.ts:compileFinish` | **早已存在**，含 receipt 精确切片校验 |
+
+且有既有测试在跑（`run.test.ts` 23/23，含 `convergence same-kind limit fails run`）。**机制不缺。**
+
+真正的缺口是：**这些边界在 system prompt 里一个字都没有**，模型只能靠被拒来学。已补 `<helm_phase>` 段（提交 `88e503d1c`），并把 `DEFAULT_SAME_KIND_LIMIT` 提到 domain 层消除四处字面量漂移。
+
+`finishTurn` 仍然不可用于此目的：`BoundaryResult = { entries?, continue? }` 无 `end` 变体，扩展层结构上无法终止 loop。
+
+### 待决定项的现状
+
+- **#1（搬多少）** —— 已定：4.5 分阈值筛出 91 篇 + 规则位 33 篇，实收 106 篇
+- **#2（6 个原创文件）** —— **已不成立**：6 个文件全部经由移植到位
+- **#3（S2 脚本放哪）** —— 未定，S2 未开始
+- **#4（S3 何时做）** —— **已消解**：S3 的机制早已存在，改为补 prompt 陈述，已做
+- **#5（AGENTS.md）** —— 未处理，文本仍在工作区
+
+---
+
+## 0. 结论先行（原文，推理留痕）
 
 三件事，**顺序不能反**：
 
@@ -19,16 +53,21 @@
 
 **先做 S3 会做出一个没有内容的编排层。**
 
+> **原文判断的错处**：S3 并**不是**待做项 —— 其三个组件早已实现且有测试。见上方"S3 的判断修正"。
+> S1 的"14 个不存在的文件"确认为真，已修。
+
 ---
 
 ## 1. 现状实测
 
 ### 1.1 知识库缺口
 
-| | helm | helm-d |
+| | helm（**原文实测**） | helm-d |
 |---|---:|---:|
 | references 文件 | **13** | **362** |
 | 体积 | ~20 KB | **3.2 MB** |
+
+> **更新**：helm 现为 **122 文件 / 811.7 KB**（vs helm-d 的 362 / 3220 KB = 数量 33.7%、体积 25.2%）。
 
 helm 的 `packages/helmpi-kernel/references/index.md` **承诺 8 个垂直领域**，实际实体只有：
 
@@ -38,23 +77,23 @@ re/          5 个 md
 + 4 个散文件（agentic-sec-radar.md / attack-coverage.md / attack-navigator.json / index.md）
 ```
 
-**逐条验证索引声称的 14 个路径，全部缺失**：
+**逐条验证索引声称的 14 个路径，全部缺失**（**现已全部补齐**，见"执行状态"）：
 
 ```
-缺失  toolbox/decision-tree.md      ← 索引第一行推荐的入口
-缺失  toolbox/methodology.md
-缺失  toolbox/patterns.md
-缺失  toolbox/tool-install.md
-缺失  toolbox/network-egress.md
-缺失  evidence/reporting.md
-缺失  android/index.md
-缺失  native/index.md
-缺失  web/index.md
-缺失  ai-security/index.md
-缺失  malware/index.md
-缺失  protocol/index.md
-缺失  evidence/index.md
-缺失  toolbox/index.md
+已补  toolbox/decision-tree.md      ← 索引第一行推荐的入口
+已补  toolbox/methodology.md
+已补  toolbox/patterns.md
+已补  toolbox/tool-install.md
+已补  toolbox/network-egress.md
+已补  evidence/reporting.md
+已补  android/index.md
+已补  native/index.md
+已补  web/index.md
+已补  ai-security/index.md
+已补  malware/index.md
+已补  protocol/index.md
+已补  evidence/index.md
+已补  toolbox/index.md
 ```
 
 **后果**：`ai_reference` / `malware_reference` / `protocol_reference` / `native_reference` / `web_reference` 这些工具**指向的文件不存在**，调用即空。
@@ -449,3 +488,4 @@ pursues or retrieves the run goal;"
 |---|---|
 | 2026-09-28 | 草案 v1 |
 | | §2 修正：原判断"搬 9 个 index.md 骨架"经实测推翻，index 是文件清单非导航，改为搬正文 + 自建索引 |
+| 2026-09-28 | **执行后修订**：S1 完成（106 篇 / 122 文件）；**S3 前提被推翻** —— lease、阶段边界、finish_basis 三者早已实现且有测试，改为补 prompt 陈述（提交 `88e503d1c`）；§1.1 的 14 个缺失路径状态更新为已补；§6 待决定项 #2/#4 已消解 |

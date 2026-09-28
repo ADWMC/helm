@@ -3,7 +3,13 @@
 > **历史归档（非活动方案）**：本文记录 ADR 和参考仓吸收过程。实施、验收和生命周期以
 > [`REDESIGN.md`](REDESIGN.md) 为准；本文不再产生新开发任务。
 
-> **定位**：架构转向 ADR + 14 个参考仓的吸收波次清单。**规范单源不变**：不变量 → [INVARIANTS.md](INVARIANTS.md)；测试门禁 → [tests/STANDARD.md](tests/STANDARD.md)；流程 → [methodology.md](methodology.md)；架构 → [../DESIGN.md](../DESIGN.md)。
+> **定位**：架构转向 ADR + 14 个参考仓的吸收波次清单。**规范单源不变**：不变量 → [INVARIANTS.md](INVARIANTS.md)；测试门禁 → [tests/STANDARD.md](tests/STANDARD.md)；流程 → [methodology.md](methodology.md)；架构 → [REDESIGN.md](REDESIGN.md)。
+>
+> **失效引用说明**：本文原有若干指向根目录 `DESIGN.md` 的链接（含 `DESIGN.md:252-262`、
+> `DESIGN.md §13 M6`、`DESIGN.md §5`）。该文件从未存在于本仓库的 git 历史中；`REDESIGN.md`
+> 的「架构单源断裂」条目已判定 `REDESIGN.md` 为当前基线。**原引用的章节号在 `REDESIGN.md`
+> 中没有对应物**，因此不重定向，仅标注来源已亡。回溯当时的设计意图时，以 `REDESIGN.md`
+> 现有章节为准；实现状态以代码和测试为准。
 > **依据**：14 个参考仓精读（6 份报告，论断全部带 `路径:行号`）+ 本仓 token 实测（2026-mimo-vulncms-ab 套件）。
 > **状态**：**ADR-001 已批准 —— 决议为 B 预案（单代理瘦身）起步**（依据步 0 真机冒烟，见 §5 定案）；A′ 分发降为备选（A″ 进程级，前置验证另立）。实施时不变量改动一律**先改** [INVARIANTS.md](INVARIANTS.md) 单源；每步以 §4 验收为准。
 
@@ -23,7 +29,7 @@
 ### 1.1 上下文（事实）
 
 - 现状：`src/` 零分发代码（grep `dispatch|subagent|child` 无匹配）；扩展 API 面无 spawn 原语（宿主 `.d.ts` grep `HITS=0`）；宿主**内部**有 subagent thread（`events.d.ts:791`，事件/确认 cross-post 到父线程 :108/:172）；同宿主 shannon 已用内置 `task` 子会话 + CHILD_TOOLS 收窄。
-- 症状一（抽风）：多域知识/工具挤同一上下文 → 域间跑偏。对症原则本来就有：P3（知识按需）、E5、P6、I2、有界视图（[DESIGN.md:252-262](../DESIGN.md#L252-L262)）。
+- 症状一（抽风）：多域知识/工具挤同一上下文 → 域间跑偏。对症原则本来就有：P3（知识按需）、E5、P6、I2、有界视图（原引 `DESIGN.md:252-262`，来源已亡，见文首说明）。
 - 症状二（token）：实测 `grand_total_with_cache = 488,169`，**cacheRead 占 89%**；D(helmpi) 202,535 vs A(裸) 156,147 = **+29%**；根因 = 「扩展工具 schema + 系统提示每轮重放」（performance-analysis.md:76）。
 
 ### 1.2 选项与选择
@@ -98,7 +104,7 @@
 | idle watchdog（inFlight 保护）→ 按 I12 收口 | SW | `src/loop.ts` | S |
 | 预算耗尽 → 出 partial 报告不 cancel | SW | loop 收敛分支（与上行合并） | 合并 |
 
-退出标准照旧：[DESIGN.md](../DESIGN.md) §13 M6「策略开关下不变量仍绿」= `npm run check` 全绿。
+退出标准照旧（原引 `DESIGN.md` §13 M6「策略开关下不变量仍绿」，来源已亡）= `npm run check` 全绿。
 
 ### Wave 4 · 知识与工具面
 
@@ -154,7 +160,7 @@
 
 ## 6. 关联
 
-- 架构/里程碑：[../DESIGN.md](../DESIGN.md)（§5 两层运行、§13 M6）
+- 架构/里程碑：[REDESIGN.md](REDESIGN.md)（原引 `DESIGN.md` §5 两层运行、§13 M6，来源已亡）
 - 不变量单源：[INVARIANTS.md](INVARIANTS.md)（I1–I18；I19/I20 待立）
 - 测试单源：[tests/STANDARD.md](tests/STANDARD.md)（本方案 Wave 2 改它）
 - 宿主共存：[COMPAT.md](COMPAT.md)（SoL-Pi 效率层复用边界）

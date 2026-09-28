@@ -9,7 +9,7 @@ helm 是基于 Pi 二改的自主渗透与逆向 Agent。唯一活动设计基�
 
 | 文档 | 角色 | 何时读 |
 |------|------|--------|
-| [../DESIGN.md](../DESIGN.md) | 架构与原则、领域模型、不变量、运行模型 | 做产品/架构决策 |
+| [REDESIGN.md](REDESIGN.md) | **架构与原则单源**、领域模型、不变量、运行模型 | 做产品/架构决策 |
 | [methodology.md](methodology.md) | **入口 E1–E12、方法论、阶段门、文档处理** | 写流程、定义入口、定「读什么/删什么」 |
 | [INVARIANTS.md](INVARIANTS.md) | 不变量编号单源（与测试对齐） | 改状态机/完成链 |
 | [COMPAT.md](COMPAT.md) | Pi/OMP/SoL-Pi 共存 | 扩展点与路径冲突 |
@@ -17,8 +17,18 @@ helm 是基于 Pi 二改的自主渗透与逆向 Agent。唯一活动设计基�
 | [playbooks/SCHEMA.md](playbooks/SCHEMA.md) | Playbook YAML 规范 | 增改阶段门 |
 | [old-project-painpoints.md](old-project-painpoints.md) | 旧 helm-d 痛点（历史） | 对照为何重做；**运行时不读** |
 | [mature-projects-comparison.md](mature-projects-comparison.md) | 成熟项目对比（历史） | 机制选型依据；**运行时不读** |
+| [competitor-equivalence.md](competitor-equivalence.md) | 竞品对标（历史） | 能力对齐核验；**运行时不读** |
+| [PLAN-product.md](PLAN-product.md) | 完整产品规格（历史大文件，120 KB） | 查规格条目；**非活动基线** |
+| [plan-helmd-methodology-integration.md](plan-helmd-methodology-integration.md) | helm-d 方法论集成方案 | 看 references 移植与阶段契约的推理留痕 |
+| [solpi-compat-0.85.1-to-0.87.1.md](solpi-compat-0.85.1-to-0.87.1.md) | SoL-Pi 版本兼容记录 | 升 SoL-Pi 时对照 |
+| [ab-mimo-vulncms.md](ab-mimo-vulncms.md) | Mimo/VulnCMS A/B 实验摘要 | 看实测数据 |
+| [agent-capability-comparison.md](agent-capability-comparison.md) | Agent 能力横向对比 | 定位自身能力边界 |
 | `../references/index.md` | Agent 领域知识总入口 | 会话按需 |
 | `reference/repos/**` | 第三方克隆 | 仅人类调研；**不入发布、不进运行时** |
+
+> **没有 `DESIGN.md`。** 本文档地图曾引用根目录 `DESIGN.md`，该文件从未存在于本仓库的
+> git 历史中。`REDESIGN.md` 的「架构单源断裂」条目已判定：本文件（`REDESIGN.md`）是当前
+> 架构基线，实现状态以代码和测试为准。请勿重新引入 `DESIGN.md` 链接。
 
 **删除规则摘要**（详见 methodology §5）：
 

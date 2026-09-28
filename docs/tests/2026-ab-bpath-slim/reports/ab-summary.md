@@ -1,6 +1,6 @@
 # A/B 汇总：现状(full) vs B 路径瘦身(lite) — 2026-ab-bpath-slim
 
-> **标准**：[../STANDARD.md](../STANDARD.md) §5.5 R 门 · **方案**：[../../PLAN-evolution.md](../../PLAN-evolution.md) §4 步4
+> **标准**：[STANDARD.md](../../STANDARD.md) §5.5 R 门 · **方案**：[PLAN-evolution.md](../../../PLAN-evolution.md) §4 步4
 > **C1**：同 prompt（sha256 `8680e96eb7a2448d`→logs/ab-prompt.txt）、同模型 `xiaomi/mimo-v2.6-flash`、同靶场 `127.0.0.1:18081`、同预算 `max_time_ms=240000` —— **仅扩展分析模式不同**：
 > **A-full（现状）** `HELPI_ANALYSIS_MODE=full`（hcot 工具在面）· **B-lite（瘦身）** `=lite`（hcot 离面 + liteHop 提示收窄）
 
