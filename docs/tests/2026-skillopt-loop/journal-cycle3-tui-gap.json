@@ -1,0 +1,85 @@
+{
+  "loop": "SkillOpt cycle 3 (TUI surface gap, 2026-09-27)",
+  "cycle": "harvest -> candidate -> decision -> replay(local) -> consolidate | reject(buffer)",
+  "harvest": {
+    "source": "git log --all feat commits at/after fork point 74886f7d5 (31 commits)",
+    "surfaces_cross_referenced": {
+      "tui_settings_rows": 44,
+      "tui_slash_commands": 27,
+      "cli_subcommands": 7
+    },
+    "tool": "docs/tests/tui-surface-gap.py",
+    "result": { "EXPOSED": 8, "CLI-ONLY": 6, "MISSING": 3, "NOT-APPLICABLE": 14 },
+    "candidates": [
+      {
+        "id": "T1",
+        "signal": "CVM/breach wired into the agent loop (123ad6ef9) has no TUI visibility. /settings carries defense-watcher but nothing shows the live RunStrategy (recover|verify|challenge|pause|continue), even though computeSensorium runs every turn and saveCvmSnapshot persists each result",
+        "proposal": "add a read-only /settings row (or status line) showing the current RunStrategy and the sensorium dims that drove it",
+        "decision": "pending",
+        "tokens_added": "0",
+        "target": "packages/coding-agent/src/modes/interactive/components/settings-selector.ts",
+        "caveat": "read-only, never a control: CVM owns cognition only, the Gateway owns permission (§16); a toggle here would imply the operator can widen authority from the TUI"
+      },
+      {
+        "id": "T2",
+        "signal": "MCP bridge (c5f97a25e, kernel/src/host/mcp-bridge.ts) has zero operator surface — the only coding-agent hit for 'mcp' is a comment",
+        "proposal": "add a read-only bridge-status row: connected / endpoint / tool count",
+        "decision": "pending",
+        "tokens_added": "0",
+        "target": "packages/coding-agent/src/modes/interactive/components/settings-selector.ts",
+        "caveat": "status only; never expose arbitrary endpoint entry from the TUI (that is a scope-surface change, not a settings row)"
+      },
+      {
+        "id": "T3",
+        "signal": "sandbox Docker executor (8331108e2, helmpi-tools/src/sandbox.ts) has no surface",
+        "proposal": "add a sandbox backend selector",
+        "decision": "rejected",
+        "reason": "buffer: the executor is chosen by Spec/tool, not switched mid-run. A settings row would promote an implementation detail to operator config, and the UI switch would need a matching authority path that does not exist",
+        "buffer": true
+      },
+      {
+        "id": "T4",
+        "signal": "CAI four-layer injection defense (2bc135312, kernel/src/guard/cai.ts, reached via runtime/gateway.ts) has no surface",
+        "proposal": "add a guard on/off toggle",
+        "decision": "rejected",
+        "reason": "buffer: a security mechanism must not be operator-disableable from a settings panel; the toggle would hand any prompt-injection payload a documented path to switch off its own detector",
+        "buffer": true
+      },
+      {
+        "id": "T5",
+        "signal": "SARIF export (2b24d9b5c), supervise/escalation (35d94d64d), playbook coverage (7f2956654), spec engagement (458b220f9) are CLI-only",
+        "proposal": "mirror them into the TUI",
+        "decision": "rejected",
+        "reason": "buffer: all four are post-hoc or pre-run actions (report export, acceptance audit, coverage review, spec freeze). The TUI is a run-time surface; moving post-run queries into it adds no capability and splits one workflow across two places. Spec is deliberately frozen before a run (handoff §0.1) — a TUI editor for it would break the evidence chain",
+        "buffer": true
+      },
+      {
+        "id": "T6",
+        "signal": "tool-memory (0f0e307ad) is doctor-only; its runtime state (which probes are stale, which verdicts are unknown) is invisible during a run",
+        "proposal": "add a read-only stale-probe count row",
+        "decision": "pending",
+        "tokens_added": "0",
+        "target": "packages/coding-agent/src/modes/interactive/components/settings-selector.ts",
+        "caveat": "status only; the probe action itself stays in `helm doctor`"
+      }
+    ]
+  },
+  "replay": {
+    "local": "python docs/tests/tui-surface-gap.py (harvest is deterministic; re-running yields the same classification)",
+    "result": "stable across 4 iterations while the matching rule was corrected: keyword matching -> longest-match -> exact feat(scope) mapping",
+    "note": "the first three iterations produced wrong classes (solpi mis-classed MISSING because its subject contains 'double-load guard'; feat(scope) and feat(spec) fell to NOT-APPLICABLE because their text also contains words owned by other features). The exact-scope map is the version that survives cross-checking"
+  },
+  "heldout": {
+    "separation": "the classification claims to cover only surface reachability. An independent check would enumerate every kernel capability and confirm three buckets again — NOT performed",
+    "status": "pending — see limitation below"
+  },
+  "limitation": "This harvest proves a capability has no TUI TEXT handle. It does NOT prove the capability is unreachable — sandbox, guard and mcp may all have automatic trigger paths that were not traced. T1/T2/T6 are therefore `pending`, not `confirmed`",
+  "changes": [
+    { "file": "docs/tests/tui-surface-gap.py", "kind": "new harvest tool" },
+    { "file": "docs/tests/2026-skillopt-loop/journal-cycle3-tui-gap.json", "kind": "journal" }
+  ],
+  "negative": {
+    "claim": "harvest-only cycle: no product code touched",
+    "verify": "git status shows docs/tests/*.py and this json only (plus the earlier kernel edits from cycles 1-2)"
+  }
+}
