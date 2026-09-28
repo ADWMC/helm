@@ -48,3 +48,32 @@ packages/agent/docs/extensions/pi-server-artifact/index.md
 **/.helm/
 # raw session JSONL from live evaluation runs — logs/reports go in, evidence/ stays local
 docs/tests/**/evidence/
+
+# rivet orchestration state — backups/artifacts/checkpoints churn every session
+.rivet/
+
+# vendored third-party checkout and downloaded papers — bulk, not work product
+research/
+
+# helmd/helmpi case workspaces (evidence/ inside them is already covered above)
+helmd-cases/*/evidence/
+helmpi-cases/*/evidence/
+
+# live-run artifacts under docs/tests: spec fixtures, corpus logs, case workspaces.
+# These churn per evaluation run; the reports and harnesses are committed, the
+# run output is not.
+docs/tests/hx-spec-*/
+docs/tests/authorized_target/
+docs/tests/hx-corpus-logs/
+
+# case workspaces written to the repo root by the case harness
+/case-*/
+
+# loose run outputs from the same sessions
+/CASE.md
+/findings.md
+/spec.json
+/evidence/
+
+# python bytecode from the docs/tests harnesses
+__pycache__/
