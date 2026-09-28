@@ -29,16 +29,43 @@ describe("built-in tool system prompt contributions", () => {
 			const definition = createDefinition("/workspace");
 
 			expect(definition.promptSnippet).toBe(contribution.snippet);
-			expect(definition.promptGuidelines ?? []).toEqual(contribution.guidelines);
+			const expected = [
+				...("guidelines" in contribution ? (contribution.guidelines ?? []) : []),
+				...("sessionEnvironmentGuidelines" in contribution
+					? (contribution.sessionEnvironmentGuidelines ?? [])
+					: []),
+			];
+			expect(definition.promptGuidelines ?? []).toEqual(expected);
 		},
 	);
 
+	// Turning off PI_* injection must not strip the shell's own syntax rules.
+	// That coupling is what left the model writing bash against PowerShell.
 	test.each([
 		["bash", createBashToolDefinition],
 		["powershell", createPowerShellToolDefinition],
-	] as const)("keeps %s session-environment guidance conditional", (_name, createDefinition) => {
-		const definition = createDefinition("/workspace", { exposeSessionEnvironment: false });
+	] as const)("keeps %s syntax guidance when session environment is hidden", (_name, createDefinition) => {
+		const shown = createDefinition("/workspace");
+		const hidden = createDefinition("/workspace", { exposeSessionEnvironment: false });
 
-		expect(definition.promptGuidelines).toBeUndefined();
+		const shownLines = shown.promptGuidelines ?? [];
+		const hiddenLines = hidden.promptGuidelines ?? [];
+
+		// The PI_* guideline is the only one dropped.
+		const withoutSession = shownLines.filter((g) => !g.includes("PI_*"));
+		expect(hiddenLines).toEqual(withoutSession);
+		// And everything that is not the PI_* guideline survives.
+		expect(hiddenLines.length).toBe(shownLines.length - 1);
+	});
+
+	test("powershell keeps its syntax rules when session environment is hidden", () => {
+		const hidden = createPowerShellToolDefinition("/workspace", { exposeSessionEnvironment: false });
+		const lines = hidden.promptGuidelines ?? [];
+
+		// These are the rules that stop bash syntax reaching a pwsh host.
+		expect(lines.some((g) => g.includes("$ErrorActionPreference"))).toBe(true);
+		expect(lines.some((g) => g.includes("-LiteralPath"))).toBe(true);
+		expect(lines.some((g) => g.includes("$LASTEXITCODE"))).toBe(true);
+		expect(lines.some((g) => g.includes("PI_*"))).toBe(false);
 	});
 });

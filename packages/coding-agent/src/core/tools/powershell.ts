@@ -17,18 +17,24 @@ const UTF8_OUTPUT_PREFIX = "try { [Console]::OutputEncoding=[System.Text.Encodin
 
 export const powershellToolSystemPromptContribution = {
 	snippet: "Execute PowerShell commands",
+	// Language and behavior rules. Not gated by exposeSessionEnvironment: these
+	// must reach the model whether or not PI_* variables are injected.
 	guidelines: [
-		"You can inspect PI_* environment variables for current model and session details.",
-		// The shell runs as `pwsh -NoProfile -NonInteractive -ExecutionPolicy Bypass
-		// -Command` (see shell.ts POWERSHELL_ARGS). Profile aliases and functions are
-		// therefore absent, and every rule below is measured against that invocation.
-		"PowerShell is not bash. Write PowerShell syntax: backtick escapes characters (not backslash), single quotes do not interpolate while double quotes do, and cmdlets return objects where their Unix namesakes return text.",
-		"Errors do NOT stop the script: $ErrorActionPreference defaults to 'Continue', so a failed cmdlet reports an error and the next statement still runs. To stop on first error set $ErrorActionPreference = 'Stop' at the top, or join steps with `&&` on PowerShell 7+. A command that finished is not evidence that every step inside it succeeded.",
-		"Native commands (git, node, npm, curl.exe) do not throw on failure; they set $LASTEXITCODE. Check it explicitly when the exit status matters, for example `git status; $LASTEXITCODE`.",
-		"Quote literal paths and arguments with single quotes so nothing is interpolated or expanded; double-quoted strings interpolate `$var`. A literal single quote inside a single-quoted string is written twice ('it''s').",
-		"On Windows `curl` resolves to curl.exe, not the Invoke-WebRequest alias, so Unix-style flags such as -sL and -o behave as written.",
+		// Measured against `pwsh -NoProfile -NonInteractive -ExecutionPolicy Bypass
+		// -Command` (shell.ts POWERSHELL_ARGS). Profile aliases and functions are
+		// absent under -NoProfile, so nothing below assumes a user profile.
+		"PowerShell is not bash. Backtick escapes characters (not backslash); single quotes are literal while double quotes interpolate; cmdlets return objects where their Unix namesakes return text. `&&` and `||` are version-sensitive: they work on PowerShell 7 but not on Windows PowerShell 5.1, so prefer `;` plus an explicit check when the host version is unknown.",
+		"Errors do NOT stop the script: $ErrorActionPreference defaults to 'Continue', so a failing cmdlet reports an error and the next statement still runs. To stop on first error set $ErrorActionPreference = 'Stop' at the top. A command that finished is not evidence that every step inside it succeeded — check the output, not just the absence of a thrown exception.",
+		"Native commands (git, node, npm, curl.exe) do not throw on failure; they set $LASTEXITCODE. Read it explicitly when the exit status matters, for example `git status; $LASTEXITCODE`.",
+		"Use -LiteralPath for exact local paths. Plain path parameters treat [ ] and * as wildcards, so a directory named with brackets or a path built from user text silently resolves to something else. Verify with `Test-Path -LiteralPath` before relying on a path.",
+		"Quote literal paths and arguments with single quotes so nothing is interpolated or expanded; double-quoted strings interpolate $var. Write a literal single quote inside a single-quoted string twice ('it''s').",
+		"A foreach statement cannot be piped directly. `foreach ($x in $items) { ... } | Format-Table` fails with 'An empty pipe element is not allowed'. Assign to a variable first, then pipe the variable.",
+		"On Windows `curl` resolves to curl.exe, not the Invoke-WebRequest alias, so Unix-style flags such as -sL and -o behave as written. Confirm an external tool exists with `Get-Command <name>` before depending on it.",
+		"Non-ASCII output from a child process (Python, Node) can arrive as mojibake even though this tool sets [Console]::OutputEncoding to UTF-8: that affects PowerShell's own output, not the child's locale. For Python set PYTHONIOENCODING=utf-8 and PYTHONUTF8=1 in the same command.",
+		"When a path may contain spaces, prefer Join-Path and quote the result. A bare unquoted path with spaces is split into several arguments.",
 		"Prefer the dedicated tools when you only need to look at files: read, grep and glob over Get-Content, Select-String and Get-ChildItem. Reach for this tool when you actually need to run something.",
 	],
+	sessionEnvironmentGuidelines: ["You can inspect PI_* environment variables for current model and session details."],
 } as const;
 
 export type PowerShellOperations = BashOperations;
@@ -54,6 +60,7 @@ const powershellToolConfig: ShellToolConfig = {
 	prompt: "PS>",
 	promptSnippet: powershellToolSystemPromptContribution.snippet,
 	promptGuidelines: powershellToolSystemPromptContribution.guidelines,
+	sessionEnvironmentGuidelines: powershellToolSystemPromptContribution.sessionEnvironmentGuidelines,
 	tempFilePrefix: "pi-powershell",
 };
 

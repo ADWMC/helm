@@ -42,7 +42,7 @@ const bashSchema = Type.Object({
 
 export const bashToolSystemPromptContribution = {
 	snippet: "Execute bash commands (ls, grep, find, etc.)",
-	guidelines: ["You can inspect PI_* environment variables for current model and session details."],
+	sessionEnvironmentGuidelines: ["You can inspect PI_* environment variables for current model and session details."],
 } as const;
 
 export type BashToolInput = Static<typeof bashSchema>;
@@ -214,13 +214,33 @@ export type BashRenderState = {
 	interval: NodeJS.Timeout | undefined;
 };
 
+/**
+ * Language and usage rules always go out; only the PI_* session-variable
+ * guidance is gated by exposeSessionEnvironment. Coupling the two meant that
+ * turning session metadata off also stripped the shell's syntax rules, and the
+ * model was then left to write bash against PowerShell with no correction.
+ */
+function assembleShellGuidelines(config: ShellToolConfig, exposeSessionEnvironment: boolean): string[] | undefined {
+	const always = config.promptGuidelines ?? [];
+	const conditional = exposeSessionEnvironment ? (config.sessionEnvironmentGuidelines ?? []) : [];
+	const all = [...always, ...conditional];
+	return all.length > 0 ? all : undefined;
+}
+
 export interface ShellToolConfig {
 	name: string;
 	label: string;
 	shellName: string;
 	prompt: string;
 	promptSnippet: string;
+	/**
+	 * How to use this shell correctly. Always sent: these are language and
+	 * behavior rules, and they must reach the model regardless of whether
+	 * session metadata is exposed.
+	 */
 	promptGuidelines?: readonly string[];
+	/** Guidelines about the injected PI_* session variables. Gated by exposeSessionEnvironment. */
+	sessionEnvironmentGuidelines?: readonly string[];
 	tempFilePrefix: string;
 }
 
@@ -238,7 +258,7 @@ export function createShellToolDefinition(
 		label: config.label,
 		description: `Execute a ${config.shellName} command in the current working directory. Returns stdout and stderr. Output is truncated to last ${DEFAULT_MAX_LINES} lines or ${DEFAULT_MAX_BYTES / 1024}KB (whichever is hit first). If truncated, full output is saved to a temp file. Optionally provide a timeout in seconds.`,
 		promptSnippet: config.promptSnippet,
-		promptGuidelines: exposeSessionEnvironment && config.promptGuidelines ? [...config.promptGuidelines] : undefined,
+		promptGuidelines: assembleShellGuidelines(config, exposeSessionEnvironment),
 		parameters: bashSchema,
 		constrainedSampling: { type: "json_schema", strict: "prefer" },
 		async execute(
@@ -386,7 +406,7 @@ const bashToolConfig: ShellToolConfig = {
 	shellName: "bash",
 	prompt: "$",
 	promptSnippet: bashToolSystemPromptContribution.snippet,
-	promptGuidelines: bashToolSystemPromptContribution.guidelines,
+	sessionEnvironmentGuidelines: bashToolSystemPromptContribution.sessionEnvironmentGuidelines,
 	tempFilePrefix: "pi-bash",
 };
 
