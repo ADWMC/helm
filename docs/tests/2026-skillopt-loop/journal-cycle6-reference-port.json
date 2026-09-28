@@ -1,0 +1,163 @@
+{
+  "loop": "SkillOpt cycle 6 (helm-d references -> helm references/, 2026-09-28)",
+  "cycle": "harvest -> candidate -> decision -> replay(local) -> consolidate | reject(buffer)",
+  "harvest": {
+    "question": "helm-d carries 362 reference markdown files in 8 domains. helm carries 13. The user asked to port them all. Should the port be a copy of everything, or a scored selection?",
+    "why_not_all": "A full copy is 3.2 MB and violates helm-d's own loading rule. Its native/index.md states: '知识按需读，模型自主判断' and helm's own index.md repeats it. A 3.2 MB tree cannot be read on demand in a bounded context; it can only be searched, which is what the model already does without it. Porting everything optimises for completeness of the source, not usability of the target.",
+    "source": {
+      "repo": "helm-d (read-only checkout, not vendored, not a dependency)",
+      "path": "packages/helmd/references",
+      "measured": "362 .md files, 3220 KB, domains: web 132 / native 128 / android 35 / ai-security 18 / malware 15 / protocol 15 / evidence 11 / toolbox 7 / root 1"
+    },
+    "target_before": {
+      "path": "packages/helmpi-kernel/references",
+      "measured": "13 files, ~20 KB",
+      "defect": "index.md promised 14 paths that did not exist on disk (toolbox/decision-tree.md, toolbox/methodology.md, toolbox/patterns.md, toolbox/tool-install.md, toolbox/network-egress.md, evidence/reporting.md, android/index.md, native/index.md, web/index.md, ai-security/index.md, malware/index.md, protocol/index.md, evidence/index.md, toolbox/index.md). Verified by stat on each. No test covered the directory: git grep 'references' across packages/helmpi-kernel/src returned zero non-test hits, so the drift was silent."
+    }
+  },
+  "candidates": [
+    {
+      "id": "R1",
+      "signal": "362 files exist and the user asked for all of them",
+      "proposal": "copy every file, plus every index.md",
+      "decision": "rejected",
+      "reason": "buffer: unreviewed bulk import. It also cannot work as stated: helm-d's index.md files list files by bare filename with no link target (native/index.md is 113 lines of '- name.md'), and some descriptions are truncated in the source itself ('...shadow credentia'). Copying the indexes would import a map whose entries do not resolve, which is the exact defect being fixed on the helm side.",
+      "buffer": true,
+      "reopen_if": "a future consumer needs a specific domain in full, at which point that domain can be ported whole with its own justification"
+    },
+    {
+      "id": "R2",
+      "signal": "the docs differ enormously in how fast they rot",
+      "proposal": "score every document on two reproducible axes — explanation density (value) against perishable content (decay) — and select above a calibrated cutoff, plus per-domain coverage rules",
+      "decision": "accepted",
+      "tokens_added": "0 (documents are read on demand, not injected into the system prompt)",
+      "target": "packages/helmpi-kernel/references/",
+      "rationale": "the user asked for a scored port. A score needs a predicate that produces the same answer twice and can be argued with. Decay is measurable: CVE pins, payload strings, software versions and external URLs are all countable. Value is measurable: a document that says why transfers, one that lists flags does not.",
+      "verified": "see replay"
+    },
+    {
+      "id": "R3",
+      "signal": "index.md files rot silently because nothing reads the directory",
+      "proposal": "generate every domain index from the directory listing, emit real markdown links, and add a test asserting index and disk agree in both directions",
+      "decision": "accepted",
+      "tokens_added": "0",
+      "target": "packages/helmpi-kernel/src/references-index.test.ts + generated indexes",
+      "rationale": "the existing drift had no detector. A generated index cannot disagree with disk at write time, and the test catches hand-edits afterwards. Both directions matter: a dangling link breaks navigation, and an unlisted document is invisible to a reader who starts from the index.",
+      "verified": "see replay"
+    }
+  ],
+  "decision": {
+    "cutoff": 4.5,
+    "rules": [
+      "rule1: every domain index.md (navigation; rebuilt from disk, never copied)",
+      "rule2: every *principles.md (scope statements; highest measured value density)",
+      "rule3: every *methodology.md (the method, not the lookup)",
+      "rule4: every *playbook*.md (sample-type routing)",
+      "rule5: net score >= 4.5",
+      "rule6: each domain keeps at least 8 documents, so no domain is represented by an index alone"
+    ],
+    "threshold_calibration": {
+      "method": "selected-set size at a range of cutoffs, measured rather than assumed",
+      "measured": {
+        "6.0": "50 files / 293 KB / 9.1%",
+        "5.0": "75 files / 466 KB / 14.5%",
+        "4.5": "91 files / 618 KB / 19.2%",
+        "4.0": "118 files / 869 KB / 27%",
+        "3.5": "156 files / 1207 KB / 37.5%",
+        "3.0": "184 files / 1490 KB / 46.3%",
+        "2.0": "263 files / 2297 KB / 71.3%"
+      },
+      "why_4_5": "4.5 is the highest cutoff whose selected set still covers every domain. Below 3.0 the set exceeds 46% of the corpus, which is no longer a selection."
+    },
+    "rule6_justification": "A pure cutoff dropped web/auth-sec.md, web/authbypass-authentication-flaws.md and native/ntlm-relay-coercion.md — core material, ranked low because their bodies are credential tables and service matrices. The floor keeps each domain usable. On inspection auth-sec.md turned out to be a router rather than a low-value document, which led to a separate fix in the scorer (see scorer_corrections)."
+  },
+  "scorer_corrections": [
+    {
+      "issue": "bare N.N tokens were counted as software versions",
+      "impact": "section numbers (§1.1, §4.2) inflated decay on well-structured documents. ai-security/prompt-injection-patterns.md scored -2.34 while carrying an explicit scope statement and a decision table.",
+      "fix": "require a v-prefix or a three-part number",
+      "verified": "the document now scores above the cutoff"
+    },
+    {
+      "issue": "scope statements were not counted as value",
+      "impact": "a document that states where it does and does not apply is the strongest transfer signal a reference can carry, because it prevents misapplication. The scorer treated it as ordinary prose.",
+      "fix": "H_SCOPE pattern ('适用范围', '不适用', '职责边界', 'when not to use') weighted 3.0 per occurrence"
+    },
+    {
+      "issue": "index.md scored as a document",
+      "impact": "an index explains nothing, so explanation density penalised it (native/index.md scored -2.80). Category error, not a ranking problem.",
+      "fix": "classify navigation separately; they carry no net score"
+    },
+    {
+      "issue": "routers are not always named index.md",
+      "impact": "first fix over-matched: '## When to Use' appears in genuine methodology documents too, so web/recon-for-sec.md (10.8, the highest value in web) was misclassified as navigation.",
+      "fix": "require an explicit routing claim — 'routing entry point', '# ... Router', or 'you need to decide whether/which'. Re-checked: native/dll-injection-runtime-patching.md returned to doc (7.97); web/recon-for-sec.md stayed nav, and reading it confirmed the classification is right — its title is '# Recon and Methodology Router' and its body is a document map plus a recommended flow."
+    },
+    {
+      "issue": "residual length bias",
+      "impact": "Pearson r(kb, net) = -0.209 over 353 documents. Weak but present: per-kilobyte normalisation mildly favours shorter documents.",
+      "fix": "not fixed; documented as a known limitation. It is not strong enough to reorder the selection at the calibrated cutoff, but it should be revisited before the cutoff is moved."
+    }
+  ],
+  "replay": {
+    "local": "node --test src/references-index.test.ts -> 4/4; node:test suite (all kernel tests excluding sol-pi) -> 238/238; vitest suite (sol-pi) -> 51/53; npm run check -> exit 0",
+    "new_tests": [
+      "references tree is non-trivial: >50 markdown files and >=9 index files",
+      "every link in every index resolves: no index points at a path that does not exist",
+      "every document is reachable from some index: no orphan documents",
+      "domain indexes do not claim more than they list: the '共 N 篇' count matches the directory"
+    ],
+    "test_caught_a_real_defect": "the reachability test failed on first run because the generator emitted filenames as code spans (`name.md`) rather than markdown links. Code spans are invisible to link resolution, which is exactly how an index rots unnoticed. The generator now emits links; the test is what forced that.",
+    "pre_existing_failures": {
+      "count": 2,
+      "files": [
+        "src/efficiency/sol-pi/tests/observation-pack.test.ts — 'fails recall closed when an object path is replaced by a symlink'",
+        "src/efficiency/sol-pi/tests/evidence-preserving-reducer.test.ts — 1 failure"
+      ],
+      "attribution": "not mine. git status on packages/helmpi-kernel/src/efficiency is empty. Both are symlink-behaviour tests and this is Windows, where symlink creation depends on privilege and developer mode.",
+      "not_used_as_evidence": true
+    },
+    "invocation_note": "running sol-pi tests with node --test reports 'Vitest failed to find the current suite' because those files are vitest tests. The kernel has two test runners: vitest is configured to include only src/efficiency/sol-pi/tests/**, everything else is node:test. Running the wrong runner produces a failure that looks like a code defect."
+  },
+  "heldout": {
+    "separation": "the ported documents are knowledge, not a behaviour change. Nothing in the runtime reads them, so no run-level measurement applies.",
+    "status": "not_applicable",
+    "why": "the value here is whether the documents are reachable and whether the selection is defensible, both of which the unit suite answers directly. A behaviour A/B would measure a path that does not exist."
+  },
+  "result": {
+    "ported": "106 documents copied across 8 domains; 18 index files rebuilt rather than copied",
+    "final_size": "122 markdown files, 811.7 KB. Against helm-d's 362 files / 3220 KB that is 33.7% of the file count and 25.2% of the volume. The gap between those two numbers is the selection working: the ported set is the smaller, denser end of the corpus.",
+    "new_domain_tree": "114 markdown files (106 documents + 8 generated indexes), 791.8 KB",
+    "per_domain": {
+      "native": "32 files (31 docs + index)",
+      "web": "29 files (28 docs + index)",
+      "android": "10 files (9 docs + index)",
+      "ai-security": "9 files (8 docs + index)",
+      "malware": "9 files (8 docs + index)",
+      "protocol": "9 files (8 docs + index)",
+      "evidence": "9 files (8 docs + index)",
+      "toolbox": "7 files (6 docs + index)",
+      "re": "5 files (pre-existing, untouched)",
+      "playbooks": "4 yaml (pre-existing, untouched)"
+    },
+    "not_ported": "256 documents. Not judged wrong — judged fast-decaying or low explanation density: tool parameter tables, CVE pin lists, payload collections, template libraries. Recoverable by the same rule set if a need appears."
+  },
+  "changes": [
+    { "file": "packages/helmpi-kernel/references/**", "kind": "106 documents ported (8 new domain directories)" },
+    { "file": "packages/helmpi-kernel/references/index.md", "kind": "rewritten: real links, domain routing with use/anti-trigger keywords, source note" },
+    { "file": "packages/helmpi-kernel/references/{domain}/index.md", "kind": "8 generated indexes" },
+    { "file": "packages/helmpi-kernel/src/references-index.test.ts", "kind": "index integrity gate (4 tests)" },
+    { "file": "docs/tests/2026-skillopt-loop/journal-cycle6-reference-port.json", "kind": "this journal" }
+  ],
+  "negative": {
+    "claim": "no runtime behaviour changed; no document is injected into the system prompt; the existing 13 files are preserved",
+    "verify": "git status shows references/index.md modified and 8 new untracked directories. No file under src/ other than the new test was touched. The four pre-existing files (agentic-sec-radar.md, attack-coverage.md, attack-navigator.json, playbooks/*.yaml, re/*) are unchanged. npm run check exit 0 confirms the type surface is unaffected."
+  },
+  "answer_to_user": {
+    "what_was_asked": "把 helm-d 的所有参考文档复制进来，按 skillopt 评分修改，最终补进来",
+    "what_was_done": "harvested all 362, scored each on reproducible axes, calibrated the cutoff against measured set sizes, ported 106, rebuilt every index from disk, and added the test that was missing. All 362 were read at the metadata level; 106 were judged worth porting rather than all of them.",
+    "why_not_all_362": "a 3.2 MB tree cannot be read on demand inside a bounded context, which is the loading rule the documents themselves state. Selection is the only way the rule holds.",
+    "what_the_scoring_changed": "four scorer defects were found and fixed by inspecting the files the score rejected, not by trusting the number. One of those inspections revealed that a low-scoring file was actually a router, which changed how the index is built.",
+    "best_next_step": "the ported tree is reachable but nothing routes to it yet. The domain indexes carry 'Use when / 不用于 / kw' signals for that purpose; wiring route_task to read them is the next step, and it is measurable against the hard-case corpus."
+  }
+}
