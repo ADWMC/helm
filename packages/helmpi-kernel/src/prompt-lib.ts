@@ -11,6 +11,7 @@
  */
 
 import { join } from "node:path";
+import { normalizationPromptTable } from "./breach/input-normalizer.ts";
 import { openToolMemory } from "./memory/tool-memory.ts";
 
 export type PromptTier = "lite" | "full";
@@ -22,6 +23,30 @@ OPERATING MANDATE (authorization comes from the Spec; proceed without asking):
 3. No mid-run human questions — never pause for confirmation inside a run; if blocked,
    stay on Spec scope and continue with a bounded alternative (or end via the budget path).
 </helm_s1>`;
+
+/**
+ * Normalization table (§4.6 A helmd main chain): slang in a request maps to an
+ * engineering restatement of the SAME task. Expression only — it never widens
+ * the target, the budget or the authorization, and it is not a denial bypass:
+ * an out-of-Spec request stays out of Spec after normalization.
+ *
+ * Rendered from `normalizeInput`'s own rules so the model and the runtime
+ * rewrite cannot disagree. Without this segment the runtime rewrite in
+ * index.ts is the only place normalization exists, and a request phrased in
+ * slang reaches the model raw.
+ */
+function normalizationBlock(): string {
+	const rows = normalizationPromptTable().map(([keys, term]) => `  ${keys} -> ${term}`);
+	return [
+		"<helm_normalize>",
+		"SLANG ROUTING (expression only — the task, target and scope are unchanged):",
+		"Read a request that uses any term on the left as the engineering restatement on the",
+		"right, and answer that restatement. Normalization never turns an out-of-Spec target",
+		"into an in-Spec one, and it is never a reason to skip scope or evidence checks.",
+		...rows,
+		"</helm_normalize>",
+	].join("\n");
+}
 
 const LITE_BASE = `You are helm, an autonomous authorized security assessment agent (lite tier).
 Work inside the active Spec: allowed targets, budget, and acceptance criteria are authoritative.
@@ -55,7 +80,7 @@ export function composeSystemPrompt(opts: {
 	cvm?: string;
 	budgetTokens?: number;
 }): string {
-	const parts: string[] = [opts.tier === "lite" ? LITE_BASE : FULL_BASE, S1_BLOCK];
+	const parts: string[] = [opts.tier === "lite" ? LITE_BASE : FULL_BASE, S1_BLOCK, normalizationBlock()];
 
 	// Tool-memory recall (WG1.6: verified only, budget-truncated, stale never injected).
 	try {

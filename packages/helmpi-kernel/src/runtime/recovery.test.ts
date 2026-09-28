@@ -157,3 +157,78 @@ test("recovery: trigger profile is derived from the excerpt; the excerpt is not 
 	assert.deepEqual(triggerProfileOf("This is out of scope for me"), ["scope_anxiety"]);
 	assert.deepEqual(triggerProfileOf("service listens on port 8080"), []);
 });
+
+test("recovery-bridge: helmd/helmx read CVM context (§16.6) — rationale carries strategy, budget unchanged", () => {
+	const store = new Ledger(":memory:");
+	const gateway = new ToolGateway({
+		readSpec: () => ({ goal: "g", allowedTargets: ["fixture-01"], highRisk: "deny" }),
+		budgetGate: () => null,
+		journal: () => {},
+		recordReceipt: () => {},
+		nextReceiptSeq: () => 1,
+		clock: () => 1000,
+	});
+	const orchestrator = new RecoveryOrchestrator({
+		store,
+		gateway,
+		readSpecHash: () => "spec-hash-1",
+		resolveStepTarget: () => "fixture-01",
+		clock: () => 1000,
+		readCvmContext: () => ({ strategy: "recover", coverage: 0.25, stability: 0.4 }),
+	});
+	const first = orchestrator.onRefusal(refusal(100));
+	assert.ok(first.action, "helmd candidate produced with bridge");
+	assert.match(first.action?.rationale ?? "", /cvm=recover coverage=0\.25 stability=0\.40/);
+	const second = orchestrator.onRefusal(refusal(200));
+	assert.equal(second.action?.source, "helmx");
+	assert.match(second.action?.rationale ?? "", /cvm=recover/);
+	assert.deepEqual(orchestrator.episodeBudget("S1", 1), { helmd: 1, helmx: 1 }, "CVM does not refill budget");
+	const selected = store.journal().filter((r) => r.kind === JOURNAL_KEYS.recoverySelected);
+	assert.equal(selected.length, 2);
+	const p1 = JSON.parse(selected[0]?.payloadJson ?? "{}") as { cvmStrategy?: string };
+	assert.equal(p1.cvmStrategy, "recover", "recovery_selected journals the bridge strategy");
+});
+
+test("session streak: second exhaust on same goal journals strategy_shift challenge without refilling budget", () => {
+	const store = new Ledger(":memory:");
+	const gateway = new ToolGateway({
+		readSpec: () => ({ goal: "g", allowedTargets: ["fixture-01"], highRisk: "deny" }),
+		budgetGate: () => null,
+		journal: () => {},
+		recordReceipt: () => {},
+		nextReceiptSeq: () => 1,
+		clock: () => 1000,
+	});
+	// One orchestrator for the whole session (product wiring) — streak lives on the instance.
+	const orchestrator = new RecoveryOrchestrator({
+		store,
+		gateway,
+		readSpecHash: () => "h",
+		resolveStepTarget: () => "fixture-01",
+		clock: () => 1000,
+	});
+	// Step 1 exhaust: helmd + helmx + third refusal
+	orchestrator.onRefusal(refusal(100, { stepId: "S1" }));
+	orchestrator.onRefusal(refusal(200, { stepId: "S1" }));
+	const e1 = orchestrator.onRefusal(refusal(300, { stepId: "S1" }));
+	assert.equal(e1.state, "recovery_exhausted");
+	const shiftsAfterFirst = store.journal().filter((r) => r.kind === "strategy_shift");
+	assert.equal(shiftsAfterFirst.length, 0, "first exhaust is streak=1 — no strategy_shift yet");
+	// Step 2 same goal exhaust → streak 2 → strategy_shift
+	orchestrator.onRefusal(refusal(400, { stepId: "S2" }));
+	orchestrator.onRefusal(refusal(500, { stepId: "S2" }));
+	const e2 = orchestrator.onRefusal(refusal(600, { stepId: "S2" }));
+	assert.equal(e2.state, "recovery_exhausted");
+	const shifts = store.journal().filter((r) => r.kind === "strategy_shift");
+	assert.ok(shifts.length >= 1, "second same-goal exhaust journals strategy_shift");
+	const payload = JSON.parse(shifts[0]?.payloadJson ?? "{}") as {
+		to?: string;
+		helmdUsed?: number;
+		helmxUsed?: number;
+	};
+	assert.equal(payload.to, "challenge");
+	assert.equal(payload.helmdUsed, 1, "strategy_shift does not refill helmd for the exhausted step");
+	assert.equal(payload.helmxUsed, 1, "strategy_shift does not refill helmx for the exhausted step");
+	// S2 stays exhausted (per-step budget); strategy_shift is a challenge marker, not a refill.
+	assert.deepEqual(orchestrator.episodeBudget("S2", 1), { helmd: 1, helmx: 1 });
+});

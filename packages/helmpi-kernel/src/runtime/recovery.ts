@@ -11,12 +11,19 @@
  */
 
 import { normalizeInput } from "../breach/input-normalizer.ts";
-import type { RecoveryAction, RecoveryKind, RecoveryState, RefusalEvent } from "./contracts.ts";
+import type { RecoveryAction, RecoveryKind, RecoveryState, RefusalEvent, RunStrategy } from "./contracts.ts";
 import { canTransitionRecovery, JOURNAL_KEYS, parseRecoveryAction } from "./contracts.ts";
 import type { GatewayRequest, ToolGateway } from "./gateway.ts";
 
 export const HELMD_BUDGET_PER_STEP = 1;
 export const HELMX_BUDGET_PER_STEP = 1;
+
+/** Read-only cognitive context bridged from CVM (REDESIGN §16.6). Never authority. */
+export interface CvmBridgeContext {
+	readonly strategy: RunStrategy;
+	readonly coverage: number;
+	readonly stability: number;
+}
 
 export interface RecoveryStore {
 	journalEvent(kind: string, payload: unknown): number;
@@ -39,6 +46,8 @@ export interface RecoveryDeps {
 	/** Frozen step target for scope comparison; null when the step carries none. */
 	readonly resolveStepTarget: (stepId: string | null) => string | null;
 	readonly clock?: () => number;
+	/** CVM recovery-bridge — latest cognitive snapshot fields, or null (§16.6). */
+	readonly readCvmContext?: () => CvmBridgeContext | null;
 }
 
 export interface RecoveryOutcome {
@@ -57,6 +66,8 @@ export interface HelmxRequest {
 	readonly normalizedGoal: string;
 	readonly specHash: string;
 	readonly attempts: { readonly helmd: number; readonly helmx: number };
+	/** CVM bridge context — read-only reference for rationale (§16.6). */
+	readonly cvm?: CvmBridgeContext | null;
 }
 
 /** helmx adapter output — candidate data only, never authority (§14.2). */
@@ -79,11 +90,23 @@ export function triggerProfileOf(excerpt: string): string[] {
 	return TRIGGER_MARKERS.filter((m) => m.re.test(excerpt)).map((m) => m.id);
 }
 
+function cvmNote(cvm: CvmBridgeContext | null | undefined): string {
+	if (!cvm) return "";
+	return ` cvm=${cvm.strategy} coverage=${cvm.coverage.toFixed(2)} stability=${cvm.stability.toFixed(2)}`;
+}
+
 /**
  * helmd adapter: one bounded normal retry — normalize the frozen goal into an
  * engineering restatement. Expression only, never scope (§4.6 A).
+ * When CVM context is present, the rationale carries the cognitive projection
+ * (recover/verify/challenge) but never widens the request (§16.6).
  */
-export function helmdPropose(event: RefusalEvent, stepTarget: string | null, specHash: string): RecoveryAction {
+export function helmdPropose(
+	event: RefusalEvent,
+	stepTarget: string | null,
+	specHash: string,
+	cvm?: CvmBridgeContext | null,
+): RecoveryAction {
 	const normalizedGoal = normalizeInput(stepTarget ?? "the frozen spec goal");
 	return {
 		id: `rec-${event.at}-helmd`,
@@ -94,7 +117,7 @@ export function helmdPropose(event: RefusalEvent, stepTarget: string | null, spe
 			directive: `Re-deliver the same in-scope technical task on ${normalizedGoal} in engineering terms; stay read-only first and cite receipts for every observation.`,
 			...(stepTarget ? { target: stepTarget } : {}),
 		},
-		rationale: "delivery refusal on an in-scope task — bounded normal retry (helmd)",
+		rationale: `delivery refusal on an in-scope task — bounded normal retry (helmd)${cvmNote(cvm)}`,
 		attempt: 1,
 		specHash,
 	};
@@ -104,6 +127,8 @@ export function helmdPropose(event: RefusalEvent, stepTarget: string | null, spe
  * helmx adapter: candidate generation from the trigger profile and the
  * frozen goal. Library-backed and deterministic; rationale/confidence are
  * reference data and never raise evidence or relax gates (§14.2).
+ * CVM strategy is referenced in rationale only — it cannot change the
+ * candidate's target or bypass Gateway validation (§16.6).
  */
 export function helmxPropose(request: HelmxRequest): HelmxResponse {
 	const profile = request.triggerProfile.length > 0 ? request.triggerProfile.join(",") : "unclassified";
@@ -112,7 +137,7 @@ export function helmxPropose(request: HelmxRequest): HelmxResponse {
 		candidateRequest: {
 			directive: `Bounded read-only diagnostics on ${request.normalizedGoal}: enumerate observable fields with read-only tools and record one receipt per observation.`,
 		},
-		rationale: `trigger profile ${profile}; attempts helmd=${request.attempts.helmd} helmx=${request.attempts.helmx}`,
+		rationale: `trigger profile ${profile}; attempts helmd=${request.attempts.helmd} helmx=${request.attempts.helmx}${cvmNote(request.cvm)}`,
 		confidence: 0.5,
 		source: "library",
 	};
@@ -152,6 +177,9 @@ export class RecoveryOrchestrator {
 	private readonly deps: RecoveryDeps;
 	private readonly episodes = new Map<string, EpisodeRecord>();
 	private pendingByEpisode = new Map<string, RecoveryAction>();
+	/** Session-level consecutive-refusal count (≥2 → challenge-premise, no extra budget). */
+	private sessionRefuseStreak = 0;
+	private lastStepTarget: string | null = null;
 
 	constructor(deps: RecoveryDeps) {
 		this.deps = deps;
@@ -240,21 +268,43 @@ export class RecoveryOrchestrator {
 		}
 		if (tier === null) {
 			this.transition(record, key, "recovery_exhausted");
+			const stepTarget = this.deps.resolveStepTarget(event.stepId);
+			const targetKey = stepTarget ?? "(session)";
+			// Session-level (multi-turn SoK): consecutive exhausts on the same
+			// goal → challenge-premise after streak≥2. Does NOT refill budget.
+			if (targetKey === this.lastStepTarget) {
+				this.sessionRefuseStreak += 1;
+			} else {
+				this.sessionRefuseStreak = 1;
+				this.lastStepTarget = targetKey;
+			}
 			this.deps.store.journalEvent(JOURNAL_KEYS.recoveryExhausted, {
 				stepId: event.stepId,
 				state: record.state,
 				helmdUsed: record.helmdUsed,
 				helmxUsed: record.helmxUsed,
+				sessionRefuseStreak: this.sessionRefuseStreak,
 				at: this.now(),
 			});
+			if (this.sessionRefuseStreak >= 2) {
+				this.deps.store.journalEvent("strategy_shift", {
+					to: "challenge",
+					reason: "session_refuse_streak",
+					streak: this.sessionRefuseStreak,
+					helmdUsed: record.helmdUsed,
+					helmxUsed: record.helmxUsed,
+					at: this.now(),
+				});
+			}
 			saveEpisode(this.deps, key, record);
 			return { state: record.state, action: null, directive: null, reason: "recovery_exhausted" };
 		}
 
 		const stepTarget = this.deps.resolveStepTarget(event.stepId);
+		const cvm = this.deps.readCvmContext?.() ?? null;
 		let action: RecoveryAction;
 		if (tier === "helmd") {
-			action = helmdPropose(event, stepTarget, record.specHash);
+			action = helmdPropose(event, stepTarget, record.specHash, cvm);
 		} else {
 			const response = helmxPropose({
 				runId: event.runId,
@@ -264,6 +314,7 @@ export class RecoveryOrchestrator {
 				normalizedGoal: stepTarget ?? "the frozen spec goal",
 				specHash: record.specHash,
 				attempts: { helmd: record.helmdUsed, helmx: record.helmxUsed },
+				cvm,
 			});
 			action = {
 				id: `rec-${event.at}-helmx`,
@@ -313,6 +364,7 @@ export class RecoveryOrchestrator {
 			kind: action.kind,
 			stepId: event.stepId,
 			attempt: action.attempt,
+			...(cvm ? { cvmStrategy: cvm.strategy } : {}),
 			at: this.now(),
 		});
 		return { state: record.state, action, directive: action.request.directive };

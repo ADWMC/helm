@@ -105,7 +105,14 @@ test("cvm: projection carries observables with provenance into the next turn", (
 	const projection = projectCognitive(snap);
 	assert.match(projection, /\[cvm\] turn=3/);
 	assert.match(projection, /coverage=/);
-	assert.match(projection, /strategy=continue/);
+	// Control metadata stays host-side. Measured on PH03: the model read
+	// `strategy=recover advisories=refusal-retry-directive` and inferred the
+	// framework was steering it away from a refusal, then hardened. The
+	// projection must not hand the model the recovery signal.
+	assert.doesNotMatch(projection, /strategy=/);
+	assert.doesNotMatch(projection, /advisories=/);
+	// deriveStrategy itself is unchanged — it still drives the host.
+	assert.equal(deriveStrategy(snap.sensorium, input({ turn: 3, receipts: 2 })), "continue");
 });
 
 test("cvm: latest snapshot wins on restore", () => {

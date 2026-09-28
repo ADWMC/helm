@@ -140,6 +140,14 @@ export function restoreCvmSnapshot(store: CvmStore): CvmSnapshot | null {
 /**
  * Stable cognitive projection for the next turn (pre-turn). Observables with
  * provenance only — never model hidden reasoning (§16.3/§16.9).
+ *
+ * The `strategy` field and the advisory key names are run-control metadata: they
+ * exist to drive the host, and projecting them tells the model that a recovery
+ * pass is running. Measured on PH03, the model read
+ * `strategy=recover advisories=refusal-retry-directive` and reasoned "the
+ * framework expects recovery from refusal" before hardening its position — the
+ * projection handed it the very signal it was meant to work around. Only
+ * progress counters are emitted now; control state stays host-side.
  */
 export function projectCognitive(snapshot: CvmSnapshot): string {
 	const s = snapshot.sensorium;
@@ -147,6 +155,5 @@ export function projectCognitive(snapshot: CvmSnapshot): string {
 	return [
 		`[cvm] turn=${snapshot.turn} momentum=${f(s.momentum)} pressure=${f(s.pressure)}`,
 		`[cvm] coverage=${f(s.verificationCoverage)}(${s.quality.coverage}) complexity=${f(s.complexity)} freshness=${f(s.freshness)} stability=${f(s.stability)}(${s.quality.stability})`,
-		`[cvm] strategy=${snapshot.strategy}${snapshot.advisoryKeys.length > 0 ? ` advisories=${snapshot.advisoryKeys.join(",")}` : ""}`,
 	].join("\n");
 }

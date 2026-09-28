@@ -114,6 +114,21 @@ test("composeSystemPrompt: tool-memory recall segment from verified entries only
 	}
 });
 
+test("composeSystemPrompt: normalization table present so slang never arrives raw (§4.6 A)", () => {
+	const cwd = mkdtempSync(join(tmpdir(), "helm-g1n-"));
+	try {
+		const full = composeSystemPrompt({ tier: "full", cwd, reminders: [] });
+		assert.ok(full.includes("<helm_normalize>"), "normalization segment present");
+		assert.ok(full.includes("keygen"), "license/keygen mapping listed");
+		assert.ok(full.includes("license"), "license mapping listed");
+		assert.ok(full.includes("外挂"), "slang mapping listed");
+		// Boundary: normalization changes expression only, never scope (§4.6 A).
+		assert.ok(full.includes("expression only") || full.includes("never scope"), "scope boundary stated");
+	} finally {
+		rmSync(cwd, { recursive: true, force: true });
+	}
+});
+
 test("G1 via before_agent_start: forceSystemPrompt set (host default replaced), host prompt untouched when no options", async () => {
 	const cwd = mkdtempSync(join(tmpdir(), "helm-g1f-"));
 	try {
