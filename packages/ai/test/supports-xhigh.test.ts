@@ -159,10 +159,12 @@ describe("getSupportedThinkingLevels", () => {
 		expect(getSupportedThinkingLevels(model!)).toEqual(["low", "high", "max"]);
 	});
 
-	it("includes only high plus off for OpenCode Go Kimi K2.6", () => {
-		const model = getModel("opencode-go", "kimi-k2.6");
+	// fork: opencode-go's keyless catalog dropped kimi-k2.6; assert the K3 entry
+	// instead, with the thinking levels that entry actually ships (measured 2026-09-30).
+	it("includes only max for OpenCode Go Kimi K3", () => {
+		const model = getModel("opencode-go", "kimi-k3");
 		expect(model).toBeDefined();
-		expect(getSupportedThinkingLevels(model!)).toEqual(["off", "high"]);
+		expect(getSupportedThinkingLevels(model!)).toEqual(["max"]);
 	});
 
 	it("excludes thinking off for Moonshot Kimi K2.7 Code models", () => {
