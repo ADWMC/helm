@@ -1442,12 +1442,14 @@ export class AgentSession {
 		const previousTransformContext = this.agent.transformContext;
 		this.agent.transformContext = async (messages, signal) => {
 			const transformed = previousTransformContext ? await previousTransformContext(messages, signal) : messages;
-			const forced = this._runSystemPromptOptions?.forceSystemPrompt;
-			if (forced === undefined) return transformed;
+			const runOptions = this._runSystemPromptOptions;
+			if (runOptions?.forceSystemPrompt === undefined) return transformed;
 			const current = getCurrentSystemMessage(transformed);
+			// buildSystemPrompt merges host resources (skills) into the forced text; the raw
+			// forceSystemPrompt string would drop them.
 			const head: SystemMessage = {
 				role: "system",
-				content: forced,
+				content: buildSystemPrompt(runOptions),
 				...(current?.toolsAdded ? { toolsAdded: current.toolsAdded } : {}),
 				timestamp: current?.timestamp ?? Date.now(),
 			};

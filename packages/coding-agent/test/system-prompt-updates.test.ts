@@ -16,6 +16,8 @@ import { describe, expect, test } from "vitest";
 import { createAgentSession } from "../src/core/sdk.ts";
 import { SessionManager } from "../src/core/session-manager.ts";
 import { SettingsManager } from "../src/core/settings-manager.ts";
+import type { Skill } from "../src/core/skills.ts";
+import { createSyntheticSourceInfo } from "../src/core/source-info.ts";
 import {
 	buildSystemPromptSections,
 	buildSystemPromptState,
@@ -23,6 +25,7 @@ import {
 } from "../src/core/system-prompt.ts";
 import type { ExtensionFactory } from "../src/index.ts";
 import { createHarness } from "./suite/harness.ts";
+import { createTestExtensionsResult, createTestResourceLoader } from "./utilities.ts";
 
 describe("system prompt updates", () => {
 	test("declares the prompt and tools once and reuses them across resume", async () => {
@@ -109,6 +112,40 @@ describe("system prompt updates", () => {
 		);
 	});
 
+	test("a forced prompt keeps the host skills section and drops it when no tool can read it", () => {
+		const skill: Skill = {
+			name: "sample-intake",
+			description: "Deterministic sample intake and triage.",
+			filePath: "/project/.helm/skills/sample-intake.md",
+			baseDir: "/project/.helm/skills",
+			sourceInfo: createSyntheticSourceInfo("/project/.helm/skills/sample-intake.md", { source: "project" }),
+			disableModelInvocation: false,
+		};
+
+		// Extensions (helm always does this) replace the whole prompt; host skills must survive.
+		const withSkills = buildSystemPromptState({
+			forceSystemPrompt: "Exact prompt.",
+			cwd: "/tmp",
+			skills: [skill],
+			selectedTools: ["read"],
+		});
+		expect(withSkills.content.startsWith("Exact prompt.")).toBe(true);
+		expect(withSkills.content).toContain("<skills>");
+		expect(withSkills.content).toContain("<name>sample-intake</name>");
+		expect(withSkills.content).toContain("<available_skills>");
+
+		// No readable tool in the loadout: skills must not be advertised.
+		expect(
+			buildSystemPromptState({ forceSystemPrompt: "Exact prompt.", cwd: "/tmp", skills: [skill], selectedTools: [] })
+				.content,
+		).toBe("Exact prompt.");
+
+		// No skills at all: the forced prompt stays byte-identical.
+		expect(
+			buildSystemPromptState({ forceSystemPrompt: "Exact prompt.", cwd: "/tmp", selectedTools: ["read"] }).content,
+		).toBe("Exact prompt.");
+	});
+
 	test("a forced prompt is sent as the leading prompt for the run and never recorded", async () => {
 		let turn = 0;
 		const extension: ExtensionFactory = (pi) => {
@@ -162,6 +199,48 @@ describe("system prompt updates", () => {
 				{ plan_mode: null },
 			]);
 			expect(getCurrentSystemPrompt(harness.session.messages)).toBe(harness.session.systemPrompt);
+		} finally {
+			harness.cleanup();
+		}
+	});
+
+	test("a forced prompt still carries host skills in the request sent to the provider", async () => {
+		const skill: Skill = {
+			name: "sample-intake",
+			description: "Deterministic sample intake and triage.",
+			filePath: "/project/.helm/skills/sample-intake.md",
+			baseDir: "/project/.helm/skills",
+			sourceInfo: createSyntheticSourceInfo("/project/.helm/skills/sample-intake.md", { source: "project" }),
+			disableModelInvocation: false,
+		};
+		// Force the prompt through the same channel extensions use (helm always does this).
+		const extension: ExtensionFactory = (pi) => {
+			pi.on("before_agent_start", (event) => {
+				event.systemPromptOptions.forceSystemPrompt = "Exact prompt.";
+			});
+		};
+		const extensionsResult = await createTestExtensionsResult([extension]);
+		const resourceLoader = {
+			...createTestResourceLoader({ extensionsResult }),
+			getSkills: () => ({ skills: [skill], diagnostics: [] }),
+		};
+		const harness = await createHarness({ resourceLoader });
+		try {
+			const requests: TranscriptContext[] = [];
+			harness.setResponses([
+				(providerContext: TranscriptContext) => {
+					requests.push(providerContext);
+					return fauxAssistantMessage("done");
+				},
+			]);
+			await harness.session.prompt("triage this sample");
+
+			const systemText = requests[0]!.messages
+				.filter((message) => message.role === "system")
+				.map((message) => getSystemMessageText(message))
+				.join("\n");
+			expect(systemText).toContain("Exact prompt.");
+			expect(systemText).toContain("<name>sample-intake</name>");
 		} finally {
 			harness.cleanup();
 		}

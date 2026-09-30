@@ -117,6 +117,19 @@ function buildRules(
 	return rules.map((rule) => `- ${rule}`).join("\n");
 }
 
+/**
+ * The skills section, or undefined when there is nothing to list. Skills are only
+ * advertised when the session can actually read them (a `read` or `bash` tool is active).
+ */
+function renderSkillsSection(options: NormalizedBuildSystemPromptOptions): string | undefined {
+	const { skills, selectedTools } = options;
+	if (skills.length === 0) return undefined;
+	const skillFileReadTool = (["read", "bash"] as const).find((tool) => selectedTools.includes(tool));
+	if (!skillFileReadTool) return undefined;
+	const rendered = formatSkillsForPrompt(skills, skillFileReadTool).trim();
+	return rendered.length > 0 ? rendered : undefined;
+}
+
 /** Build the ordered, independently replaceable sections of the structured system prompt. */
 export function buildSystemPromptSections(input: BuildSystemPromptOptions): SystemPromptSections {
 	const options = normalizeBuildSystemPromptOptions(input);
@@ -130,7 +143,6 @@ export function buildSystemPromptSections(input: BuildSystemPromptOptions): Syst
 		sections: customSections,
 		cwd,
 		contextFiles,
-		skills,
 	} = options;
 
 	for (const name of Object.keys(customSections)) {
@@ -162,11 +174,8 @@ export function buildSystemPromptSections(input: BuildSystemPromptOptions): Syst
 
 	if (appendSystemPrompt) promptSections.addendum = appendSystemPrompt;
 	if (contextFiles.length > 0) promptSections.project_context = renderProjectContext(contextFiles);
-	const skillFileReadTool = (["read", "bash"] as const).find((tool) => selectedTools.includes(tool));
-	if (skillFileReadTool && skills.length > 0) {
-		const skillsPrompt = formatSkillsForPrompt(skills, skillFileReadTool).trim();
-		if (skillsPrompt) promptSections.skills = skillsPrompt;
-	}
+	const skillsSection = renderSkillsSection(options);
+	if (skillsSection) promptSections.skills = skillsSection;
 	promptSections.cwd = cwd.replace(/\\/g, "/");
 	for (const [name, content] of Object.entries(customSections)) {
 		if (content) promptSections[name] = content;
@@ -182,12 +191,23 @@ export function buildSystemPromptSections(input: BuildSystemPromptOptions): Syst
 /**
  * The complete prompt state for `input`. A forced prompt is opaque and lives in `content`
  * with no sections; otherwise `content` is empty and the structured sections carry the prompt.
+ *
+ * A forced prompt replaces the host prompt wholesale, so host-provided skills would otherwise
+ * never reach the model (extensions such as helm always force their own prompt). Append the
+ * skills section to the forced text to keep host resources available.
  */
 export function buildSystemPromptState(input: BuildSystemPromptOptions): {
 	content: string;
 	sections?: SystemPromptSections;
 } {
-	if (input.forceSystemPrompt !== undefined) return { content: input.forceSystemPrompt };
+	if (input.forceSystemPrompt !== undefined) {
+		const skillsSection = renderSkillsSection(normalizeBuildSystemPromptOptions(input));
+		return {
+			content: skillsSection
+				? `${input.forceSystemPrompt}\n\n<skills>\n${skillsSection}\n</skills>`
+				: input.forceSystemPrompt,
+		};
+	}
 	return { content: "", sections: buildSystemPromptSections(input) };
 }
 
