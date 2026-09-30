@@ -11,12 +11,30 @@ const codingAgentName = "@adwmc/helm-coding-agent";
 const developmentPackages = new Set(["client", "protocol", "server"].map((name) => `@adwmc/helm-${name}`));
 
 function run(command, args, options = {}) {
+	// On Windows spawnSync uses cmd.exe, which splits an unquoted command at its
+	// first space: `C:\Program Files\nodejs\node.exe` dies as `'C:\Program'`.
+	const useShell = process.platform === "win32";
+	const invoked = useShell && /\s/.test(command) ? `"${command}"` : command;
+	// cmd.exe also splits unquoted arguments at spaces (user temp dirs can have them).
+	const argList = useShell ? args.map((arg) => (/\s/.test(arg) ? `"${arg}"` : arg)) : args;
 	console.log(`$ ${[command, ...args].join(" ")}`);
-	const result = spawnSync(command, args, {
+	let spawnOptions = options;
+	if (!options.env) {
+		// `npm run` re-exports configured values as npm_config_* env vars, and npm
+		// >=11 rejects an env-sourced allow-scripts in project installs
+		// (EALLOWSCRIPTS). A nested install must resolve policy from npmrc /
+		// package.json exactly as a fresh shell would, so drop that one variable.
+		const env = { ...process.env };
+		for (const key of Object.keys(env)) {
+			if (key.toLowerCase() === "npm_config_allow_scripts") delete env[key];
+		}
+		spawnOptions = { ...options, env };
+	}
+	const result = spawnSync(invoked, argList, {
 		encoding: "utf8",
-		shell: process.platform === "win32",
+		shell: useShell,
 		timeout: 300_000,
-		...options,
+		...spawnOptions,
 	});
 	if (result.status !== 0) {
 		throw new Error(`Command failed: ${command} ${args.join(" ")}\n${result.stdout ?? ""}${result.stderr ?? ""}${result.error?.message ?? ""}`);

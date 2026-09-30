@@ -18,6 +18,11 @@ const packages = [
 	{ directory: "packages/session-backends/sqlite-node", name: "@adwmc/helm-session-backend-sqlite-node" },
 	{ directory: "packages/server", name: "@adwmc/helm-server" },
 	{ directory: "packages/coding-agent", name: "@adwmc/helm-coding-agent" },
+	// Built after coding-agent: kernel's typecheck resolves coding-agent's types
+	// from its dist, and coding-agent's own typecheck reads kernel source, so this
+	// order is the one that breaks the cycle.
+	{ directory: "packages/helmpi-kernel", name: "@adwmc/helm-kernel" },
+	{ directory: "packages/helmpi-tools", name: "@adwmc/helm-tools" },
 ];
 
 function printUsage() {
@@ -206,8 +211,13 @@ if (!options.skipCheck) {
 }
 
 for (const pkg of packages) {
-	run("npm", ["run", "clean"], { cwd: pkg.directory });
-	run("npm", ["run", pkg.directory === "packages/ai" ? "build:offline" : "build"], { cwd: pkg.directory });
+	// Source-shipping packages (helm-kernel, helm-tools) resolve their exports to
+	// ./src/*.ts and are loaded by jiti directly; they define no clean/build step.
+	const scripts = readPackageJson(pkg.directory).scripts ?? {};
+	if (scripts.clean) run("npm", ["run", "clean"], { cwd: pkg.directory });
+	if (scripts.build) {
+		run("npm", ["run", pkg.directory === "packages/ai" ? "build:offline" : "build"], { cwd: pkg.directory });
+	}
 }
 
 if (!options.skipTest) {

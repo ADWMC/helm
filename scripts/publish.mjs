@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { getPublicWorkspacePackages } from "./release-packages.mjs";
 
@@ -24,6 +24,9 @@ function run(command, args, options = {}) {
 	const result = spawnSync(commandForPlatform(command), args, {
 		cwd: options.cwd,
 		encoding: "utf8",
+		// Windows resolves .cmd shims (npm.cmd) through cmd.exe; Node refuses to
+		// spawn them directly since the CVE-2024-27980 hardening.
+		shell: process.platform === "win32",
 		stdio: options.capture ? ["inherit", "pipe", "pipe"] : "inherit",
 	});
 
@@ -35,7 +38,16 @@ function run(command, args, options = {}) {
 	return result;
 }
 
+function isSourceShippingPackage(directory) {
+	// The fork's helm-kernel/helm-tools ship raw TypeScript: their exports resolve
+	// to ./src/*.ts and the runtime loads them through jiti, so no dist/ exists.
+	const manifest = JSON.parse(readFileSync(join(directory, "package.json"), "utf8"));
+	const entry = typeof manifest.exports?.["."] === "string" ? manifest.exports["."] : manifest.exports?.["."]?.import;
+	return typeof entry === "string" && entry.startsWith("./src/");
+}
+
 function assertBuildOutputExists(directory) {
+	if (isSourceShippingPackage(directory)) return;
 	if (!existsSync(join(directory, "dist"))) {
 		throw new Error(`${directory}/dist does not exist. Run npm run build before publishing.`);
 	}
@@ -50,6 +62,7 @@ function validatePack(directory) {
 function isPublished(name, version) {
 	const result = spawnSync(commandForPlatform("npm"), ["view", `${name}@${version}`, "version", "--json"], {
 		encoding: "utf8",
+		shell: process.platform === "win32",
 		stdio: ["inherit", "pipe", "pipe"],
 	});
 

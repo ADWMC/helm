@@ -3,13 +3,26 @@
 	"version": "0.87.1",
 	"description": "helm host tools: task subagent executor (spawn/steer/kill, oh-my-pi four-piece basis)",
 	"type": "module",
-	"private": true,
 	"license": "MIT",
+	"files": [
+		"dist",
+		"src"
+	],
 	"exports": {
-		".": "./src/task.ts",
-		"./task": "./src/task.ts"
+		".": {
+			"source": "./src/task.ts",
+			"types": "./src/task.ts",
+			"import": "./dist/task.js"
+		},
+		"./task": {
+			"source": "./src/task.ts",
+			"types": "./src/task.ts",
+			"import": "./dist/task.js"
+		}
 	},
 	"scripts": {
+		"clean": "shx rm -rf dist",
+		"build": "tsgo -p tsconfig.build.json",
 		"test": "node --test src/*.test.ts"
 	},
 	"dependencies": {

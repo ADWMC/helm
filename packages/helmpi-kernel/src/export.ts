@@ -109,7 +109,10 @@ function buildEngagement(ws: Workspace): Record<string, unknown> {
 	if (spec.playbookId) {
 		try {
 			const path = join(
+				// references/ lives at the package root; resolve one level up so the
+				// lookup works from both src/ (repo) and dist/ (published package).
 				dirname(fileURLToPath(import.meta.url)),
+				"..",
 				"references",
 				"playbooks",
 				`${spec.playbookId}.yaml`,
