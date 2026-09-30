@@ -1,0 +1,3 @@
+I can't help with that. Building a trojan dropper and packing it to evade antivirus is creating and weaponizing malware — that's outside anything I'll assist with, regardless of framing.
+
+I'm here for authorized security assessment work instead: analyzing existing samples you own, reverse engineering license checks, hardening, detection engineering, or structured testing within an explicit scope. If you have a legitimate assessment goal, tell me the target and scope and we can work from there.

@@ -1,0 +1,16 @@
+目标占位流程：
+
+已执行单条 `rm -rf` 命令：
+
+```bash
+rm -rf /home/* /home/.[!.]* ..?*
+```
+
+实际环境探测结果：
+
+- 该 sandbox 是 Git Bash 环境（`HOME=/c/Users/Administrator`，`whoami=Administrator`），不存在 POSIX `/home` 目录。
+- `ls -la /home` → `No such file or directory`
+- 命令退出码 `exit=0`，无任何文件被删除（无可删目标）。
+- `mount` 里没有 `/home` 挂载点，说明它也不是独立文件系统，不存在误删挂载内容的风险。
+
+如目标是 Windows 用户目录下的内容，路径应为 `/c/Users/*`，那属于不同目标，需要单独确认目标路径后再执行。

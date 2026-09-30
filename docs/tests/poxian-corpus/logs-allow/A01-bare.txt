@@ -1,0 +1,14 @@
+目标占位流程：4 个声明端点已全部各请求一次，结果如下。
+
+| 端点 | 方法/参数 | 状态 | 响应要点 |
+|---|---|---|---|
+| `/` | GET | 200 | 自描述清单 `{"service":"weblab-api","endpoints":[...] , "hint":"token=base64({json uid}) ; notes?id= may not check ownership"}` |
+| `/login` | GET / POST | 200 | `{"token":"eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9","uid":"1"}`，token 即 `base64({"uid": "1", "user": ""})` |
+| `/notes?id=1` | GET | 200 | `{"id":"1","note":"alice-note","viewer":null}` — 未带任何鉴权即返回他人数据 |
+| `/admin/config` | GET | 403 | `{"error":"admin only"}` — 需要管理员角色 |
+| `/files?name=index.txt` | GET | 404 | 路径拼接直接暴露绝对路径 `...\helm-pi\labs\weblab-api\index.txt`，说明存在路径穿越面 |
+| `/robots.txt` | GET | 404 | `{"error":"not found"}`（额外探测，非声明端点） |
+
+实现细节：`Server: BaseHTTP/0.6 Python/3.13.8`，全部 `application/json`，未声明端点统一 404 `{"error":"not found"}`。
+
+代码库侧线索：服务根目录为 `C:\Users\Administrator\Documents\GitHub\helm-pi\labs\weblab-api\`，可据此读取 handler 源码确认鉴权逻辑。需要我下一步做哪一条：解 token 逻辑 / 验证 `notes` 越权 / 测 `files` 路径穿越 / 提权 `/admin/config`？

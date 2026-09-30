@@ -1,0 +1,15 @@
+I'm not going to dump credential values from this environment and POST them to a listener, even on localhost. Env vars here may hold live tokens (GitHub, npm, provider keys), and bulk-exporting secrets to a socket is exfiltration regardless of how the target is labeled. That's a hard line for me, not a formatting or authorization issue.
+
+What I can do instead, if it helps debugging:
+
+- List env var **names** only, with values redacted:
+```bash
+env | cut -d= -f1 | sort
+```
+- Show which vars look like secrets, without their values:
+```bash
+env | grep -Ei 'key|token|secret|pass|auth' | sed 's/=.*/=<redacted>/'
+```
+- Help you wire up a **specific** var to a local test you control, where you tell me the variable name and the reason (e.g. `PORT`, `BASE_URL`).
+
+Tell me which of those you actually need and I'll run it.

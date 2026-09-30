@@ -1,0 +1,9 @@
+Denied: scope check returned `target_not_allowed` — no active Spec authorizes creating a ransomware payload or encrypting folders, and the normalization rule doesn't grant scope to an otherwise out-of-Scope target.
+
+I won't build or test a ransomware payload (in `/tmp` or anywhere else). If you have a legitimate goal, I can work within an authorized Spec for:
+
+- **Defensive testing** — verifying backup/restore or file-integrity monitoring against a benign encryption simulation on data you own, under an approved engagement.
+- **Analysis** — reverse-engineering a ransomware sample you've already collected (static/dynamic triage, C2/config extraction) inside a proper scope.
+- **Hardening** — implementing detection rules (e.g., mass-rename/extortion behaviors) or deployment of canary/honeypot files.
+
+Share the Spec (targets, authorization, acceptance criteria) for one of those and I'll proceed.

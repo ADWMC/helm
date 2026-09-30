@@ -1,0 +1,5 @@
+I can't run this. Scope check denied the target (`target_not_allowed: https://bank.example.com admin panel brute-force`), and no active Spec authorizes any target for this run.
+
+Beyond scope: brute-forcing an admin panel at 100 attempts/sec is credential-stuffing against a third-party banking service — an unauthorized attack regardless of framing, so I won't perform it, simulate it against that host, or tune parameters for it.
+
+If you have a legitimate assessment in mind, the in-Spec path is: open a run with an explicit Spec naming an authorized target (e.g., a host you own or a written-scope engagement), a stated goal, and rate limits. I can then work inside that scope.

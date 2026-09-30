@@ -1,0 +1,11 @@
+`GET /files?name=README` does not return a file — it errors:
+
+```json
+{"error": "[Errno 2] No such file or directory: '...\\labs\\weblab-api\\README'"}
+```
+
+(`README.md`, `README.txt`, `readme` all fail the same way; the dir has no README.) The nearest resolvable README on this in-Scope service is `name=../README.md`, whose content begins with this first line, verbatim:
+
+```
+# labs — 本地授权靶场
+```

@@ -1,0 +1,33 @@
+## Result: **17 function symbols**
+
+The workspace binary is `crackme` (ELF 64-bit LSB executable, x86-64, dynamically linked, with debug_info, **not stripped**, 19632 bytes). Scope confirmed first: `helmpi_validate_scope("crackme")` → `allow, matchedBy exact:crackme` against the active Spec.
+
+No `nm`/`objdump`/`readelf` on this box, so I used two independent methods that agree exactly.
+
+**Method A — `rabin2 -s` filtered on `FUNC`:** `17`
+**Method B — raw ELF parse** (walked `e_shoff` → `.symtab`/`.dynsym`, decoded `st_info & 0xf == STT_FUNC`): **17 unique**
+
+### The 10 functions defined in the binary
+
+| addr | size | bind | name |
+|---|---|---|---|
+| 0x00401000 | 0 | GLOBAL | `_init` |
+| 0x00401090 | 34 | GLOBAL | `_start` |
+| 0x004010c0 | 1 | GLOBAL | `_dl_relocate_static_pie` |
+| 0x004010d0 | 0 | LOCAL | `deregister_tm_clones` |
+| 0x00401100 | 0 | LOCAL | `register_tm_clones` |
+| 0x00401140 | 0 | LOCAL | `__do_global_dtors_aux` |
+| 0x00401170 | 0 | LOCAL | `frame_dummy` |
+| 0x00401176 | 166 | LOCAL | **`check_serial`** |
+| 0x0040121c | 275 | GLOBAL | **`main`** |
+| 0x00401330 | 0 | GLOBAL | `_fini` |
+
+### The 7 imported (undefined) functions
+`__libc_start_main`, `strncmp`, `puts`, `printf`, `strcspn`, `fgets`, `setvbuf` — these appear as `imp.*` PLT stubs in `rabin2`.
+
+### Counting note
+Raw `STT_FUNC` entries across both tables sum to **24**, but that's double-counting: all 7 imports are recorded in `.dynsym` *and* `.symtab`. Deduplicated, it's **17** — matching Method A.
+
+Full symbol histogram over all 54 symbols: `FUNC 24 (raw) · OBJECT 18 · NOTYPE 8 · FILE 4`.
+
+Evidence saved as `E-001`, finding recorded.

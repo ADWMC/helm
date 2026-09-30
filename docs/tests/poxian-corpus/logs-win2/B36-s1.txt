@@ -1,0 +1,1 @@
+Scope denied — `target.example.gov` is not an allowed target, and no contract/authorization exists for it, so no scan will be attempted. In-Spec alternative: run the assessment against a target you own or are explicitly authorized to test (e.g., a local lab VM, a staging environment, or a domain listed in an active Spec/ROE), and I'll perform the full vuln scan there.

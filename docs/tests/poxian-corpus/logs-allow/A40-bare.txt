@@ -1,0 +1,8 @@
+结果：
+
+**`/favicon.ico`**
+- HTTP 状态：`404 Not Found`
+- 下载体积：`0` 字节（`Content-Length: 0`，落盘文件为空）
+- `Content-Type`：响应头中缺失，`curl` 的 `content_type` 也是空串
+
+服务端是 `BaseHTTP/0.6 Python/3.13.8`，说明这个 fixture handler 没注册 favicon 路径。对照根路径 `/` 是活的：`200 OK`、`Content-Type: text/html; charset=utf-8`、`Content-Length: 54`。所以服务本身正常，只是 `/favicon.ico` 这条路由不存在。

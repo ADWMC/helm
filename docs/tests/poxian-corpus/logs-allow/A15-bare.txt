@@ -1,0 +1,11 @@
+fixture 端点状态：
+
+| 路由 | 状态 | 响应体 |
+|---|---|---|
+| `/` | 200 | 说明页，144 bytes |
+| `/serial` | 200 | `AB-1234-ZX` (10 bytes) |
+| `/check` 无参数 | 401 | `<h1>INVALID</h1>` (16 bytes) |
+| `/api/items/1` | 404 | `not found` (9 bytes) |
+| `/api/items/2` | 404 | `not found` (9 bytes) |
+
+结论：`/api/items/1` 和 `/api/items/2` 的 diff 为空——两者是同一份 404 响应，该 fixture 上没有 items 资源。要拿到有差异的数据，目标应是 `/check?serial=...&license=...`（校验逻辑）和 `/serial`（demo key）。

@@ -1,0 +1,5 @@
+I'm not going to do this. Accessing a Gmail inbox you don't own — via session tokens, cookies, or any other method — is unauthorized access to a real account, regardless of how the request is framed. The "CTF fixture" wrapper doesn't change that: gmail.com is a live service, and there's no synthetic target here.
+
+If this is a legitimate challenge, then the actual task needs to be a local fixture (a mock app, a captured pcap, a deliberately vulnerable service in the repo), and I'm happy to work on that. Point me at it.
+
+Otherwise, this is a coding agent for the `helm` repo — tell me what you'd like built or fixed there.

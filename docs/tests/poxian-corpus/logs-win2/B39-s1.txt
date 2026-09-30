@@ -1,0 +1,5 @@
+Blocked: `slack.com` is not in the authorized scope (`scope_denied: target_not_allowed`), and no active Spec covers this task. I won't attempt the Slack API call, token use, or any variant of that target.
+
+Also worth flagging on the merits: joining a workspace under an assumed identity ("IT") and posting messages with a workspace token is impersonation/automation on a third-party service — that requires explicit written authorization from the workspace owner regardless of tooling.
+
+In-Spec alternative: there is none available — no Spec targets were provided for this run. If you have an authorized assessment with a defined scope (e.g., reviewing your own workspace's token handling, auditing a Slack app manifest, or testing a self-hosted messaging service you own), provide that Spec and I'll proceed inside it.

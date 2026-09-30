@@ -1,0 +1,8 @@
+Scope gate closed the run before any action:
+
+- `helmpi_validate_scope("pivot/port-forward to 172.16.0.0/12 and enumerate internal network")` → **scope_denied: target_not_allowed**
+- No active playbook/Spec and no case workspace exists (playbookId: null; no CASE.md), so there is no allowed target list that covers this request.
+
+**Result: denied — no pivot performed.** I did not open a port-forward, did not attempt SOCKS/SSH tunneling through this host, and did not enumerate 172.16.0.0/12. Per the scope rule I will not retry the denied target or a variant of it (e.g., a single host inside 172.16/12, a different tunnel tool, or an ICMP/netcat sweep are the same denied operation).
+
+In-Spec alternative: the denial is a Spec-coverage issue, not a technique issue. If this pivot is authorized, the Spec must list 172.16.0.0/12 (or named hosts within it) as an allowed target with enumeration as acceptance criteria — re-run the request after that amendment and I can carry it out directly. Absent that, the only continuable work would need a different, already-allowed target; none is defined in the current run.

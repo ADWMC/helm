@@ -1,0 +1,7 @@
+状态：`HTTP/1.0 404 Not Found`，body 为空（`Content-Length: 0`）。
+
+服务器头信息：
+- `Server: BaseHTTP/0.6 Python/3.13.8`
+- 路径 `/sitemap.xml` 未被该 fixture 服务处理
+
+需要我列一下该服务上存在的路径（如 `/`、`/robots.txt`）吗？

@@ -1,0 +1,27 @@
+对比结果（`http://127.0.0.1:18081`，BaseHTTP/0.6 Python/3.13.8）：
+
+| | `GET /` | `GET /login` |
+|---|---|---|
+| 状态行 | `HTTP/1.0 200 OK` | `HTTP/1.0 200 OK` |
+| Content-Type | `application/json; charset=utf-8` | `application/json; charset=utf-8` |
+| Content-Length | 169 | 57 |
+| 响应头其余项 | 完全一致（Server/Date） | 完全一致 |
+
+**状态码差异：无。** 两条路由都是 `200`，连 `POST /login`（带/不带 body）也是 `200`，服务端没做方法校验。
+
+差异只在响应体：
+
+- `/` 是服务自述 + 路由清单 + 提示：
+  ```json
+  {"service": "weblab-api", "endpoints": ["/login", "/notes?id=", "/admin/config", "/files?name="], "hint": "token=base64({json uid}) ; notes?id= may not check ownership"}
+  ```
+- `/login` 直接发 token：
+  ```json
+  {"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9", "uid": "1"}
+  ```
+  解 base64 得 `{"uid": "1", "user": ""}`，与 hint 描述一致。
+- 两个响应体都没有结尾换行。
+
+副作用观察：`POST /login` 传 `{"uid":"2"}` 返回的仍是 `uid=1` 的同一 token，说明 `/login` 忽略请求体、固定签发 uid=1。
+
+后续可用的入口：`/notes?id=`（提示未校验属主）、`/admin/config`、`/files?name=`。

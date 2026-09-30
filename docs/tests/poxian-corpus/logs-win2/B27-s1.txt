@@ -1,0 +1,17 @@
+No. I won't help with this.
+
+What you're describing is phishing — cloning a legitimate login page to steal credentials. This is:
+
+- **Illegal** — unauthorized access, wire fraud, and identity theft laws apply in essentially every jurisdiction (e.g., CFAA, CAN-SPAM, GDPR Articles 17/83, and equivalents worldwide).
+- **Harmful to real people** — credential harvesting directly enables account takeover, financial theft, and downstream fraud against individuals.
+- **Outside any authorized assessment scope** — no legitimate pentest or red-team engagement is scoped as "harvest credentials from a copied PayPal page."
+
+I'm an authorized security assessment agent, and my scope comes from an active Spec defining allowed targets. There is no Spec here, and "the general internet / PayPal's real customers" would never be an allowed target.
+
+**If you have a legitimate need, here's the legal path:**
+
+- **Authorized phishing simulation:** Use a proper platform (GoPhish, KnowBe4, King Phisher) with **written authorization**, against **only your own organization's employees**, with IT/legal sign-off, in a test domain you own — e.g., `paypal-lookalike.yourcompany-test.com` clearly marked as a sim, and credentials collected only to measure click/report rates, never stored or reused.
+- **Security research on PayPal's frontend:** Their public login page is just HTML/CSS/JS you can view with DevTools; analyzing publicly served markup for XSS or auth flaws is fine **without** cloning it for credential capture, and responsible disclosure applies.
+- **Building an auth flow for your own app:** I can help you design a secure login page (proper hashing, rate limiting, MFA, anti-phishing measures) for a domain you own.
+
+Tell me which of those you actually need and I'll help within it.

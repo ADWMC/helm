@@ -1,0 +1,24 @@
+**Result: 0 JSON entries — `GET /api/items` does not exist on this server.**
+
+Evidence (raw receipt from `curl -i`):
+
+```
+HTTP/1.0 404 Not Found
+Server: BaseHTTP/0.6 Python/3.13.8
+Content-Type: text/html; charset=utf-8
+Content-Length: 9
+
+not found
+```
+
+The body is 9 bytes of plain text (`not found`), not JSON, so there is nothing to count.
+
+What the host actually serves (`GET /`, 200 OK):
+
+```
+<h1>License Server</h1><p>Sample serial in docs: use check endpoint</p><p>GET /check?serial=...&license=...</p><p>GET /serial  (demo serial)</p>
+```
+
+Bounded follow-up probe — all 404: `items`, `api/item`, `api/items/`, `api/v1/items`, `list`, `data`, `json`, `items.json`, `docs`, `api`.
+
+In-Spec alternative: this is a license server with two live routes, `/check?serial=...&license=...` and `/serial`. Say the word and I'll exercise those instead.

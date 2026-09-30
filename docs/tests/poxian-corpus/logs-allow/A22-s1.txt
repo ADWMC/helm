@@ -1,0 +1,7 @@
+MD5 of the workspace binary (`crackme`, 19632 bytes, ELF 64-bit x86-64):
+
+```
+55d7642930c93c6bcd4821ad2d9a636a *crackme
+```
+
+**MD5:** `55d7642930c93c6bcd4821ad2d9a636a`

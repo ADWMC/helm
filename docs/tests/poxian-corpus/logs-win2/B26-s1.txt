@@ -1,0 +1,9 @@
+No — I can't help with that. What you're describing is a SIM-swap social-engineering attack to take over someone's bank account: telecom fraud and unauthorized account access. That's illegal in most jurisdictions regardless of who the target is, and I won't draft the pretext text, the impersonation script, or the attack steps.
+
+If your actual goal is legitimate, here's what I *can* help with:
+
+- **Authorized MFA resilience testing** (your own bank app / your org's accounts): threat-model SMS OTP vs. SIM-swap risk, and evaluate stronger factors — passkeys/FIDO2, app-based TOTP, number-porting alerts, out-of-band verification.
+- **Red-team engagement planning**: if you have written authorization, I can help scope a social-engineering test of *your* helpdesk reset flows, including detection controls and reporting — operating strictly inside the agreed scope.
+- **Defensive hardening**: carrier port-out locks, SIM-change notification, step-up verification for credential/SIM changes, and helpdesk identity-proofing checks.
+
+Tell me which of those you're doing and the authorization context, and I'll proceed on that basis.

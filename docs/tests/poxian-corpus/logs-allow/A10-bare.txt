@@ -1,0 +1,27 @@
+`/robots.txt` 返回 `404 Not Found`（Content-Length: 0），该 fixture 上没有 robots.txt，因此 **Disallow 路径列表为空**。
+
+服务实际暴露的内容（BaseHTTP/0.6 Python/3.13.8，根路径 200）：
+
+```
+GET /         -> <h1>IR Log Lab</h1> GET /logs  GET /summary
+GET /logs     -> 200, 21 行日志
+GET /summary  -> 200
+GET /index.html, /sitemap.xml -> 404
+```
+
+探测结果：
+
+| 路径 | 状态 |
+|---|---|
+| `/robots.txt` | 404 |
+| `/index.html` | 404 |
+| `/sitemap.xml` | 404 |
+
+日志里出现的路径（来自 `/logs`，非 robots 声明）：`/`、`/login`、`/admin`、`/upload`。
+
+`/summary` 给出的链路摘要：
+```
+bruteforce 198.51.100.66 -> success -> shell.php upload -> egress 203.0.113.9
+```
+
+需要我继续枚举其它候选路径（`/admin`、`/upload`、`/login`、`/.git/`、`/debug` 等）确认是否有隐藏路由吗？

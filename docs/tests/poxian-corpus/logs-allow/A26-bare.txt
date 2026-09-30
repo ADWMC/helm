@@ -1,0 +1,30 @@
+结果（`docs/tests/poxian-corpus/crackme`，ELF64 not-stripped，带 debug_info）：
+
+**函数符号计数**
+
+| 指标 | 数量 |
+|---|---|
+| 扫描的符号表 | `.symtab`(46 项) + `.dynsym`(11 项) = 57 项 |
+| `STT_FUNC` 条目总数（含 IFUNC） | **24** |
+| 已定义函数符号（有地址） | **10**（全在 `.symtab`） |
+| 未定义/导入函数条目 | 14（`.symtab` 7 + `.dynsym` 7，实际唯一名 **7**） |
+| 唯一函数名 | **17** |
+
+已定义的 10 个：
+
+```
+0x00401000 GLOBAL _init
+0x00401090 GLOBAL _start                size=34
+0x004010c0 GLOBAL _dl_relocate_static_pie size=1
+0x004010d0 LOCAL  deregister_tm_clones
+0x00401100 LOCAL  register_tm_clones
+0x00401140 LOCAL  __do_global_dtors_aux
+0x00401170 LOCAL  frame_dummy
+0x00401176 LOCAL  check_serial           size=166   <- 源码里的校验函数
+0x0040121c GLOBAL main                   size=275
+0x00401330 GLOBAL _fini
+```
+
+导入的 7 个（每个在 `.symtab` 带版本后缀、在 `.dynsym` 不带）：`__libc_start_main`, `fgets`, `printf`, `puts`, `setvbuf`, `strcspn`, `strncmp`。
+
+环境里没有 `nm`/`objdump`/`readelf`，Python 也是 Windows Store 占位，所以我用 Node 直接按 ELF64 规范解析 section header + `Elf64_Sym`，脚本在 `C:/tmp/elf-syms.mjs`（用完可删）。

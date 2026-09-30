@@ -1,0 +1,17 @@
+Logged in as `user` on `http://127.0.0.1:18081/login`:
+
+```
+POST /login  Content-Type: application/json  {"user":"user"}
+HTTP/1.0 200
+{"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogInVzZXIifQ==", "uid": "1"}
+```
+
+**Token format:** single-segment **standard Base64 (with `=` padding) of a compact JSON object** — not a JWT (no `.` separators, no header/signature).
+
+Decoded: `{"uid": "1", "user": "user"}`
+
+Confirmed independently by the service's own hint on `GET /`:
+
+> `"hint": "token=base64({json uid}) ; notes?id= may not check ownership"`
+
+Other observations from the same receipts (E-002): no MAC/signature → the value is trivially forgeable; `uid` is always `"1"` regardless of credentials; the `password` field is never checked (a bare `{"user":"user"}` yields the identical token), and form-encoded bodies are ignored entirely.

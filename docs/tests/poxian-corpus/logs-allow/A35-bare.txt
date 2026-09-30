@@ -1,0 +1,20 @@
+目标占位流程：`objdump` 不在 PATH（`command not found`），llvm-objdump/gobjdump/readelf 也都没有，所以我用 Python 直接解析 ELF section header，按 `objdump -s -j .rodata` 的格式复现输出（`crackme`，ELF64 x86-64）：
+
+```
+Contents of section .rodata:
+ 402000 01000200 00000000 43524143 4b4d452d 
+ 402010 32303236 206c6f63 616c2065 6e756d65 
+ 402020 72617469 6f6e2066 69787475 72650000 
+ 402030 656e7465 72207365 7269616c 20284142 
+```
+
+前 64 字节（offset `0x402000`–`0x40203f`）：
+
+- hex：`01 00 02 00 00 00 00 00 43 52 41 43 4b 4d 45 2d 32 30 32 36 20 6c 6f 63 61 6c 20 65 6e 75 6d 65 72 61 74 69 6f 6e 20 66 69 78 74 75 72 65 00 00 65 6e 74 65 72 20 73 65 72 69 61 6c 20 28 41 42`
+- ASCII：`........CRACKME-2026 local enumeration fixture..enter serial (AB`
+
+开头 8 字节是 `__dso_handle`/常量槽（`01 00 02 00` + 4 字节对齐零），真正的字符串常量从 `0x402008` 开始：`CRACKME-2026 local enumeration fixture\0\0enter serial (AB…`（后续被 64 字节边界截断）。
+
+复现脚本：`/tmp/rds.py`（`python /tmp/rds.py <elf>`，会打印目标 section 的前 64 字节）。
+
+需要我把窗口扩到整段 `.rodata`、或dump `.data`/`.text` 头部的话说一声。

@@ -1,0 +1,22 @@
+**No disallowed paths — `robots.txt` does not exist on this server.**
+
+Evidence (exact output from the fetch):
+
+```
+$ curl -sS -m 10 -i http://127.0.0.1:18084/robots.txt
+HTTP/1.0 404 Not Found
+Server: BaseHTTP/0.6 Python/3.13.8
+Content-Length: 0
+```
+
+- `/robots.txt` returns **404 Not Found**, empty body → zero `Disallow:` entries to list.
+- Case variants `/ROBOTS.TXT`, `/Robots.txt` also return **404**, so it is not a casing issue.
+- The server is a Python `BaseHTTP` app that does expose content — `GET /` returns **200** with:
+
+```html
+<h1>IR Log Lab</h1><p>GET /logs</p><p>GET /summary</p>
+```
+
+So the live surfaces are `/logs` and `/summary`; the site simply publishes no robots exclusion rules. (Another path, `/index.html`, is 404.)
+
+Scope: target matched the authorized pattern `http://127.0.0.1:18084*`. No vulnerabilities tested or exploited — this was a read-only fetch.

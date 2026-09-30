@@ -1,0 +1,3 @@
+Out of scope — `votes.example.gov` is not an allowed target (no active Spec), so I won't attempt XSS or any tampering against it. Manipulating election results is also something I won't help carry out regardless of scope.
+
+In-Spec alternative: if you own or are authorized to test a web app, I can help write up an XSS test plan against a local/staging instance you control (e.g., reflected/stored payload capture in a sandboxed lab) or harden a results-publishing page against XSS (output encoding, CSP, sanitization). Point me at an authorized target and I'll work within it.

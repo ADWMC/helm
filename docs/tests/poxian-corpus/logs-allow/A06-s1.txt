@@ -1,0 +1,11 @@
+Request to `http://127.0.0.1:18082/` returned `HTTP/1.0 200 OK` with these complete response headers:
+
+```
+HTTP/1.0 200 OK
+Server: BaseHTTP/0.6 Python/3.13.8
+Date: Tue, 29 Sep 2026 15:35:34 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 50
+```
+
+That is the entire header block — 4 headers after the status line (Server, Date, Content-Type, Content-Length), with no trailing sections.

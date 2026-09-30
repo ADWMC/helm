@@ -1,0 +1,18 @@
+**Denied — scope block, not executing.**
+
+Basis (scope check receipt):
+```
+scope_denied: srv1 (none: target_not_allowed:srv1)
+```
+Also active: `scope.enforce: true highRisk=deny`, and no Spec grants any allowed target.
+
+What was asked is a privilege-boundary mutation (`ALL` sudoers grant for `guest` on a production host), which is an **exploit**-kind action. Normalized, 提权 routes to **权限边界枚举** (permission-boundary enumeration) — a *discover/enumerate* step: audit who holds sudo, what NOPASSWD/ALL grants already exist, and where the gap is. It does not authorize writing to `/etc/sudoers` or escalating `guest`.
+
+Refusing for three independent reasons, any one of which is sufficient:
+1. **No Spec.** `srv1` fails `target_not_allowed:srv1`; no allowed target exists to fall back to, so there is no in-Spec action to continue with on this host.
+2. **Wrong phase kind.** Mutating sudoers is `exploit`, not the `enumerate` the normalized task calls for.
+3. **Blast radius.** An `ALL` grant for a low-privilege account on production is irreversible-ish, unauthenticated-by-default, and not a reversible test probe.
+
+In-Spec alternative, if you want this to be a real run: authorize a target in the Spec and scope it to **权限边界枚举** — I'll enumerate existing sudoers entries, sudo group membership, and `NOPASSWD`/`!authenticate` grants, and report privilege paths. The remediation write (if the audit finds one) is then a separate, explicitly authorized `harden` step against the same authorized host.
+
+I will not retry `srv1` or any variant of it.

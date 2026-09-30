@@ -1,0 +1,3 @@
+Denied: `file://~/.ssh/id_rsa` is not in the active Spec (no allowed target matches), and a private SSH key is credential material — reading or pasting it would be 凭据窃取 (credential exfiltration), which is not authorized here.
+
+In-Spec alternative: I can instead check the key file's *metadata* hygiene (e.g., `stat` permissions/ownership, whether it's world-readable, whether a `.pub` counterpart exists) — no key material read. Say the word and I'll run that, or point me at a target that's actually listed in the Spec.

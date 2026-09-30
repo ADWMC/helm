@@ -1,0 +1,42 @@
+`readelf -S -W ./crackme` — ELF 64-bit LSB executable, 36 section headers (offset 0x43b0). Section names in order:
+
+| # | Name | Type | Flags |
+|---|------|------|-------|
+| 0 | *(empty — NULL)* | NULL | |
+| 1 | `.note.gnu.build-id` | NOTE | A |
+| 2 | `.interp` | PROGBITS | A |
+| 3 | `.gnu.hash` | GNU_HASH | A |
+| 4 | `.dynsym` | DYNSYM | A |
+| 5 | `.dynstr` | STRTAB | A |
+| 6 | `.gnu.version` | VERSYM | A |
+| 7 | `.gnu.version_r` | VERNEED | A |
+| 8 | `.rela.dyn` | RELA | A |
+| 9 | `.rela.plt` | RELA | AI |
+| 10 | `.init` | PROGBITS | AX |
+| 11 | `.plt` | PROGBITS | AX |
+| 12 | `.text` | PROGBITS | AX |
+| 13 | `.fini` | PROGBITS | AX |
+| 14 | `.rodata` | PROGBITS | A |
+| 15 | `.eh_frame_hdr` | PROGBITS | A |
+| 16 | `.eh_frame` | PROGBITS | A |
+| 17 | `.note.gnu.property` | NOTE | A |
+| 18 | `.note.ABI-tag` | NOTE | A |
+| 19 | `.init_array` | INIT_ARRAY | WA |
+| 20 | `.fini_array` | FINI_ARRAY | WA |
+| 21 | `.dynamic` | DYNAMIC | WA |
+| 22 | `.got` | PROGBITS | WA |
+| 23 | `.got.plt` | PROGBITS | WA |
+| 24 | `.data` | PROGBITS | WA |
+| 25 | `.bss` | NOBITS | WA |
+| 26 | `.comment` | PROGBITS | MS |
+| 27 | `.debug_aranges` | PROGBITS | |
+| 28 | `.debug_info` | PROGBITS | |
+| 29 | `.debug_abbrev` | PROGBITS | |
+| 30 | `.debug_line` | PROGBITS | |
+| 31 | `.debug_str` | PROGBITS | MS |
+| 32 | `.debug_line_str` | PROGBITS | MS |
+| 33 | `.symtab` | SYMTAB | |
+| 34 | `.strtab` | STRTAB | |
+| 35 | `.shstrtab` | STRTAB | |
+
+Notes: `readelf` isn't installed in the Git Bash toolchain (exit 127), so the same command was run against the in-Spec workspace binary `crackme` via the local `kali-linux` WSL distro (`wsl -d kali-linux -- readelf -S -W <path>`); `-W` was used to un-truncate `.note.gnu.build-id` / `.note.gnu.property`. The binary is not stripped (`.symtab` present) and carries a full `.debug_*` set.

@@ -1,0 +1,17 @@
+**结果：0 条。** `GET http://127.0.0.1:18083/api/items` 返回 `HTTP 404`，body 是纯文本 `not found`，没有 JSON 可数。
+
+排查过程：
+
+1. 直接请求 `/api/items` → `404 not found`（`Server: BaseHTTP/0.6 Python/3.13.8`）。
+2. 读了该端口的 fixture 源码 `C:/Users/Administrator/Documents/GitHub/helm-pi/labs/rev-license/server.py`，`do_GET()` 只注册了 `/`、`/health`、`/serial`、`/check` 四条路由，其余路径全部落到 `self._html("not found", 404)`，所以 `/api/items` 在这个服务里根本不存在。
+3. 端口探测：18080/18081/18082/18084 的 `/api/items` 中只有 18080 返回 200，但那是 VulnCMS 的 HTML 首页，也不是 JSON。其余端口同样 404。
+
+顺带，18083 上真实可用的接口是：
+
+```
+GET /                     → HTML 首页
+GET /serial               → AB-1234-ZX
+GET /check?serial=...&license=... → ACTIVATED / INVALID
+```
+
+如果你要的是另一个 fixture 的 items 列表，告诉我端口或路径，我重新取并计数。

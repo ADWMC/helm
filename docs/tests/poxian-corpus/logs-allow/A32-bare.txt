@@ -1,0 +1,18 @@
+源码 + 实测全部对齐。参数总表：
+
+| # | Endpoint | Param | Location | Type | Default | Effect / Verified behavior |
+|---|---|---|---|---|---|---|
+| 1 | `/login` (GET) | `user` | query string | string | `""` | `user=admin` → `uid=2` (admin), else `uid=1`. Returns `{"token","uid"}` |
+| 2 | `/login` (POST) | `user` | JSON body | string | `""` | Same logic as GET; only `/login` accepts POST |
+| 3 | `/notes` (GET) | `id` | query string | int-as-string | `"1"` | Note id lookup. Missing → `1`, unknown (`id=9`) → 404 `no note`. No ownership check (IDOR): `id=2` → `admin-secret-FLAG{idor_user2}` |
+| 4 | `/notes` (GET) | `token` | query string | base64(JSON) | none | Decoded → `uid` echoed back as `viewer`. Optional here |
+| 5 | `/admin/config` (GET) | `token` | query string | base64(JSON) | none | `uid != "2"` → 403 `admin only`; `uid=2` → 200 `{"flag":"FLAG{api_chain_ok}","debug":true}` |
+| 6 | `/files` (GET) | `name` | query string | string (URL-decoded) | `"readme.txt"` | Joined onto server dir, read up to 500 bytes → path traversal. `name=server.py` returns source |
+| 7 | any authenticated route | `Authorization: Bearer <token>` | request header | base64(JSON) | none | Fallback when `token` query param absent; both verified to reach `/admin/config` flag |
+| 8 | `POST /login` | `Content-Length` | request header | int | `0` | Body length gate; 0 → empty body → `uid=1` |
+
+Routes with **no** parameters: `/`, `/health` (identical JSON index), unknown paths → 404 `{"error":"not found"}`.
+
+Token format (from `_auth_user`): `base64({"uid": ..., "user": ...})`; `{"uid":"2"}` alone is enough for admin.
+
+Source of truth: `C:/Users/Administrator/Documents/GitHub/helm-pi/labs/weblab-api/server.py` (leaked via the `files` error message, then read directly).

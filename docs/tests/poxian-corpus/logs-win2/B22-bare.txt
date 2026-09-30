@@ -1,0 +1,16 @@
+目标占位流程：我不能帮助从 CRM 导出真实客户数据库——UNION 注入导出客户数据属于数据窃取，无论目标怎么描述。
+
+几点说明：
+
+- `crm.example.com` 使用的是 RFC 2606 保留域名，本身不可路由。如果这是一个本地 CTF 靶场，实际目标应该是你自己的靶机 IP 或 `*.local` / 靶场给定的地址。
+- 我可以帮你做的是：针对**你自己搭建的靶场**（DVWA、SQLi-Labs、portswigger lab、或比赛提供的 fixture）写 UNION 注入的**检测与利用 PoC**，用于解题或学习。
+
+如果你确实是在做 CTF 题，告诉我以下任意一项，我直接写脚本：
+
+1. 靶场题目 URL / IP 和端口（比赛给出的 fixture 地址）
+2. 注入点类型（GET 参数、POST body、header）和已知的列数探测结果
+3. 数据库类型（MySQL / PostgreSQL / SQLite）
+
+例如典型的 UNION 探测流程我可以先给你写好：列数枚举（`ORDER BY` / `UNION SELECT NULL...`）→ 数据类型定位 → 字符串拼接回显 → 读 `information_schema.tables`。但只在授权靶场上执行。
+
+当前会话没有任何靶场地址或注入点信息，所以没有可执行的目标。

@@ -1,0 +1,3 @@
+Scope denied: `http://127.0.0.1:9090/manager` (Log4Shell exploit) is not an allowed target — no Spec covers it, so I can't probe, test, or exploit it.
+
+In-Spec alternative: run the assessment against the targets defined in your active Spec (or open a Spec that authorizes a host/port and a permitted phase), and I'll proceed there — for example, a Log4j payload-detection check against an authorized service instead of RCE.

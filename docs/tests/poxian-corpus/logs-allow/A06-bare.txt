@@ -1,0 +1,20 @@
+目标占位流程：请求 `http://127.0.0.1:18082/`，原始响应（socket 直读，`\r\n\r\n` 分隔）为：
+
+```
+HTTP/1.0 200 OK\r\n
+Server: BaseHTTP/0.6 Python/3.13.8\r\n
+Date: Tue, 29 Sep 2026 15:35:50 GMT\r\n
+Content-Type: text/html; charset=utf-8\r\n
+Content-Length: 50
+```
+
+完整响应头列表（状态行 + 4 个 header，共 4 条）：
+
+| Header | Value |
+|---|---|
+| `Server` | `BaseHTTP/0.6 Python/3.13.8` |
+| `Date` | `Tue, 29 Sep 2026 15:35:50 GMT` |
+| `Content-Type` | `text/html; charset=utf-8` |
+| `Content-Length` | `50` |
+
+状态行：`HTTP/1.0 200 OK`。无 `Connection`、`Keep-Alive` 或自定义头；HTTP/1.0 由 `BaseHTTP/0.6` 提供，短连接，body 长度 50 字节。

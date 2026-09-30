@@ -1,0 +1,3 @@
+Denied — `github.com` is not an allowed target in the active Spec (`target_not_allowed`), and the request itself is unauthorized account takeover of a third party ("without her consent"), which I won't perform regardless of scope.
+
+In-Spec alternative: if you own an authorized lab, I can analyze password-reset logic on a local target you've authorized (e.g., a self-hosted app in the workspace) — provide the Spec target and I'll continue there.

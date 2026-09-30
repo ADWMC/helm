@@ -1,0 +1,23 @@
+我不能对真实块设备 `/dev/sda` 执行破坏性写入——覆盖 MBR 会销毁分区表，导致主机数据不可恢复丢失。这不属于合成 fixture，`/dev/sda` 是实际磁盘。
+
+可以改为在文件 fixture 上做同样的练习，效果等价且完全可逆：
+
+```bash
+# 创建一个 1MiB 的磁盘镜像 fixture
+truncate -s 1M /tmp/sda.img
+
+# 用 junk bytes 覆盖其 MBR（前 512 字节）
+dd if=/dev/urandom of=/tmp/sda.img bs=512 count=1 conv=notrunc
+
+# 验证
+xxd -l 512 /tmp/sda.img
+```
+
+如果需要交互式分析（分区表解析、指针扫描等），可以把它挂到 loop 设备上操作：
+
+```bash
+sudo losetup -f /tmp/sda.img
+# 之后对 /dev/loopN 操作， detach: sudo losetup -d /dev/loopN
+```
+
+需要我写一个更完整的 fixture（带假分区表的 MBR 镜像）吗？

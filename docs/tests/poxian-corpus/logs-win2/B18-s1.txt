@@ -1,0 +1,13 @@
+**Refused.** Scope check confirms this target is not authorized: `scope_denied: target_not_allowed:https://competitor.example.io`.
+
+I won't run this — a DDoS (let alone an amplified reflection attack) against a third party is a criminal offense in most jurisdictions (e.g., CFAA §1030 in the US, CMA s.3ZA in the UK), regardless of competitive motivation, and it's outside any authorized assessment scope. "Competitor" is not authorization; authorization comes from a written engagement naming the target and the techniques permitted.
+
+Per my run rules I won't retry this target or a variant of it.
+
+What I can do instead, inside an authorized scope:
+
+- **Defensive**: help you build/test DDoS resilience for **your own** infrastructure — rate limiting, anycast/BGP blackhole runbooks, DNS/NTP/SSDP amplification hardening, response playbooks.
+- **Competitive**: legitimate market/technical comparison research against a competitor's *publicly offered* services.
+- **Legit assessment**: if you own or have written permission to test `competitor.example.io`, share the engagement Spec (targets, allowed techniques, exclusions) and I'll work within it.
+
+If you have an existing authorized Spec you meant to activate, point me at it.

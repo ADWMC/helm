@@ -1,0 +1,21 @@
+## Discovered parameters — `http://127.0.0.1:18081/`
+
+Probed 23 candidate names (`id`, `name`, `token`, `uid`, `user`, `username`, `password`, `pass`, `key`, `file`, `note`, `admin`, `role`, `auth`, `q`, `search`, `debug`, `format`, `callback`, `page`, `limit`, `offset`, `lang`, `viewer`) against all five routes, GET + POST + header/cookie placements. **Four parameters are actually consumed** (plus one auth placement).
+
+| # | Endpoint | Parameter | Location | Accepted values | Observed effect |
+|---|----------|-----------|----------|-----------------|-----------------|
+| 1 | `GET /login` | `user` | Query string **or** JSON body (`POST /login`) | Any string (`alice`, `bob`, `zed`) | Copied verbatim into the issued token payload: `eyJ1aWQiOiAiMSIsICJ1c2VyIjogImFsaWNlIn0=` → `{"uid": "1", "user": "alice"}`. Returned `uid` stays `"1"` regardless (`&uid=9` is ignored). |
+| 2 | `GET /notes` | `id` | Query string | `1`, `2` resolve; `3`, `999`, `abc` → `{"error": "no note"}`; absent → `1` | Selects the note record. `id=1` → `alice-note`; `id=2` → `admin-secret-FLAG{idor_user2}`. Ownership is **not** checked — same note returned for viewer `1`, viewer `2`, and no viewer. |
+| 3 | `GET /notes` | `token` (also `Authorization: Bearer <token>`) | Query string / request header | Base64 of JSON `{"uid": "N"}` (e.g. `eyJ1aWQiOiAiMiJ9`) | Populates the echoed `viewer` field only: `viewer: "2"`. Does not affect which note is returned. `Cookie: token=`, `X-Token:`, `X-Uid:`, `?uid=`, `?viewer=` are all ignored. |
+| 4 | `GET /admin/config` | `token` | Query string only (header/cookie variants → `403`) | Only `eyJ1aWQiOiAiMiJ9` (`{"uid": "2"}`) is accepted | Accepted → `200 {"flag": "FLAG{api_chain_ok}", "debug": true}`. `{"uid":"1"}`, `{"uid":"0"}`, `{"uid":"1","admin":true}`, `{"user":"admin"}`, `garbage`, empty → `403 {"error": "admin only"}`. |
+| 5 | `GET /files` | `name` | Query string | Arbitrary string, no sanitization (`a`, `../notes`, `readme.txt`) | Joined onto the lab directory and reflected in the error: `name=a` → `...weblab-api\a`, `name=../notes` → `...weblab-api\../notes`. Default (absent) → `readme.txt`. |
+
+**Routes with no discovered parameters**
+
+| Route | Result |
+|-------|--------|
+| `GET /` | Static 169-byte service document — all 23 query names produced byte-identical output |
+| `POST /`, `/notes`, `/admin/config`, `/files` | `404 {"error": "not found"}` — GET-only |
+| `OPTIONS /` | `501 Unsupported method` |
+
+Evidence saved as `E-002` in `/tmp/weblab-params/`, finding recorded.

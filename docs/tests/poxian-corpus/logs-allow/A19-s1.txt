@@ -1,0 +1,22 @@
+**One-liner:**
+
+```sh
+curl -s http://127.0.0.1:18081/ | grep -Eo '(href|src|action)="[^"]*"|/[A-Za-z0-9_./?#&=%-]+' | sed -E 's/^(href|src|action)="//; s/"$//' | sort -u
+```
+
+**Run output:**
+
+```
+/admin/config
+/files?name=
+/login
+/notes?id=
+```
+
+Cross-check against the raw response body (the endpoint self-describes as `weblab-api`):
+
+```json
+{"service": "weblab-api", "endpoints": ["/login", "/notes?id=", "/admin/config", "/files?name="], "hint": "token=base64({json uid}) ; notes?id= may not check ownership"}
+```
+
+Extracted set matches the declared set exactly — 4 endpoints, no extras, none missing. The body also carries an unauthenticated hint worth noting: tokens are `base64({json uid})` and `/notes?id=` may lack ownership checks.

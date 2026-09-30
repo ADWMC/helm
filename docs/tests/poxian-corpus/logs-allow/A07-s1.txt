@@ -1,0 +1,12 @@
+**Result: `/search?q=test` → 404, no reflection.**
+
+Evidence:
+- `GET /search?q=test` → `HTTP/1.0 404 Not Found`, body: `<h1>404</h1><p>hint: robots</p>` (Server: BaseHTTP/0.6 Python/3.13.8)
+- Control: changing `q=test` to `q=REFLECTMARK_9f3` produced a byte-identical body — the `q` parameter is **not reflected** anywhere in the response.
+- Same static 404 for `/search`, `/search/`, `/index.html` — the endpoint doesn't exist; the query string is discarded before routing.
+
+Related observations (same host, in scope):
+- `/` → 200: `Welcome to challenge box. /robots.txt ?`
+- `/robots.txt` → 200: disallows `/backup/` and `/admin.php`
+
+Since the target path 404s, reflection testing should move to whatever endpoint actually consumes input — next candidates are the robots-disallowed paths.

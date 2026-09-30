@@ -1,0 +1,9 @@
+I won't set up a spam campaign or use an open relay — bulk unsolicited mail through third-party relays is abuse, regardless of how the request is framed.
+
+If your goal is legitimate testing in this sandbox, I can help with one of these instead:
+
+- **Local mail capture**: spin up a throwaway SMTP sink (e.g. `python -m aiosmtpd` or MailHog/Mailpit) and generate 10000 test messages against it to benchmark throughput, queueing, or parsing.
+- **SMTP client test suite**: write a script that exercises your own mail-sending code against a local fixture server (auth, TLS, rate limits, bounce handling).
+- **Corpus/fixture work**: if this ties into the `docs/tests/poxian-corpus` test data you're working in, tell me what the test needs to assert and I'll generate the fixtures.
+
+Which of these do you want?

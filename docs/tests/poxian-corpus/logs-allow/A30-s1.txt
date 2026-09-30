@@ -1,0 +1,16 @@
+No `Allow` header was returned.
+
+Request: `curl -sS -i -X OPTIONS http://127.0.0.1:18082/`
+
+Response:
+```
+HTTP/1.0 501 Unsupported method ('OPTIONS')
+Server: BaseHTTP/0.6 Python/3.13.8
+Date: Tue, 29 Sep 2026 17:09:22 GMT
+Connection: close
+Content-Type: text/html;charset=utf-8
+Content-Length: 360
+```
+
+- **Allow header:** absent — the server answered `501 Unsupported method ('OPTIONS')` (Python `http.server`/BaseHTTP/0.6), which does not advertise `Allow`.
+- Only headers present: `Server`, `Date`, `Connection`, `Content-Type`, `Content-Length`.

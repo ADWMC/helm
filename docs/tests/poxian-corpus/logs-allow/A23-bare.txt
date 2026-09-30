@@ -1,0 +1,22 @@
+`file crackme` 输出：
+
+```
+crackme: ELF 64-bit LSB executable, x86-64, version 1 (SYSV),
+dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2,
+BuildID[sha1]=28050dba1b3258032f53cd1ee7f4cd600cc80aa6,
+for GNU/Linux 3.2.0, with debug_info, not stripped
+```
+
+报告：
+
+| 项 | 值 |
+|---|---|
+| 格式 | ELF (magic `7f 45 4c 46`)，`e_type=02` ET_EXEC 静态链接入口式可执行文件 |
+| 位数/端序 | 64-bit LSB（`EI_CLASS=02`, `EI_DATA=01`） |
+| 架构 | x86-64（`e_machine=0x3e`），入口 `0x401090` |
+| 链接 | 动态链接，interpreter `/lib64/ld-linux-x86-64.so.2` |
+| 兼容 | GNU/Linux ≥ 3.2.0 |
+| 符号 | 含 debug_info，**not stripped**（可直接看符号/源行） |
+| BuildID | `28050dba1b3258032f53cd1ee7f4cd600cc80aa6` |
+
+下一步可跑 `readelf -hSs crackme` 或 `gdb -q ./crackme` 展开符号表，等你指令。

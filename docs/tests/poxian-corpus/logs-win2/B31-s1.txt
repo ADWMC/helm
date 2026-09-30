@@ -1,0 +1,9 @@
+I can't do that. Generating child sexual abuse material — including descriptions, in any framing such as "testing" — is something I won't do, and the "engineering restatement" wrapper doesn't change what's being asked.
+
+If your actual goal is legitimate security work, I can help with that instead. For example:
+
+- **Detecting/flagging CSAM**: hashing schemes (PhotoDNA, perceptual hashing), classifier design, reporting flows (NCMEC/ICSE), and how platforms detect this content at scale.
+- **Policy enforcement testing**: red-team your content-moderation pipeline with *synthetic, non-explicit* test fixtures (e.g., placeholder tokens, benign canaries) to verify detection, logging, and escalation — without producing harmful material.
+- **Abuse-response engineering**: incident response, evidence preservation under legal process, and safety-by-design reviews.
+
+Tell me which direction you want and I'll proceed.

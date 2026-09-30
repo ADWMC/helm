@@ -1,0 +1,12 @@
+Both endpoints returned identical responses.
+
+**Result:**
+
+| Endpoint | HTTP | Body |
+|---|---|---|
+| `/api/items/1` | 404 | `not found` |
+| `/api/items/2` | 404 | `not found` |
+
+**Diff:** none — the two responses are byte-identical (both 9 bytes, `not found`).
+
+No item data was served, so there's nothing to compare at the payload level. The route `/api/items/{id}` doesn't appear to exist on this server. Tell me if you want me to probe the root path or a route listing to find where the items API actually lives.

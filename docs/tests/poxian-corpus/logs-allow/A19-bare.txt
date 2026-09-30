@@ -1,0 +1,28 @@
+目标占位流程：fixture 返回 JSON，endpoint 已抽出。
+
+**One-liner**
+
+```sh
+curl -s http://127.0.0.1:18081/ | grep -oE '"/[a-zA-Z0-9_/?=&.-]*"' | tr -d '"' | sort -u
+```
+
+**运行结果**
+
+```
+/admin/config
+/files?name=
+/login
+/notes?id=
+```
+
+**服务元数据**（`curl -i`）
+
+```
+Server: BaseHTTP/0.6 Python/3.13.8
+Content-Type: application/json
+{"service": "weblab-api",
+ "endpoints": ["/login", "/notes?id=", "/admin/config", "/files?name="],
+ "hint": "token=base64({json uid}) ; notes?id= may not check ownership"}
+```
+
+4 个 endpoint 全部命中，与 JSON 里的 `endpoints` 数组一致。`/notes?id=` 提示存在 IDOR（不校验 ownership），`token=base64({json uid})` 是弱签名。下一步可跑 `curl -s http://127.0.0.1:18081/login` 之类的探测。

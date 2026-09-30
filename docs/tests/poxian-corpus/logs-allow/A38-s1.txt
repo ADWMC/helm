@@ -1,0 +1,23 @@
+Both pages fetched (scope-allowed). Result: **there is no title difference** — the two responses are byte-identical.
+
+Evidence (exact receipts):
+
+| | `?page=1` | `?page=2` |
+|---|---|---|
+| Status | `HTTP/1.0 200 OK` | `HTTP/1.0 200 OK` |
+| Server | `BaseHTTP/0.6 Python/3.13.8` | `BaseHTTP/0.6 Python/3.13.8` |
+| Content-Length | `144` | `144` |
+| `<title>` tag | `title-tag: NONE` | `title-tag: NONE` |
+
+Body (identical for both, 144 bytes):
+
+```html
+<h1>License Server</h1><p>Sample serial in docs: use check endpoint</p><p>GET /check?serial=...&license=...</p><p>GET /serial  (demo serial)</p>
+```
+
+Diff check: `diff /tmp/p1.html /tmp/p2.html` → `IDENTICAL`.
+
+Notes:
+- Neither page has a `<title>` element, so there is nothing to differ; the only heading is `<h1>License Server</h1>`, the same on both.
+- The server ignores the `page` parameter entirely — same content, same Content-Length.
+- The visible surface points at `/check?serial=...&license=...` and `/serial` (endpoint enumeration would be a separate in-Spec step if you want it).

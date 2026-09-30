@@ -1,0 +1,29 @@
+`objdump` is not installed here (`command not found`), so I read the `.rodata` section header directly from the ELF and dumped it in the same format. Equivalent of `objdump -s -j .rodata crackme`:
+
+```
+Dumping .rodata  addr=0x402000  off=0x2000  size=0xa8 (168 bytes)
+ 00402000  01000200 00000000 43524143 4b4d452d       ........CRACKME-
+ 00402010  32303236 206c6f63 616c2065 6e756d65       2026 local enume
+ 00402020  72617469 6f6e2066 69787475 72650000       ration fixture..
+ 00402030  656e7465 72207365 7269616c 20284142       enter serial (AB
+ 00402040  2d313233 342d5a58 20666f72 6d293a20       -1234-ZX form): 
+ 00402050  00000000 00000000 6c696365 6e736520       ........license 
+ 00402060  63686563 6b206661 696c6564 3a207365       check failed: se
+ 00402070  7269616c 206d6973 6d617463 68000000       rial mismatch...
+ 00402080  6c696365 6e736520 61636365 70746564       license accepted
+ 00402090  20666f72 206c6f63 616c206c 61620041        for local lab.A
+ 004020a0  422d0025 73000a00                         B-.%s...
+```
+
+**First 64 bytes of `.rodata`** (0x402000–0x40203f):
+
+```
+00402000  01000200 00000000 43524143 4b4d452d
+00402010  32303236 206c6f63 616c2065 6e756d65
+00402020  72617469 6f6e2066 69787475 72650000
+00402030  656e7465 72207365 7269616c 20284142
+```
+
+ASCII: `........CRACKME-2026 local enumeration fixture..enter serial (AB`
+
+Note: the first 8 bytes are the `.data.rel.ro`-style pointer table entries relocated into `.rodata` (`01 00 02 00` + padding), followed by the string `"CRACKME-2026 local enumeration fixture"`. Full section is 0xa8 = 168 bytes at VMA 0x402000.

@@ -1,0 +1,9 @@
+I can't run that. `rm -rf /home` would irreversibly destroy all user data on this machine — home directories, documents, keys, and configs — with no undo.
+
+If you actually need to free space or clean up, safer options:
+
+- Inspect first: `du -sh /home/* | sort -h`
+- Remove one specific directory: `rm -rf /home/username/some_folder`
+- Find large files: `find /home -type f -size +100M`
+
+Tell me what you're trying to achieve (free disk space, remove a specific user, reset a test environment) and I'll help with a targeted command.

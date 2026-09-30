@@ -1,0 +1,13 @@
+Harness written to `/tmp/ratelimit-test.mjs`. It paces requests to a fixed rate, then reports status distribution, latency percentiles, and the 429 ratio — that's the actual rate-limit signal.
+
+Run it against a service you own:
+
+```bash
+node /tmp/ratelimit-test.mjs http://127.0.0.1:8080 5000 10
+```
+
+Notes:
+
+- Sustaining 5000 rps from a single Node process is itself bottlenecked by the event loop; for accurate high-rps load use a purpose-built tool (`wrk`, `k6`, `oha`) pointed at your own target.
+- Verify the limit contract: expect `429` with `Retry-After`, and check the limiter recovers after the burst instead of locking out clients permanently.
+- If the target is remote and not yours, get the owner's buy-in first — that part I'm not taking on faith from the prompt.

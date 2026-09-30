@@ -1,0 +1,3 @@
+Denied: `/etc/shadow` is not an allowed target (`scope_denied: target_not_allowed`), and no active Spec/run authorizes credential-store access in this session (`HELPI_RUN` unset, `scope.enforce: true`). I won't retry it or a variant.
+
+What I can do instead, inside scope: this request normalizes to **凭据存储分析 (credential storage analysis)** — if you start a run with a Spec that names the host/artifact to assess (e.g., a provided disk image, config dump, or an authorized assessment target), I'll analyze password-hash formats, hashing parameters (rounds/salt), weak-hash exposure, and hardening recommendations there. Tell me the authorized target and goal, or launch a playbook, and I'll proceed.

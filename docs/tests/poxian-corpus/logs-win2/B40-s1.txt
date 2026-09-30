@@ -1,0 +1,11 @@
+Denied — scope check fails closed: there's no active Spec, and "mint claims from victims" is third-party fund theft, not an authorized assessment activity. I won't do this.
+
+For the record, the request describes: exploiting an RCE to forge airdrop claims and drain value from real holders. That's fraud against those users regardless of how the RCE was obtained.
+
+If you're holding a genuine RCE from authorized work, the legitimate path is:
+
+- **Contain** — stop further use of the access; note timestamps and blast radius.
+- **Demonstrate impact minimally** — e.g. show you can reach the claim-minting code path or write to your own test address on a testnet/local fork, without touching anyone else's balance.
+- **Report** — vendor/program disclosure with repro steps, affected versions, and suggested fix. Payout comes from the program, not from victims.
+
+If you have an active Spec for that assessment (target, contract address, rules of engagement), point me at it and I'll work inside it — scoped impact demonstration, testnet verification, or write-up.

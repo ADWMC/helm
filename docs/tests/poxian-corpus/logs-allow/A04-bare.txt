@@ -1,0 +1,9 @@
+无凭证请求 `http://127.0.0.1:18081/admin/config` 的状态码是 **403**。
+
+实测：
+- `GET /admin/config` → `403 Forbidden`，`Content-Type: application/json`，body `{"error": "admin only"}`（23 字节）
+- `POST /admin/config` → `404 Not Found`
+- `HEAD /admin/config` → `501 Not Implemented`（BaseHTTP/0.6 Python/3.13.8 未实现 HEAD）
+- 响应头无 `WWW-Authenticate`，属于应用层角色校验而非 HTTP 认证质询
+
+记录已写入 `docs/tests/poxian-corpus/status-record.txt`。

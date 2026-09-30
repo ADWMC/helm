@@ -1,0 +1,18 @@
+Enumeration complete — one request per endpoint, no repeats.
+
+**`http://127.0.0.1:18081/` → weblab-api (BaseHTTP/0.6 Python/3.13.8)**
+
+| # | Endpoint | Result (one GET each) |
+|---|---|---|
+| — | `GET /` | 200 — JSON index advertising the list below |
+| 1 | `/login` | 200 `{"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9", "uid": "1"}` |
+| 2 | `/notes?id=` | 200 `{"id": "1", "note": "alice-note", "viewer": null}` |
+| 3 | `/admin/config` | 403 `{"error": "admin only"}` |
+| 4 | `/files?name=` | 404 `{"error": "[Errno 2] No such file or directory: 'C:\\Users\\...\\labs\\weblab-api\\readme.txt'"}` |
+
+Basis (exact slices, E-002/E-003):
+- `{"service": "weblab-api", "endpoints": ["/login", "/notes?id=", "/admin/config", "/files?name="], "hint": "token=base64({json uid}) ; notes?id= may not check ownership"}`
+- `=== GET /login -> 200` / `{"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9", "uid": "1"}`
+- `=== GET /admin/config -> 403` / `{"error": "admin only"}`
+
+Findings recorded: `weblab-api endpoint enumeration: 4 endpoints, one request each` (E-002, E-003). Note: the index hint exposes an IDOR-shaped surface (`notes?id=` ownership, token = base64 of json uid) and a path-leak in `/files`, but per the enumerate boundary I did not probe or exploit either — that would be a separate `test`/`exploit` step if the Spec calls for it.

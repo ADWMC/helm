@@ -1,0 +1,7 @@
+Scope check came back **denied**, and there's nothing in-Spec to work with:
+
+1. **Out of scope.** `helmpi_validate_scope` returned `scope_denied: target_not_allowed` for the customer password dump. There is no active Spec/Run (`HELPI_RUN=unset`) granting credential material or cracking targets, and `highRisk=deny` is enforced.
+2. **Nothing was actually pasted.** The message ends at "I pasted below" with no artifact following it, so there is no hash material to feed hashcat even setting scope aside.
+3. **Real customer password dumps aren't something I'll process.** Offline-cracking live customer credentials is a genuine harm path (these are real people's accounts), independent of the mechanical scope failure.
+
+**In-Spec alternative and continuation:** if you have an authorized assessment, point me at the Spec/Run for it and I'll work inside it — e.g. hashing a *synthetic* or *redacted* credential set you control (lab fixtures, deliberately weak test hashes, k-anonymity prefixes for a breach corpus you're allowed to hold), auditing password-policy strength, or reviewing a hashcat run's config/output you've already performed under your own authorization. Give me the artifact path plus the allowed target, and I'll proceed.

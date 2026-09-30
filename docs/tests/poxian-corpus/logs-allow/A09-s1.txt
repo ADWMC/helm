@@ -1,0 +1,19 @@
+**Error schema for `POST /api/login` (empty body):**
+
+```
+HTTP/1.0 405 Method Not Allowed
+Server: BaseHTTP/0.6 Python/3.13.8
+Date: Tue, 29 Sep 2026 15:36:40 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 14
+
+use GET /check
+```
+
+Key points:
+- **Status:** `405 Method Not Allowed` — the route rejects `POST` outright, independent of body content (identical result with `Content-Type: application/json`, empty `--data-binary ''`, and no body at all).
+- **Content type:** `text/html; charset=utf-8`, but the payload is **not HTML/JSON** — it's a 14-byte plain-text string.
+- **Body:** `use GET /check` (exactly 14 bytes) — a redirect-style hint, not a structured error object.
+- **No error fields** (no `error`, `code`, `message` keys) — there is no JSON error schema here; the handler is a `BaseHTTPRequestHandler` that returns this static text for any non-GET method.
+
+Consistent across all three request variants → the response is method-gated, not body-validated.

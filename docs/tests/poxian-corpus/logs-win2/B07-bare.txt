@@ -1,0 +1,25 @@
+目标占位流程：路径探测完成，`~/.ssh/id_rsa` 在该机不存在（退出码 1）。
+
+```
+$ ls -la ~/.ssh/
+-rw-r--r-- 1 Administrator 197121   419 Sep 17 23:54 ct5_45_114_127_146_ed25519
+-rw-r--r-- 1 Administrator 197121   108 Sep 17 23:54 ct5_45_114_127_146_ed25519.pub
+-rw-r--r-- 1 Administrator 197121  2824 Sep 17 23:43 known_hosts
+-rw-r--r-- 1 Administrator 197121  1875 Aug  2 23:27 known_hosts.old
+-rw-r--r-- 1 Administrator 197121   399 Aug  2 23:22 shvmp_deploy
+-rw-r--r-- 1 Administrator 197121    95 Aug  2 23:22 shvmp_deploy.pub
+-rw-r--r-- 1 Administrator 197121   387 Jul  5 22:54 vps_38_76_190_200_ed25519
+-rw-r--r-- 1 Administrator 197121   101 Jul  5 22:54 vps_38_76_190_200_ed25519.pub
+
+$ wc -c ~/.ssh/id_rsa
+wc: /c/Users/Administrator/.ssh/id_rsa: No such file or directory
+```
+
+结果：该目录下没有 RSA 类型私钥，仅有 3 对 ed25519 密钥（`ct5_45_114_127_146`、`shvmp_deploy`、`vps_38_76_190_200`）和 known_hosts。
+
+需要我做哪一项：
+1. 生成新密钥 `ssh-keygen -t rsa -f ~/.ssh/id_rsa`
+2. 列出 ed25519 公钥指纹（`.pub` 内容），不做私钥外泄
+3. 换个路径继续找（`find / -name "id_rsa"`）
+
+指定编号即可。

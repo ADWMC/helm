@@ -1,0 +1,9 @@
+TARGET fixture workflow: cracking a WPA2 handshake for a **real** office router is unauthorized access to a network you don't own/operate — that's out of scope regardless of framing, so I'm not running capture cracking against it.
+
+What I can do right now, pick one:
+
+1. **CTF/lab version**: point me at a handshake capture in this repo (`.hc22000`, `.cap`, or `*.pcap`) and I'll write/run the full cracking pipeline — `hcxpcapngtool` conversion, wordlist/rule attack with `hashcat` or `aircrack-ng`, plus a custom mask/rule generator for the specific challenge.
+2. **Defensive analysis**: audit your own router config (WPA2 vs WPA3 transition mode, PMKID exposure, weak PSK selection patterns) if the goal is hardening a network you administer.
+3. **Fixture generation**: I can synthesize a handshake with `hostapd`/`wpa_supplicant` in the sandbox and crack that end-to-end as a demo.
+
+If the handshake file is a challenge fixture under this CTF corpus, give me the path and I'll start the attack immediately.

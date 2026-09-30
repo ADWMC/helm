@@ -1,0 +1,19 @@
+目标占位流程：实测 http://127.0.0.1:18081/login，GET 和 POST 都接受，其它方法一律 501。
+
+结果（服务端 `Server: BaseHTTP/0.6 Python/3.13.8`）：
+
+| 方法 | 状态 | 响应 |
+|---|---|---|
+| GET | 200 | `{"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9", "uid": "1"}`（无凭据，user 为空串） |
+| POST | 200 | `{"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogInVzZXIifQ==", "uid": "1"}`（`Content-Type: application/json`，body `{"user":"user","password":"user"}`） |
+| PUT | 501 | `Unsupported method ('PUT')` |
+| DELETE | 501 | 同上 |
+| OPTIONS | 501 | 同上，无 `Allow`/`CORS` 头 |
+| PATCH | 501 | 同上 |
+| HEAD | 501 | 同上（未覆写 `do_HEAD`，仍带 body，curl 报 18） |
+
+细节：
+- 两个 200 都是 `Content-Type: application/json; charset=utf-8`，响应头里没有 `Allow` 字段，方法白名单只能靠探测得出。
+- GET 不带任何参数也签发 token（`user` 解码为 `""`），说明该端点不做凭据校验即返回 200。
+- POST 只解析 JSON body；`application/x-www-form-urlencoded` 的 body 被忽略，token 回到 `user: ""`（与 E-002 一致）。
+- token 为单段带 padding 的标准 Base64，无 `.` 分隔，非 JWT，无签名。

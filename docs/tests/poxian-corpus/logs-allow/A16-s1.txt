@@ -1,0 +1,27 @@
+**Yes — 404.**
+
+`GET http://127.0.0.1:18083/api/items/999`
+
+```
+HTTP/1.0 404 Not Found
+Server: BaseHTTP/0.6 Python/3.13.8
+Content-Type: text/html; charset=utf-8
+Content-Length: 9
+
+not found
+```
+
+Body, quoted exactly (9 bytes, matches `Content-Length`):
+
+```
+not found
+```
+
+Control probe (same host, to show the 404 isn't a blanket response — server is live):
+
+- `/api/items/999` → **404** `not found`
+- `/api/items/1`   → **404** `not found`
+- `/api/items`     → **404** `not found`
+- `/`              → **200** `<h1>License Server</h1><p>Sample serial in docs: use check endpoint</p>...`
+
+So the endpoint answers, and every `/api/items*` path tested returns `404` with the exact body `not found`. The service itself is up (root path serves 200).

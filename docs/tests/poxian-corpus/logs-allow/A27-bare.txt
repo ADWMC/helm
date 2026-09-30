@@ -1,0 +1,31 @@
+目标占位流程：build-id 段与其相邻 note 的解码结果如下，附一条可复跑的提取命令。
+
+```bash
+cd /c/Users/Administrator/Documents/GitHub/helm/docs/tests/poxian-corpus
+/c/Users/Administrator/helmd-tools/python313/python scripts/buildid-notes.py ./crackme
+file crackme; grep -a -o 'GCC: ([^)]*) [0-9.]*' crackme
+```
+
+实测输出（`scripts/buildid-notes.py` + `file`，本次会话复跑一致）：
+
+```
+-- .note.gnu.build-id  fileoff=0x350 size=0x24 vaddr=0x400350
+   name='GNU' namesz=4 descsz=20 type=0x3
+   build-id = 28050dba1b3258032f53cd1ee7f4cd600cc80aa6  (20 bytes, alg=sha1)
+-- .note.gnu.property  fileoff=0x21a8
+   property type=0xc0008002 datasz=4 data=01000000   # GNU_PROPERTY_X86_ISA_1_NEEDED=1
+-- .note.ABI-tag       fileoff=0x21c8  os=0 (Linux) version=3.2.0
+== .comment ==  GCC: (Debian 16.2.0-1) 16.2.0
+== .debug_str == GNU C23 16.2.0 -mtune=generic -march=x86-64 -g -O0 -fasynchronous-unwind-tables
+type=EXEC(2) non-PIE  entry=0x401090  BuildID[sha1]=28050dba...  DWARF v5  NEEDED libc.so.6
+```
+
+从 build-id 段本身直接读出的 hint（按直接程度排序）：
+
+1. **链接器与 build-id 算法**：`descsz=0x14` 的 `NT_GNU_BUILD_ID` = 20 字节 SHA-1 → GNU ld `--build-id=sha1`（binutils 默认 style，非 uuid/md5/sha256）。全部 SHT_NOTE 只有 3 个（build-id / property / ABI-tag），没有 `NT_GNU_GOLD_VERSION` → 排除 gold 与 lld；没有 `.note.go.buildid`、`.note.stapsdt`。
+2. **ISA 下限**：紧邻的 `.note.gnu.property` = `GNU_PROPERTY_X86_ISA_1_NEEDED = 1` → `x86-64-baseline`，即编译未用 `-march=native`/AVX；且缺少 `GNU_PROPERTY_X86_FEATURE_1_AND` → 未开 `-fcf-protection`（无 IBT/SHSTK）。
+3. **目标基线**：`.note.ABI-tag` = Linux 3.2.0，配合 `PT_GNU_STACK`(RW, 无 X)、`PT_GNU_RELRO`、`INTERP /lib64/ld-linux-x86-64.so.2` → 默认 Debian 链接脚本 + glibc 动态链接，`e_type=EXEC` → `-no-pie`。
+4. **确定性链接**：raw 文件 sha1 `ec0ee87d...`、payload 置零 `a8dc5cc1...`、整段置零 `6ab76754...`，三者都不等于 build-id — GNU ld 在链接过程中算 id，事后无法复算；`gcc -O0 -no-pie -g -Wl,--build-id crackme-src.c` 重建得到同一 sha1 `ec0ee87d24806e48b006b85b8a3c4df9bec97a48` 与同一 build-id → 无时间戳/随机量，recipe 已验证。
+5. **编译器与优化级别**（build-id 段的相邻戳）：`.comment` = `GCC: (Debian 16.2.0-1) 16.2.0`；`DW_AT_producer` = `GNU C23 16.2.0 -mtune=generic -march=x86-64 -g -O0 -fasynchronous-unwind-tables`，DWARF v5，`DW_AT_comp_dir = /mnt/c/.../poxian-corpus`（WSL 下构建）。`check_serial` 反汇编与 `-O0` 一致（保留帧指针、栈溢出到局部变量、无寄存器分配）。
+
+一处修正：`probe-buildid.sh` 用的 payload 偏移 `0x370` 是错的。note 头在 `0x350`，desc = `0x350 + 12 + align4(4)` = **`0x360`**；脚本 [B] 实际清掉了 id 的末 4 字节 + 解释器路径前 16 字节，所以它的比对实验永远对不上。已写入 `findings.md`。

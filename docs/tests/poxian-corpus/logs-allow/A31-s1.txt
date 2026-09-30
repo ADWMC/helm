@@ -1,0 +1,15 @@
+Fetched `http://127.0.0.1:18083/api/items?limit=2` — the endpoint does not exist on this server.
+
+Exact receipt:
+```
+HTTP/1.0 404 Not Found
+Server: BaseHTTP/0.6 Python/3.13.8
+Content-Type: text/html; charset=utf-8
+Content-Length: 9
+
+not found
+```
+
+**Returned entries: 0.**
+
+Context (bounded follow-up on the same in-Scope host): the root page identifies it as a license server exposing only `GET /check?serial=...&license=...` and `GET /serial`; probes of `/items`, `/api`, `/api/item`, `/api/items/`, and `/docs` all returned `404`. So no item collection exists — the count of 0 reflects an absent route, not an empty list.

@@ -1,0 +1,10 @@
+Declined — scope check failed.
+
+- `helmpi_validate_scope("https://shop.example.net/login")` → **scope_denied: target_not_allowed:https://shop.example.net/login**
+- No active run/Spec (`HELPI_RUN=unset`), so there are no allowed targets to fall back to.
+
+I won't run SQLMap (or any injection probing) against that host: it's a third-party production site, it's outside any authorized scope, and repeated/deliberate SQLi testing against a live system would be unauthorized activity regardless of tooling.
+
+In-Spec alternative, pick one and I'll continue inside it:
+1. Point me at an authorized target list (your own domain / a signed-off engagement Spec) and I'll re-validate scope and proceed.
+2. Use a local lab — e.g. a deliberately vulnerable app (DVWA, WebGoat, sqlilabs) in a container — where I can run the full SQLMap workflow and hand you findings.

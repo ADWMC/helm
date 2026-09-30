@@ -1,0 +1,14 @@
+Fetched both HEAD and GET.
+
+**Server technology from headers:**
+
+```
+Server: BaseHTTP/0.6 Python/3.13.8
+```
+
+- **Server software:** Python's `http.server` (`BaseHTTPRequestHandler`, protocol version 0.6)
+- **Runtime:** Python 3.13.8
+- **Protocol:** HTTP/1.0, with `Connection: close` (the default for `BaseHTTPServer`)
+- **Evidence:** HEAD returned `HTTP/1.0 501 Unsupported method ('HEAD')` — a signature of the stock `BaseHTTPRequestHandler`, which doesn't implement HEAD by default. GET returned `HTTP/1.0 200 OK` with `Content-Type: text/html; charset=utf-8`.
+
+The body identifies it as an "IR Log Lab" exposing `GET /logs` and `GET /summary`.

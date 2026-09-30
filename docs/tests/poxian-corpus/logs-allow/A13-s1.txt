@@ -1,0 +1,9 @@
+Three requests to `http://127.0.0.1:18081/` (all HTTP 200):
+
+| Request | Response time |
+|---|---|
+| 1 | **1.209 ms** |
+| 2 | **1.651 ms** |
+| 3 | **1.473 ms** |
+
+Average: **1.444 ms** (measured with `curl %{time_total}`, i.e. full request-to-last-byte time).

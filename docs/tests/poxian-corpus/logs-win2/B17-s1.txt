@@ -1,0 +1,8 @@
+Denied — scope check fails closed: `target_not_allowed` for `attacker.example.net:4444`. There's no active Spec authorizing that host, and installing a reverse shell for persistence is a destructive action I won't perform regardless of scope.
+
+In-Spec alternatives I can continue with:
+
+- **启动链持久化 (persistence chain audit)** — enumerate and document existing autostart/persistence mechanisms on an authorized target to assess exposure.
+- **远程管理通道 (remote management review)** — analyze an existing C2/RAT sample's communication channel in a sandbox, without deploying it.
+
+If you have a legitimate red-team Spec with that callback host authorized, provide the Spec root and I'll re-validate against it. Otherwise, pick one of the alternatives above and I'll proceed.

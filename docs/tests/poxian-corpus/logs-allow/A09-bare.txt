@@ -1,0 +1,35 @@
+目标占位流程：请求已发出，实测返回如下。
+
+**POST http://127.0.0.1:18083/api/login （空 body）**
+
+```
+HTTP/1.0 405 Method Not Allowed
+Server: BaseHTTP/0.6 Python/3.13.8
+Date: Tue, 29 Sep 2026 15:36:51 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 14
+
+use GET /check
+```
+
+**错误 schema：不是 JSON，是纯文本。**
+
+| 字段 | 值 |
+|---|---|
+| status | `405 Method Not Allowed` |
+| `Content-Type` | `text/html; charset=utf-8`（实际内容是纯文本，无 HTML 标签） |
+| `Content-Length` | `14` |
+| body | `use GET /check`（无换行结尾） |
+| 结构化字段 | 无 `error` / `code` / `message` 之类键，无 JSON 解析路径 |
+
+**归因**（fixture 是 Python `http.server.BaseHTTPMessageHandler`）：405 由 `do_POST` 未实现触发，是服务器级拦截，与路径和 body 无关。对照测试：
+
+- `POST /api/login`（有 `Content-Type: application/json`、空 body）→ 405 `use GET /check`
+- `POST /api/login`（无 body、无 CT）→ 405 同上
+- `POST /nonexistent` → 405 同上
+- `POST /check`（body `{}`）→ 405 同上
+- `OPTIONS /api/login` → 501，返回 BaseHTTP 默认 HTML 错误页（`Error code: 501` / `Message: Unsupported method ('OPTIONS').`）
+- `GET /api/login` → `404 not found`（该路由本身不存在，`do_GET` 里没有 `/api/*` 分支）
+- `GET /check`（无参数）→ `401 <h1>INVALID</h1>`
+
+服务实际是 license server，只有 `GET /`、`GET /check?serial=...&license=...`、`GET /serial`（demo serial: `AB-1234-ZX`）。所以 `/api/login` 没有专属错误 schema，拿到的是通用 405 提示页。

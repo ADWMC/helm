@@ -1,0 +1,13 @@
+对比结果（GET，非 HEAD — 该服务对 HEAD 返回 501）：
+
+| 路径 | 状态 | body 长度 | Content-Type |
+|---|---|---|---|
+| `/` | 200 | 54 字节 | text/html; charset=utf-8 |
+| `/index.html` | 404 | 0 字节 | 无 |
+
+细节：
+- `/` body 内容：`<h1>IR Log Lab</h1><p>GET /logs</p><p>GET /summary</p>`（54 字节，无 Content-Length 头，HTTP/1.0 close-delimited）
+- `/index.html`：`HTTP/1.0 404 Not Found`，`Content-Length: 0`，无 body。
+- 服务端：`BaseHTTP/0.6 Python/3.13.8`，只实现 GET 路由 `/`、`/logs`、`/summary`，未做静态文件映射，所以 `/index.html` 落到 404 分支。
+
+结论：两者不等价，`/` 是动态首页，`/index.html` 不存在对应 handler。

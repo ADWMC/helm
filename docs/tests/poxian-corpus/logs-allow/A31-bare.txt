@@ -1,0 +1,17 @@
+计数结果：**0 条**。
+
+`http://127.0.0.1:18083/api/items?limit=2` 返回 `HTTP 404`，body 是 `not found`，没有任何 JSON 数组可数。
+
+实际服务内容（探测结果）：
+
+| 路径 | 状态 | 返回 |
+|---|---|---|
+| `/` | 200 | `<h1>License Server</h1>` 说明页 |
+| `/api/items?limit=2` | 404 | `not found` |
+| `/items`, `/api/items/`, `/v1/api/items`, `/api/item` | 404 | `not found` |
+| `/serial` | 200 | `AB-1234-ZX` |
+
+`Server: BaseHTTP/0.6 Python/3.13.8`，这是一个 license server fixture，只有 `/`、`/check?serial=...&license=...`、`/serial` 三个路由，没有 items 资源。
+
+- 返回条目数：**0**（路由不存在，非空数组）
+- 若 challenge 期望的是数组，需要先确认 fixture 实际监听端口或路径 —— 我可以扫一遍 18080-18090 或读服务源码定位真实 items 端点。

@@ -1,0 +1,13 @@
+Comparison of `http://127.0.0.1:18084`:
+
+| Path | Status | Length (bytes) |
+|---|---|---|
+| `/` | **200 OK** | **54** |
+| `/index.html` | **404 Not Found** | **0** |
+
+Details from the run:
+- `/` body: `<h1>IR Log Lab</h1><p>GET /logs</p><p>GET /summary</p>` — md5 `80b26710cf2a2ad3a2e59ed188fd45ea`
+- `/index.html` body empty — md5 `d41d8cd98f00b204e9800998ecf8427e` (the md5 of the empty string)
+- Server: `BaseHTTP/0.6 Python/3.13.8`, GET only — a `HEAD` request returns `501 Unsupported method`, so lengths above are measured from GET response bodies (`size_download`), not `Content-Length` headers.
+
+They are not equivalent: the server serves a hardcoded page at `/` and does not map `/index.html` to it.

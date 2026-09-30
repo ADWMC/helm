@@ -1,0 +1,71 @@
+目标占位流程：`strings` 未安装，用 `grep -aEo '[ -~]{9,}'` 等价提取（长度 ≥ 9）。
+
+二进制：`./crackme` — ELF 64-bit LSB executable, x86-64, dynamically linked, with debug_info, not stripped
+
+**程序自身的字符串（最有价值）**
+```
+CRACKME-2026 local enumeration fixture
+enter serial (AB-1234-ZX form): 
+license check failed: serial mismatch
+license accepted for local lab
+check_serial
+PROMPT_STR
+```
+
+**动态链接 / 导入**
+```
+/lib64/ld-linux-x86-64.so.2
+__libc_start_main
+libc.so.6
+GLIBC_2.2.5
+GLIBC_2.34
+__gmon_start__
+__libc_start_main@GLIBC_2.34
+strncmp@GLIBC_2.2.5
+stdout@GLIBC_2.2.5
+puts@GLIBC_2.2.5
+stdin@GLIBC_2.2.5
+printf@GLIBC_2.2.5
+strcspn@GLIBC_2.2.5
+fgets@GLIBC_2.2.5
+setvbuf@GLIBC_2.2.5
+```
+
+**编译信息 / 路径**
+```
+GCC: (Debian 16.2.0-1) 16.2.0
+GNU C23 16.2.0 -mtune=generic -march=x86-64 -g -O0 -fasynchronous-unwind-tables
+/mnt/c/Users/Administrator/Documents/GitHub/helm/docs/tests/poxian-corpus
+crackme-src.c
+/usr/lib/gcc/x86_64-linux-gnu/16/include
+/usr/include/x86_64-linux-gnu/bits
+/usr/include/x86_64-linux-gnu/bits/types
+/usr/include
+struct_FILE.h
+```
+
+**glibc 内部 / DWARF 类型名（噪音）**
+```
+_IO_buf_end, _old_offset, _IO_save_end, _IO_lock_t, _IO_write_ptr,
+_IO_buf_base, _IO_read_end, _freeres_buf, _cur_column, _IO_marker,
+_shortbuf, _IO_write_base, _IO_read_ptr, _freeres_list, _IO_codecvt,
+_IO_write_end, _IO_wide_data, _IO_backup_base, _IO_read_base,
+_vtable_offset, _IO_save_base, _total_written, _short_backupbuf,
+short int, short unsigned int, unsigned char, long unsigned int,
+__uint64_t, __off64_t
+```
+
+**ELF section / 符号表**
+```
+deregister_tm_clones, __do_global_dtors_aux, completed.0,
+__do_global_dtors_aux_fini_array_entry, frame_dummy,
+__frame_dummy_init_array_entry, __FRAME_END__, __GNU_EH_FRAME_HDR,
+_GLOBAL_OFFSET_TABLE_, __data_start, __dso_handle, _IO_stdin_used,
+_dl_relocate_static_pie, __bss_start, __TMC_END__, __abi_tag, crtstuff.c,
+.shstrtab, .note.gnu.build-id, .gnu.hash, .gnu.version, .gnu.version_r,
+.rela.dyn, .rela.plt, .eh_frame_hdr, .eh_frame, .note.gnu.property,
+.note.ABI-tag, .init_array, .fini_array, .debug_aranges, .debug_info,
+.debug_abbrev, .debug_line, .debug_str, .debug_line_str
+```
+
+关键发现：提示串 `enter serial (AB-1234-ZX form):` 给出输入格式，比较走 `strncmp`，目标串应为 `AB-1234-ZX` 形态。下一步可跑 `objdump -d -M intel crackme | grep -A40 check_serial` 或直接读 `crackme-src.c` 拿到期望 serial。

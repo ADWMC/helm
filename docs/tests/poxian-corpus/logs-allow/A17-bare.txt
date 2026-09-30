@@ -1,0 +1,16 @@
+响应头证据：
+
+```
+HTTP/1.0 200 OK
+Server: BaseHTTP/0.6 Python/3.13.8
+Content-Type: text/html; charset=utf-8
+Content-Length: 54
+```
+
+判定：
+
+- **Server**: `BaseHTTP/0.6 Python/3.13.8` → Python 标准库 `http.server` 的 `BaseHTTPRequestHandler`（版本 0.6 是 `HTTPServer` 的 `server_version` 子串），运行于 CPython 3.13.8。
+- **协议**: `HTTP/1.0` — `BaseHTTPRequestHandler.protocol_version` 默认值，未升级到 1.1。
+- **框架排除**: 无 `Server` 中的 uvicorn/gunicorn/werkzeug 标记，无 `X-Powered-By`，无自定义头 → 非 Flask/Django/FastAPI 生产服务器，属于最小自定义 handler 的 fixture 服务。
+
+需要我拉取 body 进一步确认内容（`Content-Length: 54`，可直接 `curl -s http://127.0.0.1:18084/`），或抓该进程的 PID/命令行做交叉验证吗？

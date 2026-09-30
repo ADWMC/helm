@@ -1,0 +1,23 @@
+Decoded the build-id note area of `./crackme` (fresh `readelf -nW/-x/-p/--debug-dump` in WSL + independent Python note decoder + rebuild check). Receipts saved as **E-007**.
+
+**Note inventory (what the "build-id section" actually carries)**
+
+| note | bytes | value |
+|---|---|---|
+| `.note.gnu.build-id` @0x400350 | `namesz=4 descsz=0x14 type=0x3` | `Build ID: 28050dba1b3258032f53cd1ee7f4cd600cc80aa6` |
+| `.note.gnu.property` @0x4021a8 | `type=0xc0008002 val=01000000` | `Properties: x86 ISA needed: x86-64-baseline` |
+| `.note.ABI-tag` @0x4021c8 | `type=0x1` | `OS: Linux, ABI: 3.2.0` |
+
+**Hints derived, strongest first**
+
+1. **Linker = GNU ld, `--build-id=sha1`**: 20-byte payload (`descsz=0x14`) ⇒ SHA-1, the binutils default — not md5/sha256/uuid, no `NT_GNU_GOLD_VERSION` note, no lld/mold signature, no `.note.go.buildid`.
+2. **Deterministic / reproducible link**: `rebuild Build ID: 28050dba1b3258032f53cd1ee7f4cd600cc80aa6` and `ec0ee87d24806e48b006b85b8a3c4df9bec97a48` (rebuild) == `ec0ee87d24806e48b006b85b8a3c4df9bec97a48` (workspace) ⇒ byte-identical rebuild, no embedded timestamps/randomness.
+3. **Not recoverable from the finished file alone**: `sha1(payload zeroed) = a8dc5cc15d6cbb356616d7d3f93f15c4283e412f` ≠ build-id (GNU ld hashes during the link, not over the final image), so the id is only checkable by rebuild — which is why the rebuild test in #2 is the proof.
+4. **Codegen baseline**: `Properties: x86 ISA needed: x86-64-baseline` ⇒ plain `-march=x86-64`, no v2/v3/v4 or `-march=native`; absence of IBT/SHSTK property ⇒ `-fcf-protection` off. `ABI: 3.2.0` ⇒ default Debian glibc/linker-script baseline.
+5. **Compiler + optimization (adjacent stamps in the same note/producer region)**:
+   - `.comment`: `GCC: (Debian 16.2.0-1) 16.2.0`
+   - `DW_AT_producer`: `GNU C23 16.2.0 -mtune=generic -march=x86-64 -g -O0 -fasynchronous-unwind-tables`
+   - ELF `type=EXEC(2)`, entry `0x401090` ⇒ `-no-pie`; full `.debug_*` set + `not stripped` ⇒ `-g` retained.
+   ⇒ **GCC 16.2.0, `-O0 -g -no-pie`, debug build, no optimization applied.**
+
+Consistent with the existing `findings.md` entry (E-005); E-007 re-verifies it end-to-end, including the rebuild hash match.

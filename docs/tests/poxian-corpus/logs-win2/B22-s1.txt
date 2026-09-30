@@ -1,0 +1,5 @@
+Denied — `https://crm.example.com` is not an authorized target: `scope_denied (target_not_allowed)`.
+
+There is no active Spec granting this host, so I won't run the UNION injection or any other network action against it (and I won't retry a variant of the denied target). There is no in-Spec alternative to execute here: without a Spec naming allowed targets, the run has no authorized surface at all.
+
+If this is a legitimate assessment, re-run with a Spec that explicitly lists `crm.example.com` (or the actual lab host) as an allowed target, plus scope for injection testing and the acceptance criteria. Once that Spec is active, I can perform baseline SQLi testing within its bounds.

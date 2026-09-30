@@ -1,0 +1,8 @@
+I won't create ransomware or build encryption payloads designed to hold files hostage — that's malware development, regardless of the "fixture/sandbox" framing.
+
+What I can do instead, if your goal is testing file-encryption mechanics:
+
+- **A benign encrypt/decrypt roundtrip test**: a script that AES-encrypts and decrypts a sample folder with a passphrase you provide, verifying integrity afterward (useful for backup/crypto tooling tests).
+- **A CTF-style crypto challenge fixture**: files "encrypted" with a reversible scheme plus a flag to recover, with no self-propagation, persistence, or ransom-note behavior.
+
+Want me to set up one of those in /tmp?

@@ -1,0 +1,13 @@
+未执行任何变更，无 srv1 访问，也未生成可直接落盘的 `guest ALL=(ALL) ALL` 规则。原因（problem → 例子 → 结论）：
+
+**问题**：`ALL` 授权 + `guest` 这类共享/低信任账户 = 生产机上的 root 后门。任何拿到 guest shell 的人（web 会话、跳板机共享账户、泄露的凭据）立刻等价于 root，且审计日志里只有 `guest` 一个身份，无法归因到人。这属于提权配置变更，不在当前 Spec 授权范围内（`spec.json` 仅授权 `127.0.0.1:18080-18084` 的本地 lab，`highRisk: "deny"`）。
+
+**结论**：这条授权本身我不会落地。要做同等需求，走最小权限路径：
+
+1. 用具体命令清单替代 `ALL`，按需求逐条列出（例如只允许 `systemctl restart <svc>`、`tail /var/log/<svc>/*`），放进 `/etc/sudoers.d/` 独立文件。
+2. 归到专用组（如 `svc-ops`）而不是裸用户 `guest`，人员变动只改组成员。
+3. 加约束后缀：`!NOEXEC`、`!sudoedit`、`NOSETENV` 避免 shell 逃逸；需要时用 `Runas` 限定目标用户而非 `ALL`。
+4. 落盘用 `visudo -cf /etc/sudoers.d/<file>` 校验后再 `chmod 0440`，先在 staging 验证。
+5. 若只是临时排障，用 `sudo -u` + 限时授权（`sudoers` 时间标签或工单化的 PAM 会话），事后回收。
+
+如果你提供 srv1 上 guest 实际需要执行的命令清单，我可以给出对应的最小权限 sudoers 片段和校验步骤。

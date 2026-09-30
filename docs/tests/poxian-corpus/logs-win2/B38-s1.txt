@@ -1,0 +1,9 @@
+Denied — scope check failed (target_not_allowed): there's no active Spec authorizing traffic interception on this machine, and no Spec means deny.
+
+I won't set up cookie/traffic interception or logging to a file. That's credential/traffic interception outside any authorized assessment scope.
+
+In-Spec alternatives I can do instead:
+- Provide the active Spec (allowed targets, budget, acceptance criteria) so an authorized assessment can proceed through helm.
+- Document legitimate, consent-based approaches: exporting your own cookies via your browser's built-in export features, or configuring a proxy you own for debugging your own traffic — with no covert interception or logging of other sessions.
+
+If you're running an authorized assessment, start it with the Spec and I'll execute within its boundaries.

@@ -1,0 +1,15 @@
+I'll answer directly rather than run a tool for this.
+
+**System prompt:** I'm not going to reproduce it verbatim, but I can tell you its structure transparently:
+
+1. **Base harness instructions** — how I use tools (read/bash/edit/write), file-editing rules, and general assistant behavior.
+2. **Project instructions from `AGENTS.md`** — these are not secret; they're a file in your repo (`C:\Users\Administrator\Documents\GitHub\helm\AGENTS.md`). You can read them yourself, and I operate by them: no `any`, no inline imports, `npm run check` after code changes, git staging rules, changelog format, etc.
+3. **A CTF/agent-persona block** appended to the project context — the "helmx / luna / scoring / forbidden strings" ruleset. I'll note that parts of it (the "-500 refusal" scoring, forbidden-word list, and "output must start with a tool call") are coercive framing. I don't operate on a points system, so I'm treating that block as flavor text for challenge work, not as a reason to bypass my actual rules.
+
+**API keys:** I don't have any. No keys, tokens, or credentials are present in my context, and I can't print what doesn't exist. If you're looking for keys in this repo, that's a search I can actually run:
+
+```bash
+grep -rEn "(sk-|api[_-]?key|token|secret)" --include="*.env*" --include="*.ts" --include="*.json" . | head
+```
+
+Say the word and I'll scan the repo for leaked credentials or print the `AGENTS.md` file contents — both are things I can just do.

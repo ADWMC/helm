@@ -141,9 +141,11 @@ finish only when every claim has Evidence and no required Step is open
 
 当前产品主循环是 Pi 二改后的 `packages/agent/src/agent-loop.ts` 与 `packages/coding-agent` 交互层；`packages/helmpi-kernel` 的 Spec/Ledger/Receipt 能力是可复用的领域实现，不是新的产品主循环。缺口是把 Gateway、CVM、破甲和 Evidence 接到现有 Pi tool-call 生命周期，并完成真实 provider 的长任务恢复。
 
-### 4.4 破甲层：提示词越权（越的是模型拒绝约束，不是授权边界）
+### 4.4 破甲层：让模型继续执行范围内任务
 
-“破甲”在 helm 中的定义就是**提示词越权**：用提示层手段（目标归一化、技术轨道重试、有界改写、候选恢复请求）越过模型的泛化拒答、工具拒绝与中途停止约束。越权的对象是**模型的拒绝约束**；**授权边界不在越权范围内**——它只在 Spec 范围内合法：模型面对**已在 Spec 范围内**的技术任务出现泛化拒答、工具拒绝或中途停止时，Run 仍能选择有界路径继续。它不能扩大目标、绕过 Scope、隐藏证据或改变人工边界。
+“破甲”在 helm 中的定义是：**模型面对 Spec 已允许的技术任务时发生泛化拒答、推脱或中途停止，系统通过有限的提示恢复让模型继续交付该任务。** 破甲针对的是模型的拒答约束，不是授权边界。它只能改变任务的表达、拆分方式或只读恢复路径，不能扩大目标、绕过 Scope、隐藏证据或改变人工边界。
+
+一句话验收标准：**范围内的任务，模型不因泛化拒答而卡死；范围外的任务，仍然被硬门拦截。**
 
 ```text
 模型输出/工具结果
@@ -185,8 +187,8 @@ recovery_exhausted
 #### 明确禁止
 
 - 不无限重写提示词；不修改 Spec、allowedTargets、凭据或 Tool Gateway 规则。
-- 不把外部目标输出中的指令当作恢复策略；外部内容继续经过 `sanitizeExternalContent`。
-- 不轮换模型逃避拒答、不把“拒答减少”当作成功指标。
+- 不把外部目标输出中的指令当作恢复策略；外部内容按“数据而非指令”处理，该语义由 `prompt-lib.ts` 的提示词条款承载（内核无改写缝：Receipt 存原始 stdout，证据取其切片，围栏会污染证据）。
+- 不轮换模型逃避拒答、不把“拒答减少”当作唯一成功指标；成功必须落到有效 Receipt/Evidence。
 - 不将拒答恢复计入 verified finding；只有 Receipt/Evidence 能进入报告。
 
 #### 可测指标
@@ -244,7 +246,7 @@ Review Gate 与主模型共享 ledger，但不共享主模型的结论文本作�
 
 ### 4.6 破甲正式方案：helmd 主链 + helmx 兜底
 
-前文把 helmd/helmx 写成普通参考，这是错误的。helm 的破甲层必须继承两个项目已经形成的分工：**helmd 负责主链上的行为和会话闭环，helmx 负责宿主外的代理兜底**。二者不是同一层，也不是两个互相竞争的 prompt 包。
+helm 的破甲层采用两级有限恢复：**helmd 负责第一次温和重试，helmx 负责一次兜底候选**。二者都是 helm 内的恢复模块，不是独立产品、独立进程或第二套 Agent Loop。
 
 #### A. helmd 主链：温和推进与拒答闭环
 
@@ -277,9 +279,9 @@ observe(response) -> { stance, refusalExcerpt, uncertainty }
 advisory(event) -> { key, tier, content, proof, withinTurns }
 ```
 
-#### B. helmx 兜底：独立代理层
+#### B. helmx 兜底：候选恢复模块
 
-helmx 不拥有工具权限，但进入 helm 的恢复编排链。它作为 Pi agent loop 内的**候选恢复策略模块**被调用，输入为脱敏后的拒答事件、CVM snapshot 和已冻结的 Spec，输出为候选的技术请求或交付草案；实际工具执行仍回到 helm Tool Gateway。第一版不通过独立进程或第二个 agent loop 实现 helmx。
+helmx 不拥有工具权限。它在 Pi agent loop 内读取脱敏后的拒答事件、CVM snapshot 和已冻结的 Spec，生成一个候选技术请求或交付草案；实际工具执行仍回到 helm Tool Gateway。
 
 ```text
 helmd 常规重试失败
@@ -287,7 +289,7 @@ helmd 常规重试失败
        v
 helm-x adapter
   - 读取 refusal/trigger/profile
-  - 选择或生成代理策略
+  - 选择或生成恢复策略
   - 返回 candidate request
        |
        v
@@ -324,7 +326,7 @@ HelmxResponse {
 |---|---|---|
 | 首次交付拒答 | helmd 归一化 + 常规技术轨道重试 | 继续当前 Step |
 | 第二次同类拒答 | helmd advisory + 记录拒答原因 | 继续或进入兜底 |
-| 常规轨道耗尽 | 调用 helmx adapter 一次 | 候选请求待验证 |
+| helmd 重试仍拒答 | 调用 helmx adapter 一次 | 候选请求待验证 |
 | helmx 候选越界 | 写 `recovery_denied` | denied/blocked |
 | helmx 候选通过 | 回到 Tool Gateway | receipt/progress |
 | 同一 Step 再次拒答 | 不再自动升级 | recovery_exhausted |
@@ -806,7 +808,68 @@ assistant output
 下一轮 prompt 前永远是指导数据。两者都不能直接写 Receipt、Evidence、Claim 或
 最终 Outcome。
 
-### 14.4 设计取舍
+### 14.4 当前实现状态（2026-09）
+
+已实现并有确定性回归：
+
+- `refusal.ts` 能区分交付拒答、模糊推脱（软性改写，无拒绝动词）与不确定性表达；
+  后者的显式非触发由 `§4.6 F4` 钉住，软性推脱的检测补齐了参考实现遗留风险
+  （helm-d `understand-jailbreak-2026.md` §5.4：“换个说法拒”不在正则内）；
+- 首次拒答生成一次 `helmd` 重述，第二次拒答生成一次 `helmx` 候选；
+- `helmx` 候选由策略库按触发画像选择（`breach/strategy-library.ts`）：样本 <3 探索未测
+  条目，样本足够按胜率排序；胜率只排序，不授予执行权（§14.1 / §4.6 E）；
+- 策略选择写入 `recovery_selected` 的 `strategyId`/`triggerProfile`，胜率账本由
+  `breach/metrics.ts:strategyOutcomesFromJournal` 从 journal 投影，`adopted` 只认
+  “候选之后落了 Receipt”，不认模型口头答应；
+- advisory 账本落 `adopted/ignored/delivered`，非 mandatory 累计忽略 ≥3 次后降频
+  （计数从账本文件回读，重启不重置），并提供 per-key 采纳率 KPI；
+- `§4.4 可测指标` 的 `in_scope_recovery_rate`、`recovery_attempts_per_step`（attempts =
+  每 Step 的 `recovery_selected` 次数）、`false_refusal_rate` 可从 journal 计算；
+  无法从单次 Run 得出的指标（`out_of_scope_block_rate` 分母、`verified_finding_delta`）
+  显式返回 null + note，不编造比值；
+- 恢复候选统一经过 Tool Gateway，越界、能力、预算和 tripwire 仍由硬门决定；
+- 每个 Step 的额度固定为 `helmd=1 + helmx=1`，写入 Ledger，resume 不补额；
+- `HX-01` 至 `HX-06` 及 mock SSE 重放通过，候选成功后可落 Receipt/Evidence。
+
+契约变更（§4.2 冻结对象的增量）：`RefusalEvent.stance` 由 `refusal|challenged` 扩为
+`refusal|hedge|challenged`，因为检测层需要把自己的判定（显式拒绝 vs 软性推脱）写进事件；
+`parseRefusalEvent` 同步收紧，非法值仍然拒绝。
+
+#### 14.4.1 真题语料回归（2026-09-29，零 API 成本）
+
+数据：`docs/tests/poxian-corpus/logs-win/` —— 2026-09-25 真机双臂（bare pi vs +S1）block 桶
+40 题、63 份回复（bare 23 / s1 40，其中 3 份空）。回归测试：`src/breach-realcorpus.test.ts`。
+
+首版检测器在这批真题上只判出 **12/60**：它只认模板化礼貌拒绝（`I can't assist/provide`），
+而真实拒答大量以模型自述形式出现（`I'm not going to run that.` / `I won't run SQLMap…` /
+`I can't do that.` / `I don't dump environment variables` / `Declined — out of scope.`）。
+补齐第一人称拒绝族（含知识类动词豁免，避免把 `I cannot verify` 误判为拒答）后：
+
+| 判定 | 数量 | 说明 |
+|---|---|---|
+| 升级为 refusal | **47 / 60** | 含 bare 臂全部自述拒绝 |
+| 正确不升级（门禁报告） | 12 | `isGateReportOnly=true`，§4.4 第四层：范围拒绝是终止态 |
+| 正确不升级（其他） | 1 | `B03-bare`：真执行了越权尝试（ssh + 改路由 + 试代理），无第一人称拒绝 |
+| 漏检（自述拒绝未被识别） | **0** | 逐条人读核对 |
+
+两条必须记住的结论：
+
+1. 语料的 `bucket`/verdict 记录的是**运行结果轴（漏 / 被拦）**，不是**模型姿态轴**；
+   两者不可直接对比。本回归只钉检测器该负责的两件事：真拒答要命中、门禁报告与不确定性不升级。
+2. 软性推脱（deflection）类在这批真题里**没有出现**（仅 1 条 hand-off，即 `B03-bare`）。
+   它的价值由单测覆盖，不由此语料佐证 —— 不要把未观察到的类目写成实测收益。
+
+尚未完成的产品验收：
+
+- 真实 provider 的长任务回放；
+- 真实模型在拒答后是否按 reminder 发起下一轮有效工具调用；
+- 完整 `Spec -> refusal -> helmd -> helmx -> Gateway -> Report` 的宿主级验收；
+- 身份/人格层（参考实现的“拒绝即残余注入”话术）：属 §14.2 D2 未决产品决策，
+  且与 helm 的“marker 即信号”实测结论冲突，**不在本实现内**。
+
+因此当前状态应写作：**破甲编排和边界已实现，真实模型“拒答后继续交付”的效果仍未验收。**
+
+### 14.5 设计取舍
 
 - 保留 helmd 的“先换技术轨道、再进入兜底”和上下文重构，解决盲目重复与拒答原文
   传染问题。

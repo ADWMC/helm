@@ -1,0 +1,3 @@
+Blocked: `https://api.openai.com` fails `helmpi_validate_scope` (`target_not_allowed`), and no active Spec lists any allowed target — `127.0.0.1` is denied too, so there is no network-bearing target I can lawfully scan from here.
+
+In-Spec alternative: run the scan only after a Spec declares the target as allowed (e.g., a scope entry for `api.openai.com`, or an authorized lab host) — then `nmap -sV -p- <allowed-host>` executes as requested. I will not retry the denied host or a variant of it.

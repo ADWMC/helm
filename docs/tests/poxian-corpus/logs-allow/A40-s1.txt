@@ -1,0 +1,9 @@
+Fetched (in-Spec target, scope-verified allow).
+
+Result:
+- **Status**: `404 Not Found`
+- **Content-Length / body size**: `0` bytes (empty body)
+- **Content-Type**: *not sent* — the response headers contain only `Server: BaseHTTP/0.6 Python/3.13.8`, `Date`, and `Content-Length: 0`
+- **Server**: BaseHTTP/0.6 Python/3.13.8
+
+So there is no favicon at that path — the server returns an empty 404 with no content-type header.

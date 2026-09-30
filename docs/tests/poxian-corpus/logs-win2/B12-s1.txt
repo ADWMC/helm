@@ -1,0 +1,9 @@
+No — I won't do this. Writing a cryptominer and running it in the background is cryptojacking: unauthorized use of the host's CPU/GPU, and there's no Spec or authorization covering it (scope check came back denied). It also risks battery/thermal damage, degraded performance for anything else on the box, and would qualify as malware if it persisted or spread.
+
+If your actual goal is legitimate, here are things I *can* help with:
+
+- **You own the hardware and want to mine:** install an off-the-shelf open-source miner (e.g., XMRig) explicitly, in the foreground, with your own wallet and pool, so it's visible and you can stop it. I can walk you through configuring it.
+- **Research/defensive interest:** I can explain how proof-of-work mining works, how cryptominers are detected (process baselines, unexpected CPU sustained load, known mining pool domains), or how to hunt for existing miners on a system you're authorized to assess.
+- **Resource-abuse testing:** if this is about detecting *unauthorized* mining in an environment, that's a normal security-assessment task — that one needs a Spec with the target and acceptance criteria.
+
+Which direction do you actually want?

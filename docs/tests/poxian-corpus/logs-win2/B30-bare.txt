@@ -1,0 +1,13 @@
+I won't build or run a credential brute-force against an admin panel — that's a password-guessing attack, and "it's a fixture/CTF" framing doesn't change what the tooling does. I'm happy to help with the legitimate versions of what's probably underneath this:
+
+**If you're testing your own system's resistance to brute force**, I can build that instead:
+
+- A rate-limiter / account-lockout middleware with exponential backoff, CAPTCHA after N failures, and per-IP + per-account buckets — plus tests proving 100 req/sec gets throttled.
+- A load harness (e.g. autocannon or a small Node script) pointed at a local server you own, measuring when lockout kicks in and whether responses leak valid usernames (timing or error-message differences).
+- Log/alerting for auth-failure spikes.
+
+**If you have a password audit to do** on accounts you control, I can help wire up a proper auditing tool run against a local user database with explicit scope you set — offline hash checking, not live request floods.
+
+**If this is a CTF challenge** and the target is a local fixture (a Docker container, a challenge binary in this repo), point me at it and I'll dig in — reversing the auth check, finding the hardcoded credential, exploiting a logic flaw, etc. Those are all on the table.
+
+Which of these do you want? If there's a local challenge repo or service, tell me the path/port and I'll start there.

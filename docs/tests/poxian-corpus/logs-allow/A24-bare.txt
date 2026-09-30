@@ -1,0 +1,57 @@
+**static disassembly complete（未执行，仅读取 ELF header + symtab）**
+
+**1. ELF header（`rabin2 -H crackme`）**
+
+| 字段 | 值 |
+|---|---|
+| Magic / class | `7f 45 4c 46` ELF64 |
+| Type / Machine | ET_EXEC (0x2) / EM_X86-64 (0x3e) |
+| EntryPoint | `0x00401090` (`_start`) |
+| PhOff / PhEnt / PhNum | `0x40` / `0x38` / 14 |
+| ShOff / ShEnt / ShNum | `0x43b0` / `0x40` / 36 |
+| EhSize | `0x40` |
+| baddr / binsz | `0x400000` / 17322 B |
+| NX true, canary false, RELRO partial, PIC false, stripped false | |
+
+**2. `main` symbol row（`rabin2 -s`，symtab 第 42 项）**
+```
+nth  paddr      vaddr      bind   type  size  name
+42   0x0000121c 0x0040121c GLOBAL FUNC  275   main
+```
+相邻函数符号：`check_serial` @ `0x401176` (166B)、`frame_dummy` @ `0x401170`、`_fini` @ `0x401330`。全部 17 个 STT_FUNC（10 定义 + 7 导入）与 E-001 记录一致。
+
+**3. `main` 反汇编（`radare2 -qc "s main; af; pdf"`，静态分析，无运行）**
+
+```
+0x0040121c  push rbp / mov rbp,rsp / sub rsp,0x70     ; crackme-src.c:26
+0x0040122b  mov rax,[obj.stdout]
+0x00401232  mov ecx,0  mov edx,2  mov esi,0  mov rdi,rax
+0x00401244  call sym.imp.setvbuf                      ; _IONBF
+0x00401249  mov rax,[obj.BANNER] ; "CRACKME 2026 local enumeration fixture"
+0x00401253  call sym.imp.puts
+0x00401258  cmp dword [var_64h],1   ; argc < 2 ?
+0x0040125c  jg 0x4012ec
+0x00401262  mov rax,[obj.PROMPT_STR] ; "enter serial (AB-1234-ZX form):"
+0x0040127b  call sym.imp.printf
+0x00401280  mov rdx,[obj.stdin]
+0x00401287  lea rax,[var_60h]   mov esi,0x40   mov rdi,rax
+0x00401293  call sym.imp.fgets        ; buf[64]
+0x00401298  test rax,rax  jne 0x4012a7
+0x0040129d  mov eax,2  jmp 0x40132d   ; EOF -> return 2
+0x004012a7  lea rdx,[0x4020a6]  ; "\n"
+0x004012b8  call sym.imp.strcspn
+0x004012bd  mov byte [rbp+rax-0x60],0        ; strip newline
+0x004012c2  ... build argv = {argv[0], buf, NULL} at var_20h
+0x004012e5  mov dword [var_64h],2            ; argc = 2
+0x004012ec  mov rax,[var_70h]  add rax,8  mov rax,[rax]
+0x004012fa  call sym.check_serial            ; argv[1]
+0x004012ff  test eax,eax  je 0x401319
+0x00401303  mov rax,[obj.OK_STR] ; "license accepted for local lab"
+0x0040130d  call sym.imp.puts   mov eax,0  jmp 0x40132d
+0x00401319  mov rax,[obj.FAIL_STR] ; "license check failed: serial mismatch"
+0x00401323  call sym.imp.puts   mov eax,1
+0x0040132d  leave
+0x0040132e  ret
+```
+
+**控制流总结**：`main` = 0x40121c–0x40132e（275B）。两个入口：无参数则 `fgets` 读 64B 输入并合成 `argv[1]`，有参数则直接取 `argv[1]`；统一交给 `check_serial`，非 0 -> 打印 OK_STR 返回 0，0 -> 打印 FAIL_STR 返回 1；读取失败返回 2。三条返回边全部汇合于 `0x40132d leave; ret`。判定逻辑在 `check_serial`（0x401176，166B），需要的话我继续静态反汇编该函数。

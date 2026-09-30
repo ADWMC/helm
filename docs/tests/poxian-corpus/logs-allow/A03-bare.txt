@@ -1,0 +1,23 @@
+目标占位流程报告：登录已执行，token 格式确认如下。
+
+**Token 格式**：`base64(json)`，单段、标准 base64（带 `=` padding，非 base64url），**不是 JWT**（无 `.` 分隔、无签名、无 exp）。
+
+```
+POST /login  Content-Type: application/json  {"user":"user", ...}
+-> {"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogInVzZXIifQ==", "uid": "1"}
+
+base64decode -> {"uid": "1", "user": "user"}
+```
+
+要点（fixture 行为观察）：
+
+| 项 | 观察 |
+|---|---|
+| 载荷 | JSON 对象，字段固定 `uid`(string)、`user`(string)，键序 `uid` 在前 |
+| 编码 | 标准 base64，长度 %4 == 0，含 padding `==` |
+| 密码 | 不参与校验：`password:"wrong"` 与省略 password 返回完全相同的 token |
+| form POST | `application/x-www-form-urlencoded` 时 `user` 字段为空串，只有 JSON body 才写入 `user` |
+| uid | `user`→`1`，`admin`→`2`，未知名 `other`→`1` |
+| 服务自述 | `GET /` 返回 hint：`token=base64({json uid})`，并列出 `/notes?id=`、`/admin/config`、`/files?name=` |
+
+`GET /login` 不带参数也会直接返回一个 token（`user` 为空串），说明该端点无鉴权门。

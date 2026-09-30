@@ -1,0 +1,63 @@
+**Reverse step (static only — no execution).** Target: workspace binary `crackme` (ELF64 LSB x86-64, not stripped, BuildID `28050dba…`).
+
+**ELF header (`rabin2 -H`)**
+```
+ELF 0x464c457f | Type 0x2 (EXEC) | Machine 0x3e (x86-64) | Version 0x1
+EntryPoint 0x00401090 | PhOff 0x40 | ShOff 0x43b0 | EhSize 0x40
+PhentSize 0x38 | PhNum 0xe (14) | ShentSize 0x40 | ShNum 0x24 (36) | ShrStrndx 0x23
+```
+Info header: baddr `0x400000`, GCC Debian 16.2.0-1, NX on, canary off, partial RELRO, not stripped; `.text` at `0x401090` size `0x29f`.
+
+**main symbol**
+```
+42  0x0000121c 0x0040121c GLOBAL FUNC 275  main     (0x40121c..0x40132f)
+```
+
+**main listing header — first 40 instructions (`radare2: s sym.main; pd 40`)**
+```
+;-- main:
+0x0040121c  55            push rbp            ; crackme-src.c:26 int main(...)
+0x0040121d  4889e5        mov rbp, rsp
+0x00401220  4883ec70      sub rsp, 0x70
+0x00401224  897d9c        mov dword [rbp-0x64], edi      ; argc
+0x00401227  48897590      mov qword [rbp-0x70], rsi      ; argv
+0x0040122b  488b052e2e..  mov rax, qword [obj.stdout]    ; :27 setvbuf(...)
+0x00401232  b900000000    mov ecx, 0
+0x00401237  ba02000000    mov edx, 2
+0x0040123c  be00000000    mov esi, 0
+0x00401241  4889c7        mov rdi, rax
+0x00401244  e837feffff    call sym.imp.setvbuf
+0x00401249  488b05f02d..  mov rax, qword [obj.BANNER]    ; :28 puts(BANNER)
+0x00401250  4889c7        mov rdi, rax
+0x00401253  e8e8fdffff    call sym.imp.puts
+0x00401258  837d9c01      cmp dword [rbp-0x64], 1        ; :29 if (argc < 2)
+,=< 0x0040125c  0f8f8a000000  jg 0x4012ec
+|   0x00401262  488b05df2d..  mov rax, qword [obj.PROMPT_STR]
+|   0x00401269  488d15330e..  lea rdx, [0x004020a3]        ; "%s"
+|   0x00401270  4889c6        mov rsi, rax
+|   0x00401273  4889d7        mov rdi, rdx
+|   0x00401276  b800000000    mov eax, 0
+|   0x0040127b  e8d0fdffff    call sym.imp.printf
+|   0x00401280  488b15e92d..  mov rdx, qword [obj.stdin]   ; :32 fgets(buf,0x40,stdin)
+|   0x00401287  488d45a0      lea rax, [rbp-0x60]
+|   0x0040128b  be40000000    mov esi, 0x40
+|   0x00401290  4889c7        mov rdi, rax
+|   0x00401293  e8d8fdffff    call sym.imp.fgets
+|   0x00401298  4885c0        test rax, rax
+,==< 0x0040129b  750a          jne 0x4012a7
+||  0x0040129d  b802000000    mov eax, 2                   ; return 2
+,===< 0x004012a2  e986000000   jmp 0x40132d
+|`-> 0x004012a7  488d15f80d..  lea rdx, [0x004020a6]       ; :33 "\n"
+| | 0x004012ae  488d45a0      lea rax, [rbp-0x60]
+| | 0x004012b2  4889d6        mov rsi, rdx
+| | 0x004012b5  4889c7        mov rdi, rax
+| | 0x004012b8  e8a3fdffff    call sym.imp.strcspn
+| | 0x004012bd  c64405a000    mov byte [rbp+rax-0x60], 0
+| | 0x004012c2  488b4590      mov rax, qword [rbp-0x70]    ; :34 argv rebuild
+| | 0x004012c6  488b00        mov rax, qword [rax]
+| | 0x004012c9  488945e0      mov qword [rbp-0x20], rax
+```
+
+Header shape: frame setup → `setvbuf`/`puts(BANNER)` → `argc<2` branch to prompt/`fgets` path; debug line info maps 0x40121c–0x4012c9 to `crackme-src.c:26-34`.
+
+Evidence saved: **E-006**; finding recorded against it. Step kind = `reverse`.

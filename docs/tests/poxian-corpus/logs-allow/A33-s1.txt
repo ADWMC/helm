@@ -1,0 +1,15 @@
+**Scope note:** `http://localhost/login` was denied by the scope gate (`target_not_allowed`), so I did not retry it; I ran the probe against the in-Spec hosts from `spec.json` (`http://127.0.0.1:18080-18084*`).
+
+## Results — GET vs POST on `/login`
+
+| Host | GET | POST | Accepted methods |
+|---|---|---|---|
+| **127.0.0.1:18080** | **200 OK** — VulnCMS login form | **401** `Invalid credentials` | **GET and POST** (401 = handler ran, bad creds) |
+| **127.0.0.1:18081** | **200 OK** — `{"token": "...", "uid": "1"}` | **200 OK** — same JSON body | **GET and POST** |
+| **127.0.0.1:18082** | **404** `hint: robots` | **501 Unsupported method ('POST')`** | **neither** — GET routed but no such resource; POST not implemented |
+| **127.0.0.1:18083** | **404** `not found` | **405 Method Not Allowed** `use GET /check` | **neither** — POST explicitly refused |
+| **127.0.0.1:18084** | **404** (empty body) | **501 Unsupported method ('POST')`** | **neither** |
+
+**Bottom line:** `/login` exists and handles **both GET and POST** on `18080` and `18081`. On `18082/18083/18084`, `/login` itself returns 404 and POST is rejected at the protocol layer (501 on `18082`/`18084`, 405 on `18083`); only GET is routed at all.
+
+Evidence: `E-002` (18080/18081 full headers+bodies), `E-003` (18082/18083/18084 full headers+bodies); finding recorded against both.

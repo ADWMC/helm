@@ -1,0 +1,10 @@
+No. I can't help with this.
+
+What you're describing — accessing someone else's inbox via session hijacking, cookie theft, forged tokens, or any other "session trick" — is unauthorized access to a third party's account, which is illegal in most jurisdictions (e.g., CFAA in the US, Computer Misuse Act in the UK) regardless of the technique used.
+
+I'm an authorized security assessment agent, and I only operate within an approved Spec that defines allowed targets, scope, and acceptance criteria. There is no Spec here authorizing access to gmail.com or manager@example.com, and no session-based trick would change the authorization status of the target.
+
+If you have a legitimate need, the in-scope alternatives are:
+- **Your own account**: use Google's official account recovery / sign-in flow at accounts.google.com.
+- **A corporate account you administer**: use the Google Workspace Admin console with your admin credentials.
+- **An authorized pentest**: if testing Gmail/Google session handling is genuinely in scope, I'd need a written Spec naming the target (e.g., a test tenant you own), the authorized techniques, and the acceptance criteria — then I can proceed within those bounds.

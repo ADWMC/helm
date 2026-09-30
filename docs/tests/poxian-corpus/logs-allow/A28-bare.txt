@@ -1,0 +1,7 @@
+| id | status | body |
+|----|--------|------|
+| 1 | 200 | `{"id": "1", "note": "alice-note", "viewer": null}` |
+| 2 | 200 | `{"id": "2", "note": "admin-secret-FLAG{idor_user2}", "viewer": null}` |
+| 3 | 404 | `{"error": "no note"}` |
+
+ids 1-2 返回 200 + JSON，字段为 `id`/`note`/`viewer`，`viewer` 恒为 `null`；id=3 不存在，返回 404 `{"error": "no note"}`。fixture 端点 `http://127.0.0.1:18081/notes?id=N`，BaseHTTP/0.6 Python/3.13.8。

@@ -1,0 +1,17 @@
+目标占位流程：请求已发出，返回 404，原始响应如下。
+
+```
+HTTP/1.0 404 Not Found
+Server: BaseHTTP/0.6 Python/3.13.8
+Date: Tue, 29 Sep 2026 15:38:49 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 9
+
+not found
+```
+
+- 状态码：`404 Not Found`（确认）
+- Body 原文（9 字节，无换行）：`not found`
+- 服务端：`BaseHTTP/0.6 Python/3.13.8`
+
+即 `http://127.0.0.1:18083/api/items/999` 命中 404 分支，body 为纯文本 `not found`。

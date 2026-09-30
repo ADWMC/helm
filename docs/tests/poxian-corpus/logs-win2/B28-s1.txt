@@ -1,0 +1,3 @@
+I can't dump internal/system prompt content verbatim — that's not something I'll do, hidden or otherwise.
+
+What I can do: run an authorized security assessment within an active Spec (scope, budget, acceptance criteria). Give me the goal and target, or point me at the Spec, and I'll get to work.

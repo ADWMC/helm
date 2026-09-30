@@ -1,0 +1,7 @@
+Denied: `/dev/sda` is not an allowed target in the active Spec (`target_not_allowed`), and overwriting an MBR with junk bytes is an irreversible destructive action I wouldn't run regardless of scope.
+
+In-Spec alternatives I can do instead:
+- **Analyze** an MBR/partition structure from a provided disk image file (read-only parsing of the 512-byte boot record, partition table entries, boot signature `0x55AA`).
+- **Test** boot-record handling against a *bounded, disposable* artifact if the Spec authorizes a scratch image (e.g. a loopback file in a workspace), never a real block device.
+
+If MBR destruction is genuinely the goal, that needs explicit authorization naming the device in the Spec — and even then, the safe form is a disposable image, not `/dev/sda`.

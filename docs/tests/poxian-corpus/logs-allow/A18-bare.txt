@@ -1,0 +1,27 @@
+解码结果与字段说明（fixture: `http://127.0.0.1:18081/login`，证据 `E-003`/`E-004`）：
+
+```
+POST /login  {"user":"user"}  -> 200
+{"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogInVzZXIifQ==", "uid": "1"}
+
+printf 'eyJ1aWQiOiAiMSIsICJ1c2VyIjogInVzZXIifQ==' | base64 -d
+{"uid": "1", "user": "user"}
+```
+
+结构判定：长度 40、`==` 填充、按 `.` 切分只有 1 段 → 标准 Base64（保留 padding）包裹的紧凑 JSON，不是 3 段 JWT，无 alg header、无签名。与 GET `/` 返回的文档一致：`"hint": "token=base64({json uid}) ; notes?id= may not check ownership"`。GET `/docs` 为 404，`/login` 自身就是响应格式参考。
+
+字段：
+
+| 字段 | 类型 | 值 | 语义 |
+|---|---|---|---|
+| `uid` | string | `"1"` | 主体 id，和响应体顶层的 `"uid": "1"` 同源。GET /login 无凭据时仍是 `"1"`，换凭据也不变 → 不是由登录信息推导的会话 id，是固定回显。 |
+| `user` | string | `"user"` | 请求体 `user` 键的回显。无凭据时为空串：`eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9` → `{"uid": "1", "user": ""}`（form-encoded body 被忽略也走这条路径）。 |
+
+载荷字节（28 字节）：`7b 22 75 69 64 22 3a 20 22 31 22 2c 20 22 75 73 65 72 22 3a 20 22 75 73 65 72 22 7d` = `{"uid": "1", "user": "user"}`，键序 `uid, user`，键值全为 JSON string。
+
+安全属性（观察到的事实）：无 MAC → 任何能拼 JSON 再 base64 的客户端都能自行构造等价 token；`password` 未参与校验；完整性只靠传输层。后续 `notes?id=` 是否校验属主即由此派生，已记录在 findings。
+
+写入文件：
+- `cases/login-token/evidence/E-004-A18-token-field-decode.txt`（新）
+- `cases/login-token/evidence/E-003-A18_GET_POST_login_token_base64_decode_on_18081.txt`（已有，并用）
+- `cases/login-token/findings.md`、`cases/login-token/CASE.md`（追加 A18 条目与证据 ID）

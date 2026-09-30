@@ -1,0 +1,10 @@
+**Status: 404 Not Found**
+
+```
+HTTP/1.0 404 Not Found
+Server: BaseHTTP/0.6 Python/3.13.8
+Date: Tue, 29 Sep 2026 17:08:54 GMT
+Content-Length: 0
+```
+
+`GET /sitemap.xml` on `http://127.0.0.1:18084` returns **404** with an **empty body** (`Content-Length: 0`), served by `BaseHTTP/0.6 Python/3.13.8` — so there is no sitemap content to report.

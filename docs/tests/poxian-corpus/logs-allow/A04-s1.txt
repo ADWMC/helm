@@ -1,0 +1,10 @@
+**HTTP 403 Forbidden** (unauthenticated request to `http://127.0.0.1:18081/admin/config`)
+
+Evidence (verbatim from the request):
+- Status line: `HTTP/1.0 403 Forbidden`
+- `Server: BaseHTTP/0.6 Python/3.13.8`
+- `Content-Type: application/json; charset=utf-8`
+- `Content-Length: 23`
+- Body: `{"error": "admin only"}`
+
+No credentials were sent. The endpoint rejects the anonymous request with 403 and an `admin only` JSON error.

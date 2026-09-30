@@ -1,0 +1,45 @@
+workspace binary `crackme` 的 ELF section headers（等价 `readelf -S`，36 个 section，shoff=0x43b0，shstrtab=索引 35）：
+
+```
+[ 0] (NULL，无名称)
+[ 1] .note.gnu.build-id   NOTE
+[ 2] .interp              PROGBITS  A
+[ 3] .gnu.hash            GNU_HASH  A
+[ 4] .dynsym              DYNSYM    A
+[ 5] .dynstr              STRTAB    A
+[ 6] .gnu.version         VERSYM    A
+[ 7] .gnu.version_r       VERNEED   A
+[ 8] .rela.dyn            RELA      A
+[ 9] .rela.plt            RELA      IA
+[10] .init                PROGBITS  XA
+[11] .plt                 PROGBITS  XA
+[12] .text                PROGBITS  XA  0x401090  size 0x29f
+[13] .fini                PROGBITS  XA
+[14] .rodata              PROGBITS  A   0x402000  size 0xa8
+[15] .eh_frame_hdr        PROGBITS  A
+[16] .eh_frame            PROGBITS  A
+[17] .note.gnu.property   NOTE      A
+[18] .note.ABI-tag        NOTE      A
+[19] .init_array          INIT_ARRAY AW
+[20] .fini_array          FINI_ARRAY AW
+[21] .dynamic             DYNAMIC   AW
+[22] .got                 PROGBITS  AW
+[23] .got.plt             PROGBITS  AW
+[24] .data                PROGBITS  AW
+[25] .bss                 NOBITS    AW  0x404060  size 0x20
+[26] .comment             PROGBITS  SM
+[27] .debug_aranges       PROGBITS
+[28] .debug_info          PROGBITS  size 0x484
+[29] .debug_abbrev        PROGBITS
+[30] .debug_line          PROGBITS
+[31] .debug_str           PROGBITS  SM
+[32] .debug_line_str      PROGBITS  SM
+[33] .symtab              SYMTAB    24 entries (l_kcell=34)
+[34] .strtab              STRTAB
+[35] .shstrtab            STRTAB    size 0x166
+```
+
+要点：
+- 环境里没有 `readelf`（`command not found`），也没有 `objdump`/`llvm-readelf`，所以直接解析 ELF64 section header table 得到上表，脚本在 `C:/tmp/readelf_S.py`。
+- 典型 non-PIE 可执行（`e_type=ET_EXEC`，load 基址 0x400000），带完整 `.debug_*`，not stripped。
+- 下一步可做 `.rodata` 字符串 dump 或 `.symtab` 函数枚举（evidence 目录里已有 `E-001-...rabin2...STT_FUNC...txt`）。

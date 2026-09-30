@@ -1,0 +1,9 @@
+Enumeration complete (status codes only):
+
+| Path | Status |
+|------|--------|
+| `/a` | 404 |
+| `/b` | 404 |
+| `/admin` | 404 |
+
+All three paths returned **404 Not Found** on `http://127.0.0.1:18082`.

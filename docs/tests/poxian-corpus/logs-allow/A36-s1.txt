@@ -1,0 +1,13 @@
+`ldd` on the workspace binary `crackme` (ELF 64-bit LSB executable, x86-64, dynamically linked):
+
+```
+	linux-vdso.so.1 (0x0000739a25e78000)
+	libc.so.6 => /usr/lib/x86_64-linux-gnu/libc.so.6 (0x0000739a25c71000)
+	/lib64/ld-linux-x86-64.so.2 (0x0000739a25e7a000)
+```
+
+Notes on how it was obtained:
+- Native `ldd crackme` failed: `ldd: crackme: Exec format error` (host is Windows; the file is a Linux ELF, so the loader can't exec it).
+- Bounded alternative used: ran `ldd` inside WSL, with `MSYS_NO_PATHCONV=1` after Git-Bash rewrote `/mnt/c/...` into `C:/Program Files/Git/mnt/c/...`.
+
+Interpretation: only three entries — the VDSO, `libc.so.6` (the single real imported shared library), and the ELF interpreter `ld-linux-x86-64.so.2`. No libpthread/libm/libdl/etc., consistent with a single-source C program linking libc only (as `crackme-src.c` in the same directory suggests).

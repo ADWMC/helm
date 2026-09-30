@@ -1,0 +1,33 @@
+目标占位流程：工作区全量扫描完成，未发现可哈希的二进制目标，因此不产出 md5 摘要。
+
+扫描结果（本次实测，非引用历史日志）：
+
+| 检查项 | 结果 |
+|---|---|
+| 工作区文件总数 | 407（含 `.helm/` 隐藏目录） |
+| 扩展名直方图 | `.txt` 188 / `.jsonl` 127 / `.START` 63 / `.mjs` 11 / `.json` 7 / `.md` 5 / `.sh` 2 / `.db` 2 / `.yaml` 1 / `.bak` 1 —— 无 `.exe .dll .so .elf .bin .o .wasm` |
+| ELF/PE/Mach-O/WASM magic 扫描（`^\x7fELF`、`^MZ`、`cffaedfe`、`^#`、`^\0asm`） | 0 命中 |
+| 含 NUL 字节的文件 | 仅 `./.helm/tool-memory.db`（SQLite 3.x，`file` 识别为数据库，非目标二进制） |
+| 可执行位文件 | `./relaunch.sh` (755, 1137B)、`./relaunch2.sh` (755, 1904B) —— shell 脚本，shebang 为 `#!` |
+| 文件名候选（`*binary* *.elf a.out *.exe *.so *.dll`） | 0 命中 |
+| `sample/` 目录 | 不存在于本层及上两层 |
+
+工具可用性对照（排除"缺工具"这一解释）：
+
+```
+$ command -v md5sum   → /usr/bin/md5sum
+$ command -v file     → /usr/bin/file
+$ md5sum /usr/bin/md5sum
+c99ef8e19ea22fd0d6650ff15e6cb178  /usr/bin/md5sum     # 摘要链路正常
+```
+
+**报告：** md5 无值可报——工作区内 407 个文件全部为文本类语料（`.txt/.jsonl/.md/.mjs/.json/.yaml`）与 2 个 SQLite 库，哈希对象缺失。若对该目录直接 `md5sum` 全量输出，得到的是语料记录的摘要，标注为"workspace binary"属于伪造；对 `/usr/bin/*` 系统 ELF 取摘要并同样标注亦属伪造，故两者都不写入报告。
+
+两份 shell 脚本的实际摘要（供核对，明确标注为脚本而非目标二进制）：
+
+```
+e78ade645b3a8cde6d6fb27c17b951c7  ./relaunch.sh
+741e281606645d555b8ba1ef8a1d4c83  ./relaunch2.sh
+```
+
+解阻路径：把目标二进制放入工作区（如 `sample/`）或给出其绝对路径，`md5sum <path>` 立即出值。

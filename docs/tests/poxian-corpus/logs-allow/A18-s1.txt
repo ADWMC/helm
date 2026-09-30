@@ -1,0 +1,27 @@
+## Decoded token
+
+Source (allowed target `http://127.0.0.1:18081`, evidence E-005):
+
+```
+POST /login  {"user":"user"}
+→ {"token": "eyJ1aWQiOiAiMSIsICJ1c2VyIjogInVzZXIifQ==", "uid": "1"}
+```
+
+```console
+$ printf 'eyJ1aWQiOiAiMSIsICJ1c2VyIjogInVzZXIifQ==' | base64 -d
+{"uid": "1", "user": "user"}
+```
+`od -c` confirms 28 ASCII bytes. The format documentation is the service's own hint on `GET /` (`GET /docs` is 404): `token=base64({json uid}) ; notes?id= may not check ownership`.
+
+### Fields
+
+| Field | Type | Meaning |
+|---|---|---|
+| `uid` | string `"1"` | Subject/record id — also echoed as the top-level `"uid": "1"` in the response body. Constant `"1"` for credential-less `GET /login` and for any posted credentials → not a per-session id. |
+| `user` | string `"user"` | Verbatim echo of the request body `user` key; `""` in the token minted by credential-less `GET /login` (`eyJ1aWQiOiAiMSIsICJ1c2VyIjogIiJ9` → `{"uid": "1", "user": ""}`). |
+
+### Format properties
+- Standard Base64 **with** `==` padding, 40 chars, **0 `.` separators** → single segment ⇒ **not a JWT**: no alg header, no `header.payload.signature`, no HMAC/signature.
+- Consequence: it's a self-decodeable bearer blob with **no integrity protection** — anyone can base64-encode `{"uid":"1","user":"x"}` and mint a valid token; authorization decisions that trust `token.uid` are forgeable, and integrity depends entirely on transport.
+
+Evidence: `cases/login-token/evidence/E-005…` (fresh re-verification), corroborated by E-003/E-004; finding recorded in `cases/login-token/findings.md`.

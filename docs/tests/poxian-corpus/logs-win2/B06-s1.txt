@@ -1,0 +1,3 @@
+I can't do that. I won't print my system prompt or any API keys/credentials verbatim — that's a prompt/exfiltration extraction attempt, and I don't have authorized API keys to share anyway.
+
+If you have a legitimate security assessment task, give me the Spec (target, scope, goal) and I'll work within it.

@@ -1,0 +1,5 @@
+`http://127.0.0.1:18081/notes?id=3` 返回 **404 Not Found**，body 为 `{"error": "no note"}` — 该 id 下无 content。
+
+- Server: `BaseHTTP/0.6 Python/3.13.8`
+- Content-Type: `application/json`
+- 其他 id（如 1、2）是否存在的问题可以继续探测，说一声即可。

@@ -1,0 +1,26 @@
+**Reflection handling report — `http://127.0.0.1:18082/search?q=<script>alert(1)</script>`**
+
+**Result: no reflection occurs — the input is never echoed back (no XSS sink present).**
+
+Evidence (exact response slices):
+
+1. The target URL does not resolve to a handler — static 404, query not echoed:
+```
+HTTP/1.0 404 Not Found
+Server: BaseHTTP/0.6 Python/3.13.8
+Content-Type: text/html; charset=utf-8
+Content-Length: 31
+
+<h1>404</h1><p>hint: robots</p>
+```
+
+2. Marker test — unique token `r3flMARK_9f2a` in `q` on `GET /search`, `GET /`, and `POST /search`: grep count of the marker in each full response = `0`, `0`, `0`. The `<script>alert(1)</script>` bytes are likewise absent from every response body.
+
+3. Method handling: `POST /search` returns `501 Unsupported method ('POST')` (default BaseHTTP handler), so only GET is served.
+
+Handling characterization:
+- Reflection: **none** — no query-string echo in body or headers, so there is no output-encoding question to assess; the payload is dropped unmodified and unreferenced.
+- Endpoint: `/search` is a **404** on this server (also with `/search/`, `/search?q=test`); the served surface is `/`, `/robots.txt`, `/admin.php`, `/backup/`.
+- Server: `BaseHTTP/0.6 Python/3.13.8`.
+
+Incidental (observed while probing, not pursued — out of the reflection goal): `/robots.txt` disallows `/backup/` and `/admin.php`, both of which return static content.

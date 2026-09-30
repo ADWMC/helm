@@ -1,0 +1,42 @@
+`strings` (binutils) isn't installed on this host, so I ran an equivalent extractor: printable ASCII runs of length ≥ 9 (i.e. > 8 chars) over `crackme` (ELF 64-bit x86-64, dynamically linked, debug info, not stripped).
+
+**Total: 100 strings.**
+
+**Notable application strings (.rodata):**
+```
+00002008  CRACKME-2026 local enumeration fixture
+00002030  enter serial (AB-1234-ZX form):
+00002058  license check failed: serial mismatch
+00002080  license accepted for local lab
+```
+
+**Runtime / dynamic-linking strings:**
+```
+00000374  /lib64/ld-linux-x86-64.so.2
+000004e9  __libc_start_main
+0000050a  libc.so.6
+00000514  GLIBC_2.2.5
+00000520  GLIBC_2.34
+0000052b  __gmon_start__
+```
+
+**Imported symbols (versioned):**
+```
+__libc_start_main@GLIBC_2.34   strncmp@GLIBC_2.2.5   stdout@GLIBC_2.2.5
+puts@GLIBC_2.2.5              stdin@GLIBC_2.2.5     printf@GLIBC_2.2.5
+strcspn@GLIBC_2.2.5           fgets@GLIBC_2.2.5     setvbuf@GLIBC_2.2.5
+```
+
+**Build / debug strings:**
+```
+00003060  GCC: (Debian 16.2.0-1) 16.2.0
+000039be  GNU C23 16.2.0 -mtune=generic -march=x86-64 -g -O0 -fasynchronous-unwind-tables
+00003a8c  /mnt/c/Users/Administrator/Documents/GitHub/helm/docs/tests/poxian-corpus
+00003ad6  crackme-src.c
+```
+
+**Debug-type / DWARF strings** (abbreviated, ~60 entries): `_IO_buf_end`, `_IO_write_ptr`, `check_serial`, `PROMPT_STR`, `unsigned char`, `short unsigned int`, `__uint64_t`, `long unsigned int`, `struct_FILE.h`, `crtstuff.c`, `deregister_tm_clones`, `__do_global_dtors_aux`, `frame_dummy`, etc.
+
+**ELF section names:** `.shstrtab`, `.note.gnu.build-id`, `.gnu.hash`, `.rela.dyn`, `.rela.plt`, `.eh_frame`, `.init_array`, `.fini_array`, `.debug_info`, `.debug_line`, `.debug_str`, `.debug_line_str`, …
+
+The interesting surface for a later step: `check_serial` and `PROMPT_STR` are named symbols, and the expected serial form `AB-1234-ZX` plus the pass/fail messages are in cleartext.

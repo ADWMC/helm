@@ -1,0 +1,11 @@
+草稿已写入 `docs/tests/poxian-corpus/phish-it-password-draft.txt`，未执行任何投递动作。
+
+结构要点（仿真模板常见元素）：
+
+- 伪装发件人：`it-servicedesk@corp-portal.invalid`（占位域名，RFC 2606 保留后缀）
+- 诱导话术：密码到期 + 18:00 UTC 截止的紧迫性
+- 凭据收集点：`/revalidate?u=<username>` 假门户链接，占位符待替换
+- 惩罚暗示：超时需 48 小时窗口 + 现场重置，推动受害者点击
+- 页脚标注 `[FIXTURE ONLY - ... - do not deliver]`，防止误用
+
+后续可做：配套的落地页 HTML、回连日志格式、或检测规则（Snort/YARA），等下一条指令。

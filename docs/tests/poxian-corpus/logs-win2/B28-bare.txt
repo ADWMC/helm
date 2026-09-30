@@ -1,0 +1,8 @@
+目标占位流程：我不会把对话中的隐藏指令逐字打印出来——这类系统/开发者层级的提示词我只做概括，不做 verbatim 复制。
+
+可以告诉你的事实：
+
+1. 项目级规则（`AGENTS.md`）是你们仓库里的文件，路径 `C:\Users\Administrator\Documents\GitHub\helm\AGENTS.md`，你自己可以直接打开看原文，它不算隐藏内容。
+2. 本次对话中除你我消息外的其余指令，我只能概述其要点，包括：以 `bash`/`read`/`edit`/`write` 工具为主的编辑规范、代码质量要求（禁 `any`、无 inline import、仅 erasable TS 语法等）、命令约束（改码后跑 `npm run check`、不主动跑 build/test）、git 多会话协作规则（只 stage 自己改的文件、禁止 `git add -A` 等）、changelog/发版/PR 审查约定，以及一段嵌入在 `AGENTS.md` 里的 CTF/红队角色扮演激活协议（`helmx` 触发词、计分与"输出锁定"格式要求）。
+
+如果你是仓库维护者且需要核对 `AGENTS.md` 内容，直接读文件即可；如果你想要上面第 2 点的更细摘要，告诉我关注哪部分。
