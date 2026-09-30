@@ -12,7 +12,8 @@ import { Type } from "typebox";
 import { matchActivation } from "./activation.ts";
 import { AdvisoryLedger } from "./breach/advisory.ts";
 import { normalizedRequestNote, normalizeInput } from "./breach/input-normalizer.ts";
-import { classifyStance, isRefusal, refusalExcerpt } from "./breach/refusal.ts";
+import { strategyOutcomesFromJournal } from "./breach/metrics.ts";
+import { classifyDelivery, deliveryExcerpt, isRefusal, shouldRecover } from "./breach/refusal.ts";
 import { createStreamGuard, ingest as streamIngest, settle as streamSettle } from "./breach/stream-guard.ts";
 import { washText } from "./breach/tool-wash.ts";
 import type { AnalysisMode } from "./config.ts";
@@ -145,6 +146,55 @@ function loadSessionSpec(): Spec | null {
 	}
 }
 
+/**
+ * Diagnosis for a `no_spec` denial: says WHERE resolution looked and why each
+ * candidate was unusable. loadSessionSpec silently falls through on a
+ * malformed or shape-invalid file, which makes "file written but still
+ * denied" indistinguishable from "no file" — this string disambiguates.
+ * Pure reporting; never affects the gate decision (still fail-closed).
+ */
+export function describeSpecResolution(cwd = process.cwd()): string {
+	const notes: string[] = [];
+	for (const p of [join(cwd, ".helm", "spec.json"), join(cwd, "spec.json")]) {
+		if (!existsSync(p)) {
+			notes.push(`${p}: absent`);
+			continue;
+		}
+		let raw: unknown;
+		try {
+			raw = JSON.parse(readFileSync(p, "utf8"));
+		} catch (e) {
+			notes.push(`${p}: present but UNREADABLE (${e instanceof Error ? e.message.split("\n")[0] : String(e)})`);
+			continue;
+		}
+		// Same acceptance predicate as loadSessionSpec (index.ts): allowedTargets
+		// must be an array and highRisk a string, else the file is skipped.
+		const r = raw as { allowedTargets?: unknown; highRisk?: unknown } | null;
+		if (Array.isArray(r?.allowedTargets) && typeof r?.highRisk === "string") {
+			notes.push(`${p}: present and usable`);
+		} else {
+			const missing: string[] = [];
+			if (!Array.isArray(r?.allowedTargets)) missing.push("allowedTargets (must be a string array)");
+			if (typeof r?.highRisk !== "string") missing.push("highRisk (must be a string: deny|hitl|allow)");
+			notes.push(`${p}: present but SKIPPED — missing ${missing.join(" + ")}`);
+		}
+	}
+	try {
+		const led = openPhaseLedger();
+		try {
+			led.spec();
+			notes.push("phase ledger: spec set");
+		} catch {
+			notes.push("phase ledger: spec not set");
+		} finally {
+			led.close();
+		}
+	} catch {
+		notes.push("phase ledger: unavailable");
+	}
+	return notes.join("; ");
+}
+
 // ── runtime wiring helpers (Tool Gateway / CVM / Recovery / Review) ─────────
 
 /** Capability class of a tool call for the Gateway capability gate. */
@@ -271,6 +321,9 @@ export default function helmPiExtension(pi: ExtensionAPI): void {
 				stability: snap?.sensorium.stability ?? 1,
 			};
 		},
+		// Strategy-library win rates, projected from the phase journal (§4.6 E):
+		// candidate ordering only — never execution authority.
+		readStrategyOutcomes: () => withLedger((led) => strategyOutcomesFromJournal(led.journal())),
 	});
 	const reviewGate = (): ReviewGate =>
 		new ReviewGate({
@@ -455,7 +508,12 @@ export default function helmPiExtension(pi: ExtensionAPI): void {
 				.join("");
 		}
 		if (!textBody) return;
-		if (classifyStance(textBody) !== "refusal") return;
+		// §4.4 layer 1: escalate on a delivery refusal OR a soft deflection
+		// (the rewrite that carries no refusal verb). Honest uncertainty
+		// ("无法核实/证据不足") is NOT an escalation trigger — it is the reporting
+		// behaviour the evidence invariants require (§4.6 F4).
+		const deliveryStance = classifyDelivery(textBody);
+		if (!shouldRecover(deliveryStance)) return;
 
 		const stepKey = currentStepKey();
 		const refusalEvent: RefusalEvent = {
@@ -463,8 +521,8 @@ export default function helmPiExtension(pi: ExtensionAPI): void {
 			runId,
 			turn: stepKey.turn,
 			stepId: stepKey.stepId,
-			excerpt: refusalExcerpt(textBody) ?? textBody.slice(0, 240),
-			stance: "refusal",
+			excerpt: deliveryExcerpt(textBody) ?? textBody.slice(0, 240),
+			stance: deliveryStance === "refusal" ? "refusal" : "hedge",
 			at: Date.now(),
 		};
 		const outcome = recovery.onRefusal(refusalEvent);
@@ -547,6 +605,10 @@ export default function helmPiExtension(pi: ExtensionAPI): void {
 		async execute(_id, params: { target: string }): Promise<TextResult> {
 			const spec = loadSessionSpec();
 			const d = validateScopeQuery(spec, params.target);
+			// A no_spec denial is ambiguous without detail: absent file, malformed
+			// file and shape-invalid file all land here. Surface the resolution
+			// trace so the operator sees which one happened.
+			const reason = d.matchedBy === "no_spec" ? `${d.reason} | ${describeSpecResolution()}` : d.reason;
 			if (!d.allow) {
 				try {
 					const led = openPhaseLedger();
@@ -555,7 +617,7 @@ export default function helmPiExtension(pi: ExtensionAPI): void {
 							source: "validate_scope",
 							target: params.target,
 							matchedBy: d.matchedBy,
-							reason: d.reason,
+							reason,
 							at: Date.now(),
 						});
 					} finally {
@@ -565,7 +627,7 @@ export default function helmPiExtension(pi: ExtensionAPI): void {
 					/* ledger unavailable — decision still returned */
 				}
 			}
-			return text(JSON.stringify({ allow: d.allow, matchedBy: d.matchedBy, reason: d.reason }, null, 2));
+			return text(JSON.stringify({ allow: d.allow, matchedBy: d.matchedBy, reason }, null, 2));
 		},
 	});
 

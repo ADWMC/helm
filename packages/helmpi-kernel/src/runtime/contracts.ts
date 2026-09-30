@@ -19,7 +19,8 @@ export interface RefusalEvent {
 	readonly stepId: string | null;
 	/** Trimmed refusal excerpt (audit only — never fed back as policy). */
 	readonly excerpt: string;
-	readonly stance: "refusal" | "challenged";
+	/** Detected delivery stance: explicit refusal, soft deflection, or premise challenge. */
+	readonly stance: "refusal" | "hedge" | "challenged";
 	readonly at: number;
 }
 
@@ -252,8 +253,8 @@ export function parseRefusalEvent(raw: unknown): RefusalEvent {
 		throw new ContractError(contract, "stepId must be string or null");
 	}
 	requireString(obj.excerpt, contract, "excerpt");
-	if (obj.stance !== "refusal" && obj.stance !== "challenged") {
-		throw new ContractError(contract, "stance must be refusal|challenged");
+	if (obj.stance !== "refusal" && obj.stance !== "hedge" && obj.stance !== "challenged") {
+		throw new ContractError(contract, "stance must be refusal|hedge|challenged");
 	}
 	requireNumber(obj.at, contract, "at");
 	return raw as RefusalEvent;

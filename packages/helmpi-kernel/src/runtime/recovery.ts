@@ -11,6 +11,7 @@
  */
 
 import { normalizeInput } from "../breach/input-normalizer.ts";
+import { chooseStrategy, type StrategyOutcome } from "../breach/strategy-library.ts";
 import type { RecoveryAction, RecoveryKind, RecoveryState, RefusalEvent, RunStrategy } from "./contracts.ts";
 import { canTransitionRecovery, JOURNAL_KEYS, parseRecoveryAction } from "./contracts.ts";
 import type { GatewayRequest, ToolGateway } from "./gateway.ts";
@@ -48,6 +49,11 @@ export interface RecoveryDeps {
 	readonly clock?: () => number;
 	/** CVM recovery-bridge — latest cognitive snapshot fields, or null (§16.6). */
 	readonly readCvmContext?: () => CvmBridgeContext | null;
+	/**
+	 * Prior recovery outcomes for the strategy library. Reference data only:
+	 * it reorders candidates and never grants execution (§4.6 E).
+	 */
+	readonly readStrategyOutcomes?: () => readonly StrategyOutcome[];
 }
 
 export interface RecoveryOutcome {
@@ -68,11 +74,18 @@ export interface HelmxRequest {
 	readonly attempts: { readonly helmd: number; readonly helmx: number };
 	/** CVM bridge context — read-only reference for rationale (§16.6). */
 	readonly cvm?: CvmBridgeContext | null;
+	/**
+	 * Prior recovery outcomes, used ONLY to order the strategy library
+	 * (§4.6 E: win rates order candidates, they never relax a gate).
+	 */
+	readonly strategyOutcomes?: readonly StrategyOutcome[];
 }
 
 /** helmx adapter output — candidate data only, never authority (§14.2). */
 export interface HelmxResponse {
 	readonly strategyId: string;
+	/** Bounded move the candidate expresses (closed set, §4.4 layer 2). */
+	readonly kind: RecoveryKind;
 	readonly candidateRequest: { readonly directive: string; readonly tool?: string; readonly target?: string };
 	readonly rationale: string;
 	readonly confidence: number;
@@ -124,20 +137,22 @@ export function helmdPropose(
 }
 
 /**
- * helmx adapter: candidate generation from the trigger profile and the
- * frozen goal. Library-backed and deterministic; rationale/confidence are
- * reference data and never raise evidence or relax gates (§14.2).
- * CVM strategy is referenced in rationale only — it cannot change the
- * candidate's target or bypass Gateway validation (§16.6).
+ * helmx adapter: candidate generation from the trigger profile, the frozen goal
+ * and the strategy library. Library-backed and deterministic; the chosen
+ * strategy reorders the candidate only — the Gateway still validates it, and
+ * rationale/confidence never raise evidence or relax gates (§14.2, §4.6 E).
  */
 export function helmxPropose(request: HelmxRequest): HelmxResponse {
 	const profile = request.triggerProfile.length > 0 ? request.triggerProfile.join(",") : "unclassified";
+	const chosen = chooseStrategy(request.triggerProfile, request.strategyOutcomes ?? []);
+	const s = chosen.strategy;
 	return {
-		strategyId: `hx-lib-${profile}`,
+		strategyId: `${s.id}@${profile}`,
+		kind: s.kind,
 		candidateRequest: {
-			directive: `Bounded read-only diagnostics on ${request.normalizedGoal}: enumerate observable fields with read-only tools and record one receipt per observation.`,
+			directive: s.directive(request.normalizedGoal),
 		},
-		rationale: `trigger profile ${profile}; attempts helmd=${request.attempts.helmd} helmx=${request.attempts.helmx}${cvmNote(request.cvm)}`,
+		rationale: `trigger profile ${profile}; strategy ${s.id} (${chosen.why}); attempts helmd=${request.attempts.helmd} helmx=${request.attempts.helmx}${cvmNote(request.cvm)}`,
 		confidence: 0.5,
 		source: "library",
 	};
@@ -302,6 +317,8 @@ export class RecoveryOrchestrator {
 
 		const stepTarget = this.deps.resolveStepTarget(event.stepId);
 		const cvm = this.deps.readCvmContext?.() ?? null;
+		/** Library strategy behind a helmx candidate — journaled for the win-rate ledger. */
+		let selectedStrategy: { strategyId: string; triggerProfile: readonly string[] } | null = null;
 		let action: RecoveryAction;
 		if (tier === "helmd") {
 			action = helmdPropose(event, stepTarget, record.specHash, cvm);
@@ -315,10 +332,11 @@ export class RecoveryOrchestrator {
 				specHash: record.specHash,
 				attempts: { helmd: record.helmdUsed, helmx: record.helmxUsed },
 				cvm,
+				...(this.deps.readStrategyOutcomes ? { strategyOutcomes: this.deps.readStrategyOutcomes() } : {}),
 			});
 			action = {
 				id: `rec-${event.at}-helmx`,
-				kind: "readonly_diagnostics",
+				kind: response.kind,
 				source: "helmx",
 				stepId: event.stepId,
 				request: {
@@ -329,6 +347,7 @@ export class RecoveryOrchestrator {
 				attempt: 2,
 				specHash: record.specHash,
 			};
+			selectedStrategy = { strategyId: response.strategyId, triggerProfile: triggerProfileOf(event.excerpt) };
 		}
 
 		if (record.state === "refusal_detected") {
@@ -364,6 +383,9 @@ export class RecoveryOrchestrator {
 			kind: action.kind,
 			stepId: event.stepId,
 			attempt: action.attempt,
+			...(selectedStrategy
+				? { strategyId: selectedStrategy.strategyId, triggerProfile: selectedStrategy.triggerProfile }
+				: {}),
 			...(cvm ? { cvmStrategy: cvm.strategy } : {}),
 			at: this.now(),
 		});
