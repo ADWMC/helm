@@ -3,12 +3,13 @@
  *
  * The payload is the platform binary archive produced by
  * scripts/build-binaries.sh and published by the tag-triggered Build Binaries
- * workflow: `pi-<platform>.tar.gz` (unix, wrapper dir `pi/`) or
- * `pi-<platform>.zip` (windows, flat), plus a `SHA256SUMS` asset. The archive
- * carries the compiled executable `pi`/`pi.exe` plus its runtime siblings
+ * workflow: `helm-<platform>.tar.gz` (unix, wrapper dir `helm/`) or
+ * `helm-<platform>.zip` (windows, flat), plus a `SHA256SUMS` asset. The archive
+ * carries the compiled executable `helm`/`helm.exe` plus its runtime siblings
  * (package.json, theme/, assets/, native prebuilds, wasm); the installer copies
  * the whole set into the install dir and renames the command to
- * `helm`/`helm.exe`.
+ * `helm`/`helm.exe`. The payload's `skills/*.md` are copied into the user-level
+ * skills dir (<agentDir>/skills) where the host discovers them.
  *
  * Every network step is injectable so tests run fully offline.
  */
@@ -42,7 +43,7 @@ export function platformAsset(platform, arch) {
 	}
 	if (arch !== "x64" && arch !== "arm64") throw new Error(`unsupported arch: ${arch}`);
 	const assetPlatform = `${plat}-${arch}`;
-	return { platform: assetPlatform, file: `pi-${assetPlatform}.${plat === "windows" ? "zip" : "tar.gz"}` };
+	return { platform: assetPlatform, file: `helm-${assetPlatform}.${plat === "windows" ? "zip" : "tar.gz"}` };
 }
 
 /**
@@ -59,6 +60,44 @@ export function resolvePayloadPath(env = process.env, home = homedir()) {
 	if (env.HELM_BIN_PATH) return env.HELM_BIN_PATH;
 	const exe = process.platform === "win32" ? "helm.exe" : "helm";
 	return join(resolveInstallDir(env, home), exe);
+}
+
+/**
+ * Agent dir: HELM_CODING_AGENT_DIR or <home>/.helm/agent — mirrors the host's
+ * getAgentDir() (env override, else <home>/<configDir>/agent).
+ */
+export function resolveAgentDir(env = process.env, home = homedir()) {
+	return env.HELM_CODING_AGENT_DIR ? resolve(env.HELM_CODING_AGENT_DIR) : join(home, ".helm", "agent");
+}
+
+/**
+ * Install the product skills shipped in the payload into the user-level skills
+ * dir (<agentDir>/skills), where the host discovers them. Content-addressed:
+ * only files whose bytes differ are rewritten, so reruns are idempotent and
+ * local edits to an unchanged skill survive. Disabled by HELM_INSTALL_SKILLS=0.
+ */
+export function installSkills(env = process.env, home = homedir(), installDir = resolveInstallDir(env, home)) {
+	const dir = join(resolveAgentDir(env, home), "skills");
+	if (env.HELM_INSTALL_SKILLS === "0") return { dir, skipped: "disabled", updated: 0, unchanged: 0 };
+	const srcDir = join(installDir, "skills");
+	if (!existsSync(srcDir)) return { dir, skipped: "no-payload-skills", updated: 0, unchanged: 0 };
+	let updated = 0;
+	let unchanged = 0;
+	mkdirSync(dir, { recursive: true });
+	for (const name of readdirSync(srcDir)) {
+		if (!name.endsWith(".md")) continue;
+		const src = join(srcDir, name);
+		if (!statSync(src).isFile()) continue;
+		const dest = join(dir, name);
+		const bytes = readFileSync(src);
+		if (existsSync(dest) && sha256(readFileSync(dest)) === sha256(bytes)) {
+			unchanged += 1;
+			continue;
+		}
+		writeFileSync(dest, bytes);
+		updated += 1;
+	}
+	return { dir, updated, unchanged };
 }
 
 export function sha256(data) {
@@ -169,7 +208,7 @@ export async function installPayload(opts = {}) {
 		if (extracted.status !== 0) {
 			throw new Error(`tar -xf ${asset.file} failed (${String(extracted.status)}): ${extracted.stderr ?? ""}`);
 		}
-		const exeName = platform === "win32" ? "pi.exe" : "pi";
+		const exeName = platform === "win32" ? "helm.exe" : "helm";
 		const exeSrc = findFile(work, exeName);
 		if (!exeSrc) throw new Error(`${exeName} not found inside ${asset.file}`);
 		const payloadDir = dirname(exeSrc);
@@ -183,7 +222,8 @@ export async function installPayload(opts = {}) {
 		if (existsSync(exeDest)) unlinkSync(exeDest);
 		copyFileSync(exeSrc, exeDest);
 		if (platform !== "win32") chmodSync(exeDest, 0o755);
-		return { version, asset: asset.file, exePath: exeDest, sha256: actual, destDir };
+		const skills = installSkills(env, opts.home ?? homedir(), destDir);
+		return { version, asset: asset.file, exePath: exeDest, sha256: actual, destDir, skills };
 	} finally {
 		rmSync(work, { recursive: true, force: true });
 	}

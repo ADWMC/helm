@@ -5,12 +5,15 @@
 #
 # Pins:      --version 1.2.3   or  HELM_VERSION=1.2.3
 # Options:   --no-modify-path  or  HELM_NO_MODIFY_PATH=1
+#            --no-skills       or  HELM_INSTALL_SKILLS=0
 #            --dry-run         (print the plan, touch nothing)
-# Overrides: HELM_INSTALL_DIR  HELM_REPO  HELM_RELEASE_BASE
+# Overrides: HELM_INSTALL_DIR  HELM_REPO  HELM_RELEASE_BASE  HELM_CODING_AGENT_DIR
 #
-# Payload = the Build Binaries release assets (pi-<platform>.tar.gz + SHA256SUMS).
+# Payload = the Build Binaries release assets (helm-<platform>.tar.gz + SHA256SUMS).
 # Installs the whole payload under ~/.helm/bin and exposes the command `helm`
-# (the released executable `pi` is renamed on install).
+# (the payload executable is already named `helm`).
+# Product skills (payload `skills/*.md`) are copied into the user-level skills
+# dir (${HELM_CODING_AGENT_DIR:-~/.helm/agent}/skills) where helm discovers them.
 set -euo pipefail
 
 VERSION="${HELM_VERSION:-}"
@@ -18,6 +21,7 @@ REPO="${HELM_REPO:-ADWMC/helm}"
 RELEASE_BASE="${HELM_RELEASE_BASE:-https://github.com/${REPO}/releases/download}"
 INSTALL_DIR="${HELM_INSTALL_DIR:-${HOME}/.helm/bin}"
 MODIFY_PATH=1
+INSTALL_SKILLS=1
 DRY_RUN=0
 
 while [[ $# -gt 0 ]]; do
@@ -34,8 +38,12 @@ while [[ $# -gt 0 ]]; do
 			DRY_RUN=1
 			shift
 			;;
+		--no-skills)
+			INSTALL_SKILLS=0
+			shift
+			;;
 		-h | --help)
-			sed -n '2,14p' "$0"
+			sed -n '2,16p' "$0"
 			exit 0
 			;;
 		*)
@@ -46,6 +54,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 [[ "${HELM_NO_MODIFY_PATH:-0}" == "1" ]] && MODIFY_PATH=0
+[[ "${HELM_INSTALL_SKILLS:-1}" == "0" ]] && INSTALL_SKILLS=0
 
 case "$(uname -s)" in
 	Darwin) PLATFORM="darwin" ;;
@@ -65,7 +74,7 @@ case "$(uname -m)" in
 		;;
 esac
 
-ASSET="pi-${PLATFORM}-${ARCH}.tar.gz"
+ASSET="helm-${PLATFORM}-${ARCH}.tar.gz"
 
 if [[ -z "$VERSION" ]]; then
 	echo "==> resolving latest release from ${REPO} ..."
@@ -84,6 +93,11 @@ SUMS_URL="${RELEASE_BASE}/v${VERSION}/SHA256SUMS"
 echo "==> helm v${VERSION} (${PLATFORM}-${ARCH})"
 echo "    asset:    ${ASSET_URL}"
 echo "    install:  ${INSTALL_DIR}"
+if [[ "$INSTALL_SKILLS" == "1" ]]; then
+	echo "    skills:   ${HELM_CODING_AGENT_DIR:-${HOME}/.helm/agent}/skills"
+else
+	echo "    skills:   (skipped)"
+fi
 
 if [[ "$DRY_RUN" == "1" ]]; then
 	echo "    (dry run: nothing downloaded, nothing written)"
@@ -118,16 +132,40 @@ fi
 
 echo "==> extracting payload"
 tar -xzf "${WORK}/${ASSET}" -C "$WORK"
-PAYLOAD_DIR="$(dirname "$(find "$WORK" -type f -name pi | head -n 1)")"
-[[ -d "$PAYLOAD_DIR" ]] || { echo "payload binary 'pi' not found in ${ASSET}" >&2; exit 1; }
+PAYLOAD_DIR="$(dirname "$(find "$WORK" -type f -name helm | head -n 1)")"
+[[ -d "$PAYLOAD_DIR" ]] || { echo "payload binary 'helm' not found in ${ASSET}" >&2; exit 1; }
 
 mkdir -p "$INSTALL_DIR"
 cp -R "${PAYLOAD_DIR}/." "$INSTALL_DIR/"
-# rename the released command to helm (replace any previous install)
+# drop a stale pre-rename payload binary if one is still around
 if [[ -f "${INSTALL_DIR}/pi" ]]; then
-	mv -f "${INSTALL_DIR}/pi" "${INSTALL_DIR}/helm"
+	rm -f "${INSTALL_DIR}/pi"
 fi
 chmod +x "${INSTALL_DIR}/helm"
+
+# product skills: payload ships them, helm discovers them in the user-level skills dir
+if [[ "$INSTALL_SKILLS" == "0" ]]; then
+	echo "==> --no-skills: skipping product skills"
+elif [[ -d "${INSTALL_DIR}/skills" ]]; then
+	AGENT_DIR="${HELM_CODING_AGENT_DIR:-${HOME}/.helm/agent}"
+	SKILLS_DIR="${AGENT_DIR}/skills"
+	mkdir -p "${SKILLS_DIR}"
+	updated=0
+	unchanged=0
+	for skill in "${INSTALL_DIR}"/skills/*.md; do
+		[[ -e "$skill" ]] || continue
+		name="$(basename "$skill")"
+		if [[ -f "${SKILLS_DIR}/${name}" ]] && cmp -s "$skill" "${SKILLS_DIR}/${name}"; then
+			unchanged=$((unchanged + 1))
+		else
+			cp -f "$skill" "${SKILLS_DIR}/${name}"
+			updated=$((updated + 1))
+		fi
+	done
+	echo "==> skills: ${updated} updated, ${unchanged} unchanged -> ${SKILLS_DIR}"
+else
+	echo "==> no skills/ in payload (older release) — skipped"
+fi
 
 if [[ "$MODIFY_PATH" == "1" ]]; then
 	case ":${PATH}:" in

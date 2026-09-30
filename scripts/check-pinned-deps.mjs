@@ -3,7 +3,9 @@ import { join } from "node:path";
 
 const dependencySections = ["dependencies", "devDependencies", "optionalDependencies"];
 const exactVersionPattern = /^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
-const ignoredDirectories = new Set([".git", "dist", "node_modules"]);
+// Vendored third-party checkouts are not product dependencies (mirrors .gitignore:
+// `research/`, `reference/`), so their package.json files are out of scope.
+const ignoredDirectories = new Set([".git", "dist", "node_modules", "research", "reference"]);
 const internalPackageNames = new Set(["@adwmc/helm-chord"]);
 const packageJsonFiles = [];
 

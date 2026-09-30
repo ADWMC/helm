@@ -16,6 +16,14 @@ try {
 		console.log(`[helm-installer] dry run: would install ${result.asset} from ${result.assetUrl} into ${result.destDir}`);
 	} else {
 		console.log(`[helm-installer] payload v${result.version} (${result.asset}, sha256 ${result.sha256.slice(0, 12)}...) -> ${result.exePath}`);
+		const skills = result.skills;
+		if (skills === undefined || skills.skipped === "disabled") {
+			console.log("[helm-installer] skills: skipped (HELM_INSTALL_SKILLS=0)");
+		} else if (skills.skipped === "no-payload-skills") {
+			console.log("[helm-installer] skills: none in payload (older release)");
+		} else {
+			console.log(`[helm-installer] skills: ${skills.updated} updated, ${skills.unchanged} unchanged -> ${skills.dir}`);
+		}
 	}
 } catch (error) {
 	console.warn(`[helm-installer] payload download skipped: ${error instanceof Error ? error.message : String(error)}`);

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Build pi binaries for all platforms locally.
+# Build helm binaries for all platforms locally.
 # Mirrors .github/workflows/build-binaries.yml
 #
 # Usage:
@@ -15,12 +15,12 @@
 #
 # Output:
 #   packages/coding-agent/binaries/
-#     pi-darwin-arm64.tar.gz
-#     pi-darwin-x64.tar.gz
-#     pi-linux-x64.tar.gz
-#     pi-linux-arm64.tar.gz
-#     pi-windows-x64.zip
-#     pi-windows-arm64.zip
+#     helm-darwin-arm64.tar.gz
+#     helm-darwin-x64.tar.gz
+#     helm-linux-x64.tar.gz
+#     helm-linux-arm64.tar.gz
+#     helm-windows-x64.zip
+#     helm-windows-arm64.zip
 
 set -euo pipefail
 
@@ -128,9 +128,9 @@ for platform in "${PLATFORMS[@]}"; do
     # Disable cwd bunfig.toml autoload so project preload scripts cannot crash the
     # standalone binary before pi starts (see #7684).
     if [[ "$platform" == windows-* ]]; then
-        bun build --compile --no-compile-autoload-bunfig --target="$bun_target" ./dist/bun/cli.js ./src/utils/image-resize-worker.ts --outfile "$OUTPUT_DIR/$platform/pi.exe"
+        bun build --compile --no-compile-autoload-bunfig --target="$bun_target" ./dist/bun/cli.js ./src/utils/image-resize-worker.ts --outfile "$OUTPUT_DIR/$platform/helm.exe"
     else
-        bun build --compile --no-compile-autoload-bunfig --target="$bun_target" ./dist/bun/cli.js ./src/utils/image-resize-worker.ts --outfile "$OUTPUT_DIR/$platform/pi"
+        bun build --compile --no-compile-autoload-bunfig --target="$bun_target" ./dist/bun/cli.js ./src/utils/image-resize-worker.ts --outfile "$OUTPUT_DIR/$platform/helm"
     fi
 done
 
@@ -149,6 +149,18 @@ for platform in "${PLATFORMS[@]}"; do
     cp -r dist/core/export-html "$OUTPUT_DIR/$platform/"
     cp -r docs "$OUTPUT_DIR/$platform/"
     cp -r examples "$OUTPUT_DIR/$platform/"
+    # Product skills ship with the payload (source of truth: <repo>/.helm/skills).
+    # The installer copies them into the user-level skills dir (~/.helm/agent/skills)
+    # where pi discovers them; they are never read from the install dir directly.
+    # Tolerate a source tree without them (release builds from an older tag) with a
+    # warning instead of failing the build; the installers report "no skills in
+    # payload" in that case.
+    if compgen -G "../../.helm/skills/*.md" > /dev/null; then
+        mkdir -p "$OUTPUT_DIR/$platform/skills"
+        cp ../../.helm/skills/*.md "$OUTPUT_DIR/$platform/skills/"
+    else
+        echo "warning: ../../.helm/skills/*.md not found — payload ships without skills" >&2
+    fi
 
     # Copy the selected architecture's native platform helpers next to the executable.
     native_platform="${platform/windows-/win32-}"
@@ -163,12 +175,12 @@ cd "$OUTPUT_DIR"
 for platform in "${PLATFORMS[@]}"; do
     if [[ "$platform" == windows-* ]]; then
         # Windows (zip)
-        echo "Creating pi-$platform.zip..."
-        (cd "$platform" && zip -r ../pi-$platform.zip .)
+        echo "Creating helm-$platform.zip..."
+        (cd "$platform" && zip -r ../helm-$platform.zip .)
     else
-        # Unix platforms (tar.gz) - use wrapper directory for mise compatibility
-        echo "Creating pi-$platform.tar.gz..."
-        mv "$platform" pi && tar -czf pi-$platform.tar.gz pi && mv pi "$platform"
+        # Unix platforms (tar.gz) - use wrapper directory for compatibility
+        echo "Creating helm-$platform.tar.gz..."
+        mv "$platform" helm && tar -czf helm-$platform.tar.gz helm && mv helm "$platform"
     fi
 done
 
@@ -177,9 +189,9 @@ echo "==> Extracting archives for testing..."
 for platform in "${PLATFORMS[@]}"; do
     rm -rf "$platform"
     if [[ "$platform" == windows-* ]]; then
-        mkdir -p "$platform" && (cd "$platform" && unzip -q ../pi-$platform.zip)
+        mkdir -p "$platform" && (cd "$platform" && unzip -q ../helm-$platform.zip)
     else
-        tar -xzf pi-$platform.tar.gz && mv pi "$platform"
+        tar -xzf helm-$platform.tar.gz && mv helm "$platform"
     fi
 done
 
@@ -191,8 +203,8 @@ echo ""
 echo "Extracted directories for testing:"
 for platform in "${PLATFORMS[@]}"; do
     if [[ "$platform" == windows-* ]]; then
-        echo "  $OUTPUT_DIR/$platform/pi.exe"
+        echo "  $OUTPUT_DIR/$platform/helm.exe"
     else
-        echo "  $OUTPUT_DIR/$platform/pi"
+        echo "  $OUTPUT_DIR/$platform/helm"
     fi
 done

@@ -2,7 +2,9 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import ts from "typescript";
 
-const ignoredDirectories = new Set([".git", "coverage", "dist", "node_modules"]);
+// Vendored third-party checkouts are not product code (mirrors .gitignore:
+// `research/`, `reference/`), so their TypeScript files are out of scope.
+const ignoredDirectories = new Set([".git", "coverage", "dist", "node_modules", "research", "reference"]);
 const files = [];
 
 function collectTypescriptFiles(directory) {

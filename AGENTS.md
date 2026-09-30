@@ -97,7 +97,7 @@ When closing issues via commit:
 
 ## Testing pi Interactive Mode with tmux
 
-For testing pi's interactive mode, load and follow [.pi/skills/interactive-testing.md](.pi/skills/interactive-testing.md).
+For testing pi's interactive mode, load and follow [.helm/skills/interactive-testing.md](.helm/skills/interactive-testing.md).
 
 ## Changelog
 
@@ -118,7 +118,7 @@ Attribution:
 
 ## Releasing
 
-For release preparation, publishing, verification, or recovery, load and follow [.pi/skills/release.md](.pi/skills/release.md).
+For release preparation, publishing, verification, or recovery, load and follow [.helm/skills/release.md](.helm/skills/release.md).
 
 ## User Override
 

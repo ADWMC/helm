@@ -7,6 +7,11 @@ Build Binaries workflow, verifies it against `SHA256SUMS`, and installs it to
 `~/.helm/bin` (Windows: `%USERPROFILE%\.helm\bin`). The `helm` bin resolves
 that payload and execs it.
 
+Product skills (`skills/*.md` in the payload) are installed alongside into the
+user-level skills directory the host scans:
+`%USERPROFILE%\.helm\agent\skills` (Linux/macOS `~/.helm/agent/skills`). The copy
+is content-addressed, so reruns only rewrite files whose bytes changed.
+
 ```sh
 npm install -g @adwmc/helm-installer
 helm --version
@@ -31,6 +36,8 @@ irm https://raw.githubusercontent.com/ADWMC/helm/main/install/install.ps1 | iex
 | `HELM_VERSION` | Pin a payload version (default: the installer package's own version) |
 | `HELM_INSTALL_DIR` | Install directory (default `~/.helm/bin`) |
 | `HELM_BIN_PATH` | Point the `helm` bin at a specific payload executable |
+| `HELM_CODING_AGENT_DIR` | Agent dir whose `skills/` receives the product skills (default `~/.helm/agent`) |
+| `HELM_INSTALL_SKILLS` | `0` = skip installing product skills |
 | `HELM_REPO` | Source repository for the latest-version lookup (default `ADWMC/helm`) |
 | `HELM_RELEASE_BASE` | Release download base URL (default GitHub Releases) |
 | `HELM_DRY_RUN` | `1` = print the plan without downloading |

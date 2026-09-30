@@ -46,6 +46,10 @@ packages/agent/docs/extensions/pi-server-artifact/index.md
 
 # runtime state (tool-memory/ledger artifacts) — never commit
 **/.helm/
+# ...except the product skills that ship with helm (source of truth for the payload)
+!/.helm/
+/.helm/*
+!/.helm/skills/
 # raw session JSONL from live evaluation runs — logs/reports go in, evidence/ stays local
 docs/tests/**/evidence/
 
@@ -54,6 +58,9 @@ docs/tests/**/evidence/
 
 # vendored third-party checkout and downloaded papers — bulk, not work product
 research/
+
+# third-party reference checkouts (read-only study material; see docs/README.md)
+reference/
 
 # helmd/helmpi case workspaces (evidence/ inside them is already covered above)
 helmd-cases/*/evidence/
