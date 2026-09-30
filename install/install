@@ -1,0 +1,160 @@
+#!/usr/bin/env bash
+# helm one-line installer (macOS / Linux).
+#
+#   curl -fsSL https://raw.githubusercontent.com/ADWMC/helm/main/install/install | bash
+#
+# Pins:      --version 1.2.3   or  HELM_VERSION=1.2.3
+# Options:   --no-modify-path  or  HELM_NO_MODIFY_PATH=1
+#            --dry-run         (print the plan, touch nothing)
+# Overrides: HELM_INSTALL_DIR  HELM_REPO  HELM_RELEASE_BASE
+#
+# Payload = the Build Binaries release assets (pi-<platform>.tar.gz + SHA256SUMS).
+# Installs the whole payload under ~/.helm/bin and exposes the command `helm`
+# (the released executable `pi` is renamed on install).
+set -euo pipefail
+
+VERSION="${HELM_VERSION:-}"
+REPO="${HELM_REPO:-ADWMC/helm}"
+RELEASE_BASE="${HELM_RELEASE_BASE:-https://github.com/${REPO}/releases/download}"
+INSTALL_DIR="${HELM_INSTALL_DIR:-${HOME}/.helm/bin}"
+MODIFY_PATH=1
+DRY_RUN=0
+
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+		--version)
+			VERSION="${2:-}"
+			shift 2
+			;;
+		--no-modify-path)
+			MODIFY_PATH=0
+			shift
+			;;
+		--dry-run)
+			DRY_RUN=1
+			shift
+			;;
+		-h | --help)
+			sed -n '2,14p' "$0"
+			exit 0
+			;;
+		*)
+			echo "unknown option: $1" >&2
+			exit 2
+			;;
+	esac
+done
+
+[[ "${HELM_NO_MODIFY_PATH:-0}" == "1" ]] && MODIFY_PATH=0
+
+case "$(uname -s)" in
+	Darwin) PLATFORM="darwin" ;;
+	Linux) PLATFORM="linux" ;;
+	*)
+		echo "unsupported OS: $(uname -s) (Windows: use install.ps1)" >&2
+		exit 2
+		;;
+esac
+
+case "$(uname -m)" in
+	x86_64 | amd64) ARCH="x64" ;;
+	aarch64 | arm64) ARCH="arm64" ;;
+	*)
+		echo "unsupported arch: $(uname -m)" >&2
+		exit 2
+		;;
+esac
+
+ASSET="pi-${PLATFORM}-${ARCH}.tar.gz"
+
+if [[ -z "$VERSION" ]]; then
+	echo "==> resolving latest release from ${REPO} ..."
+	if command -v curl >/dev/null 2>&1; then
+		LATEST_JSON="$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest")"
+	else
+		LATEST_JSON="$(wget -qO- "https://api.github.com/repos/${REPO}/releases/latest")"
+	fi
+	VERSION="$(printf '%s' "$LATEST_JSON" | sed -n 's/.*"tag_name"[[:space:]]*:[[:space:]]*"v\?\([^"]*\)".*/\1/p' | head -n 1)"
+	[[ -n "$VERSION" ]] || { echo "failed to resolve latest release for ${REPO}" >&2; exit 1; }
+fi
+
+ASSET_URL="${RELEASE_BASE}/v${VERSION}/${ASSET}"
+SUMS_URL="${RELEASE_BASE}/v${VERSION}/SHA256SUMS"
+
+echo "==> helm v${VERSION} (${PLATFORM}-${ARCH})"
+echo "    asset:    ${ASSET_URL}"
+echo "    install:  ${INSTALL_DIR}"
+
+if [[ "$DRY_RUN" == "1" ]]; then
+	echo "    (dry run: nothing downloaded, nothing written)"
+	exit 0
+fi
+
+WORK="$(mktemp -d)"
+cleanup() { rm -rf "$WORK"; }
+trap cleanup EXIT
+
+echo "==> downloading ${ASSET} + SHA256SUMS"
+if command -v curl >/dev/null 2>&1; then
+	curl -fsSL -o "${WORK}/${ASSET}" "$ASSET_URL"
+	curl -fsSL -o "${WORK}/SHA256SUMS" "$SUMS_URL"
+else
+	wget -qO "${WORK}/${ASSET}" "$ASSET_URL"
+	wget -qO "${WORK}/SHA256SUMS" "$SUMS_URL"
+fi
+
+echo "==> verifying sha256"
+EXPECTED="$(grep -E "[ *]${ASSET}\$" "${WORK}/SHA256SUMS" | awk '{print $1}' | head -n 1 | tr 'A-F' 'a-f')"
+[[ -n "$EXPECTED" ]] || { echo "SHA256SUMS has no entry for ${ASSET}" >&2; exit 1; }
+if command -v sha256sum >/dev/null 2>&1; then
+	ACTUAL="$(sha256sum "${WORK}/${ASSET}" | awk '{print $1}')"
+else
+	ACTUAL="$(shasum -a 256 "${WORK}/${ASSET}" | awk '{print $1}')"
+fi
+if [[ "$ACTUAL" != "$EXPECTED" ]]; then
+	echo "sha256 mismatch: expected ${EXPECTED}, got ${ACTUAL}" >&2
+	exit 1
+fi
+
+echo "==> extracting payload"
+tar -xzf "${WORK}/${ASSET}" -C "$WORK"
+PAYLOAD_DIR="$(dirname "$(find "$WORK" -type f -name pi | head -n 1)")"
+[[ -d "$PAYLOAD_DIR" ]] || { echo "payload binary 'pi' not found in ${ASSET}" >&2; exit 1; }
+
+mkdir -p "$INSTALL_DIR"
+cp -R "${PAYLOAD_DIR}/." "$INSTALL_DIR/"
+# rename the released command to helm (replace any previous install)
+if [[ -f "${INSTALL_DIR}/pi" ]]; then
+	mv -f "${INSTALL_DIR}/pi" "${INSTALL_DIR}/helm"
+fi
+chmod +x "${INSTALL_DIR}/helm"
+
+if [[ "$MODIFY_PATH" == "1" ]]; then
+	case ":${PATH}:" in
+		*":${INSTALL_DIR}:"*) echo "==> ${INSTALL_DIR} already on PATH" ;;
+		*)
+			PROFILE=""
+			for candidate in "${HOME}/.zshrc" "${HOME}/.bashrc" "${HOME}/.profile"; do
+				if [[ -f "$candidate" ]]; then
+					PROFILE="$candidate"
+					break
+				fi
+			done
+			[[ -n "$PROFILE" ]] || PROFILE="${HOME}/.profile"
+			if ! grep -qF "$INSTALL_DIR" "$PROFILE" 2>/dev/null; then
+				printf '\n# helm installer\nexport PATH="%s:$PATH"\n' "$INSTALL_DIR" >>"$PROFILE"
+				echo "==> PATH appended to ${PROFILE} (open a new shell or: source ${PROFILE})"
+			fi
+			;;
+	esac
+else
+	echo "==> --no-modify-path: add ${INSTALL_DIR} to PATH yourself"
+fi
+
+echo "==> smoke test"
+if "${INSTALL_DIR}/helm" --version >/dev/null 2>&1; then
+	echo "helm v${VERSION} installed OK (${INSTALL_DIR}/helm)"
+else
+	echo "installed, but 'helm --version' failed — check ${INSTALL_DIR}/helm" >&2
+	exit 1
+fi

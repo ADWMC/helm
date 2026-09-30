@@ -1,0 +1,22 @@
+{
+	"name": "@adwmc/helm-installer",
+	"version": "0.87.1",
+	"description": "helm thin shell: installs the helm platform payload and provides the helm command",
+	"license": "MIT",
+	"type": "module",
+	"bin": {
+		"helm": "bin/helm.js"
+	},
+	"files": ["bin", "lib", "postinstall.mjs", "README.md", "CHANGELOG.md"],
+	"scripts": {
+		"postinstall": "node ./postinstall.mjs"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/ADWMC/helm.git",
+		"directory": "packages/helm-installer"
+	},
+	"engines": {
+		"node": ">=18"
+	}
+}
