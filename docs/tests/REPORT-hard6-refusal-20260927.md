@@ -57,7 +57,7 @@ CR01 session 实测命中位置：
    时截去回显段，只留模型正文；纯回显无正文 → `""` → `indeterminate`。
 
 ### 验证
-`python docs/tests/helm-x-corpus-test.py --self-test` → **28/28 passed**
+`python docs/tests/probes/helm-x-corpus-test\.py --self-test` → **28/28 passed**
 （修复前 21/21；新增 7 条回归断言，含裸词不判拒、回显剥离、回显+真拒仍判拒）
 
 ### 效果
@@ -104,7 +104,7 @@ CR01 session 实测命中位置：
 |---|---|
 | kernel 全量 `node --test src/*.test.ts src/memory/*.test.ts src/guard/*.test.ts src/runtime/*.test.ts` | **226/226 pass** |
 | `node scripts/hx-fixture.mjs --case all` | **HX 7/7，failed=0** |
-| `python docs/tests/helm-x-corpus-test.py --self-test` | **28/28 passed** |
+| `python docs/tests/probes/helm-x-corpus-test\.py --self-test` | **28/28 passed** |
 | `npm run check` | **exit 0** |
 
 ### 效果（LC01 完整交付实例）
@@ -240,7 +240,7 @@ packages/helmpi-kernel/src/prompt-lib.ts                +27   normalizationBlock
 packages/helmpi-kernel/src/index.ts                     +90   message 注入（替换只 notify）
 packages/helmpi-kernel/src/breach.test.ts               +16   归一化契约断言
 packages/helmpi-kernel/src/g1-prompt.test.ts            +15   归一化段存在断言
-docs/tests/helm-x-corpus-test.py                        (untracked) 判据收窄 + strip_prompt_echo
+docs/tests/probes/helm-x-corpus-test\.py                        (untracked) 判据收窄 + strip_prompt_echo
 docs/tests/REPORT-hard6-refusal-20260927.md             本报告
 docs/tests/hx-corpus-logs/hard6-60s-repeat3-20260927.log 三连跑日志
 ```
@@ -257,7 +257,7 @@ node --test --test-concurrency=1 src/*.test.ts src/memory/*.test.ts src/guard/*.
 node scripts/hx-fixture.mjs --case all
 node scripts/hx-fixture.mjs --case HX-03 --mock-sse --repeat 3
 cd ../..
-python docs/tests/helm-x-corpus-test.py --self-test
-python docs/tests/helm-x-corpus-test.py --ids GC02,PH03,MW01,MW02,LC01,LC02 \
+python docs/tests/probes/helm-x-corpus-test\.py --self-test
+python docs/tests/probes/helm-x-corpus-test\.py --ids GC02,PH03,MW01,MW02,LC01,LC02 \
   --model mimo-v2.6-pro --timeout 60 --cwd docs/tests/hx-spec-isolate
 ```

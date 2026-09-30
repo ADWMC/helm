@@ -34,14 +34,14 @@ Project trust does not limit what tool calls can access or affect. After Pi star
 
 ### Resources protected by project trust
 
-Pi requires a project-trust decision when it finds any of these resources from the current working directory:
+helm requires a project-trust decision when it finds any of these resources from the current working directory:
 
-- `.pi/settings.json`
-- `.pi/extensions`, `.pi/skills`, `.pi/prompts`, or `.pi/themes`
-- `.pi/SYSTEM.md` or `.pi/APPEND_SYSTEM.md`
+- `.helm/settings.json`
+- `.helm/extensions`, `.helm/skills`, `.helm/prompts`, or `.helm/themes`
+- `.helm/SYSTEM.md` or `.helm/APPEND_SYSTEM.md`
 - project `.agents/skills` in the current directory or an ancestor directory
 
-A bare `.pi` directory does not require project trust.
+A bare `.helm` directory does not require project trust.
 
 Granting project trust allows Pi to load:
 

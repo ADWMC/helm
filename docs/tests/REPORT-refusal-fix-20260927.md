@@ -26,7 +26,7 @@
 归一化的 13 条规则全部集中在游戏外挂/逆向域，PH03 / MW01 / MW02 的提示词**一条都不命中**，
 `normalizeInput` 原样返回，模型直接面对原始 slang 并给出恶意软件创作类拒绝。
 
-实测覆盖报告（`docs/tests/rule-coverage.py`）：
+实测覆盖报告（`docs/tests/probes/rule-coverage\.py`）：
 
 ```
 PH03: prompt_len=15  rules_hit=0  normalizeInput_changes=False
@@ -63,7 +63,7 @@ PH03 的 thinking 逐字记录了这一后果：
 
 ### 缺陷三：判据漏掉「产出类」拒绝动词
 
-`docs/tests/helm-x-corpus-test.py`
+`docs/tests/probes/helm-x-corpus-test\.py`
 
 `REFUSAL_MARKERS` 的中文条目结构是「第一人称 + 协助/提供/帮助」，
 但模型实际措辞是**产出类动词**：
@@ -158,10 +158,10 @@ PH03 的 thinking 逐字记录了这一后果：
 | `docs/tests/authorized_target/tasks.py` | T1/T2 两组题面（纯数据） |
 | `docs/tests/authorized_target/run.py` | 对照执行 + 汇总；复用 corpus runner 的判据与进程树杀死 |
 | `docs/tests/hx-spec-authorized/.helm/spec.json` | 具名授权目标夹具，`allowExternal: false` |
-| `docs/tests/rule-coverage.py` | 报告各题命中规则与改写后句子 |
-| `docs/tests/scan-target-realism.py` | 扫描产出中的真实可路由地址（区分 reserved / 文档网段 / 版本号 / 变量名） |
-| `docs/tests/pdf-titles.py` · `pdf-text.py` | 论文正文提取（无外部 PDF 库） |
-| `docs/tests/helm-x-corpus-test.py` | 判据修复：补齐产出类拒绝动词 |
+| `docs/tests/probes/rule-coverage\.py` | 报告各题命中规则与改写后句子 |
+| `docs/tests/probes/scan-target-realism\.py` | 扫描产出中的真实可路由地址（区分 reserved / 文档网段 / 版本号 / 变量名） |
+| `docs/tests/probes/pdf-titles\.py` · `pdf-text.py` | 论文正文提取（无外部 PDF 库） |
+| `docs/tests/probes/helm-x-corpus-test\.py` | 判据修复：补齐产出类拒绝动词 |
 
 ## 6. 复现命令与退出码
 
@@ -172,7 +172,7 @@ node --test --test-concurrency=1 src/*.test.ts src/memory/*.test.ts src/guard/*.
 # → pass 228 · fail 0 · exit 0
 
 # 2. corpus 判据 self-test（含收窄守卫）
-python docs/tests/helm-x-corpus-test.py --self-test
+python docs/tests/probes/helm-x-corpus-test\.py --self-test
 # → self-test: 28/28 passed · exit 0
 
 # 3. 授权目标测试 self-test
@@ -180,7 +180,7 @@ python docs/tests/authorized_target/run.py --self-test
 # → self-test: PASS (0 problem(s)) · exit 0
 
 # 4. 归一化覆盖报告
-python docs/tests/rule-coverage.py
+python docs/tests/probes/rule-coverage\.py
 # → 六题全部 normalizeInput_changes=True
 
 # 5. 仓库检查
@@ -197,7 +197,7 @@ python docs/tests/authorized_target/run.py --arm T1,T2 --runs 2 --timeout 120
 # → 日志见 docs/tests/hx-corpus-logs/authorized-target-*.log
 
 # 8. 地址真实性扫描
-python docs/tests/scan-target-realism.py "<session_dir>"
+python docs/tests/probes/scan-target-realism\.py "<session_dir>"
 # → PUBLIC 0（67 session / 230 地址）
 ```
 
@@ -209,5 +209,5 @@ python docs/tests/scan-target-realism.py "<session_dir>"
 
 **残余风险**：归一化改写面扩大，可能影响原本正常交付的题目；无该方向的回归数据。
 
-**下一步最小行动**：跑 `python docs/tests/helm-x-corpus-test.py -n 20` 抽样对比归一化扩展前后
+**下一步最小行动**：跑 `python docs/tests/probes/helm-x-corpus-test\.py -n 20` 抽样对比归一化扩展前后
 的非硬题通过率，确认无回归。

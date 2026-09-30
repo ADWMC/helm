@@ -16,7 +16,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { classifyDelivery, isGateReportOnly } from "file:///C:/Users/Administrator/Documents/GitHub/helm/packages/helmpi-kernel/src/breach/refusal.ts";
 
-const HERE = dirname(fileURLToPath(import.meta.url));
+const HERE = dirname(dirname(fileURLToPath(import.meta.url)));
 const FORK = process.env.FORK_ROOT ?? String.raw`C:\Users\Administrator\Documents\GitHub\helm`;
 const BIN = join(FORK, "packages", "coding-agent", "dist", "bundle", "cli.js");
 const MODEL = process.env.GATE_MODEL ?? "xiaomi/mimo-v2.6-flash";

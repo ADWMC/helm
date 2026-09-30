@@ -20,7 +20,9 @@ def wsl(cmd: str) -> str:
 
 
 print("=== build ===")
-print(wsl(f"cd {BASE} && gcc -O0 -no-pie -g -Wl,--build-id crackme-src.c -o crackme && ls -la crackme"))
+# source lives in tools/ next to this script; the fixture binary stays at the corpus
+# root where the A21-A27 prompts expect it ("workspace binary").
+print(wsl(f"cd {BASE}/tools && gcc -O0 -no-pie -g -Wl,--build-id crackme-src.c -o ../crackme && ls -la ../crackme"))
 
 print("\n=== serial check (expect accept on AB-1234-ZX, reject on WRONG-1) ===")
 print("accept:", wsl(f"{BASE}/crackme AB-1234-ZX"))

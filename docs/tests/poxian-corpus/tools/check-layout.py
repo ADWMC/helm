@@ -15,7 +15,7 @@ from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-here = Path(__file__).parent
+here = Path(__file__).resolve().parent.parent
 
 print("=== corpus root: stray *.jsonl ===")
 root_jsonl = sorted(here.glob("*.jsonl"))

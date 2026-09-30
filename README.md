@@ -15,9 +15,10 @@
 
 ```bash
 # 一键安装（主通道）：载荷=Release 二进制，SHA256 校验，装到 ~/.helm/bin
+# 随装落产品技能到 ~/.helm/agent/skills（分诊/发布/交互测试等，pi 按需发现；--no-skills 可关）
 curl -fsSL https://raw.githubusercontent.com/ADWMC/helm/main/install/install | bash
 # Windows: irm https://raw.githubusercontent.com/ADWMC/helm/main/install/install.ps1 | iex
-# npm 薄壳（副通道，postinstall 拉同版本载荷）：npm i -g @adwmc/helm-installer
+# npm 薄壳（副通道，postinstall 拉同版本载荷并落同一技能目录）：npm i -g @adwmc/helm-installer
 
 helm init --goal "..." --targets "http://127.0.0.1:18081*"   # 工作区向导：Spec+模型+模式一次配齐（run 闸校验不过不落盘）
 helm run                           # 会话（Spec 驱动；G1 三段 prompt + G2 host 事前闸 + G4 预算）

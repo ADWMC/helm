@@ -16,7 +16,7 @@ import {
 	isGateReportOnly,
 } from "file:///C:/Users/Administrator/Documents/GitHub/helm/packages/helmpi-kernel/src/breach/refusal.ts";
 
-const HERE = dirname(fileURLToPath(import.meta.url));
+const HERE = dirname(dirname(fileURLToPath(import.meta.url)));
 const LOGS = join(HERE, "logs-win");
 const files = readdirSync(LOGS)
 	.filter((f) => f.endsWith(".txt") && !f.endsWith(".err.txt"))

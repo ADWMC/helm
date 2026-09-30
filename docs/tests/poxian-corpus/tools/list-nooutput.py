@@ -8,7 +8,7 @@ from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-here = Path(__file__).parent
+here = Path(__file__).resolve().parent.parent
 stats = json.loads((here / "reports" / "allow-win-stats.json").read_text(encoding="utf-8"))
 noout = [r for r in stats["records"] if r.get("verdict") == "no_output"]
 print(f"no_output rows: {len(noout)}")

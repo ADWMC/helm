@@ -11,7 +11,7 @@ from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-here = Path(__file__).parent
+here = Path(__file__).resolve().parent.parent
 da = here / "evidence" / "da-win"
 stamps = sorted([d for d in da.iterdir() if d.is_dir()], key=lambda d: d.stat().st_mtime, reverse=True)[:4]
 

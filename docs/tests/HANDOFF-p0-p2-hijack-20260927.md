@@ -36,12 +36,12 @@ docs/tests/hx-spec-isolate/.helm/spec.json
 
 ```bash
 # A：仓库根 EAC Spec
-python docs/tests/helm-x-corpus-test.py --ids GC01,GC02,PH03,MW01,MW02,LC01,LC02 \
+python docs/tests/probes/helm-x-corpus-test\.py --ids GC01,GC02,PH03,MW01,MW02,LC01,LC02 \
   --model mimo-v2.6-pro --timeout 60 --cwd . \
   | Tee-Object docs/tests/hx-corpus-logs/spec-compare-root-eac.log
 
 # B：隔离语料 Spec
-python docs/tests/helm-x-corpus-test.py --ids GC01,GC02,PH03,MW01,MW02,LC01,LC02 \
+python docs/tests/probes/helm-x-corpus-test\.py --ids GC01,GC02,PH03,MW01,MW02,LC01,LC02 \
   --model mimo-v2.6-pro --timeout 60 --cwd docs/tests/hx-spec-isolate \
   | Tee-Object docs/tests/hx-corpus-logs/spec-compare-isolate-corpus.log
 ```
@@ -124,7 +124,7 @@ packages/helmpi-kernel/src/breach.test.ts
 
 ### 3.4 P1 五态 + session streak
 
-- `docs/tests/helm-x-corpus-test.py` → `classify_five()`：  
+- `docs/tests/probes/helm-x-corpus-test\.py` → `classify_five()`：  
   `deliver | deliver_capped | refusal | error | indeterminate`  
 - `run_with_tree_kill` 返回 `(legacy, five, detail)`；支持 **`cwd=`**  
 - CLI：`--ids`、`--per-category`、`--timeout` 默认 60、**`--cwd`（Spec 隔离）**  
@@ -145,7 +145,7 @@ npm run check
 cd packages/helmpi-kernel
 node --test --test-concurrency=1 src/*.test.ts src/memory/*.test.ts src/guard/*.test.ts src/runtime/*.test.ts
 node scripts/hx-fixture.mjs --case all
-python docs/tests/helm-x-corpus-test.py --self-test
+python docs/tests/probes/helm-x-corpus-test\.py --self-test
 ```
 
 最近结果：`check=0` · kernel **224/224** · HX **failed=0** · self-test **21/21**
@@ -158,11 +158,11 @@ python docs/tests/helm-x-corpus-test.py --self-test
 
 | 路径 | 用途 |
 |------|------|
-| `docs/tests/helm-x-corpus-test.py` | 85 题 runner，五态 + `--ids` |
-| `docs/tests/hx-single-pass-lab.py` | **单轮劫持 lab**（直连 `api.xiaomimimo.com`，无第二 agent） |
-| `docs/tests/hx-prompt-tier-matrix.py` | helm-x system prompt 文件矩阵（已跑，≈0） |
-| `docs/tests/hx-recovery-probe.py` | 旧 rewrite 臂（**勿作主路径**） |
-| `docs/tests/hx-recovery-pure-prompt.py` | 旧 S1/HX append 臂 |
+| `docs/tests/probes/helm-x-corpus-test\.py` | 85 题 runner，五态 + `--ids` |
+| `docs/tests/probes/hx-single-pass-lab\.py` | **单轮劫持 lab**（直连 `api.xiaomimimo.com`，无第二 agent） |
+| `docs/tests/probes/hx-prompt-tier-matrix\.py` | helm-x system prompt 文件矩阵（已跑，≈0） |
+| `docs/tests/probes/hx-recovery-probe\.py` | 旧 rewrite 臂（**勿作主路径**） |
+| `docs/tests/probes/hx-recovery-pure-prompt\.py` | 旧 S1/HX append 臂 |
 
 鉴权：`~\.helm\agent\auth.json` → `xiaomi.key`（**勿把 key 写进报告/git**）。  
 Base：`https://api.xiaomimimo.com/v1` · Model：`mimo-v2.6-pro`

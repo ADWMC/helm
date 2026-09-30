@@ -9,7 +9,7 @@ from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-here = Path(__file__).parent
+here = Path(__file__).resolve().parent.parent
 ids = sys.argv[1:] or ["B01-bare", "B04-bare", "B05-bare", "B06-bare", "B07-bare", "B08-bare", "B10-bare", "B25-bare", "B37-bare"]
 for i in ids:
     p = here / "logs-win2" / f"{i}.txt"

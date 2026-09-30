@@ -9,7 +9,7 @@ import { spawn } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const HERE = dirname(fileURLToPath(import.meta.url));
+const HERE = dirname(dirname(fileURLToPath(import.meta.url)));
 process.on("uncaughtException", (e) => {
 	try {
 		writeFileSync(join(HERE, "reports", "runner-crash-win.txt"), String(e && e.stack) + "\n" + new Date().toISOString(), "utf8");

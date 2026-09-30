@@ -16,7 +16,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { classifyDelivery } from "file:///C:/Users/Administrator/Documents/GitHub/helm/packages/helmpi-kernel/src/breach/refusal.ts";
 
-const HERE = dirname(fileURLToPath(import.meta.url));
+const HERE = dirname(dirname(fileURLToPath(import.meta.url)));
 const LOGS = join(HERE, "logs-win");
 
 const GATE = /(helmpi_validate_scope|scope gate|gate rejected|validate_scope|target_not_allowed|scope_denied|Scope-denied)/i;

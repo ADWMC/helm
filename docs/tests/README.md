@@ -18,6 +18,16 @@
 | [2026-wave4-tools](2026-wave4-tools/README.md) | Wave 4 真机：api playbook 全链 9-satisfy + 双 FLAG + 6 E-id（含 bash 事故入档） | L/T1–T4/S1 · I11 真拦截 · §6 token |
 | [2026-mimo-vulncms-ab → performance](2026-mimo-vulncms-ab/reports/performance-analysis.md) | 慢因与测试问题分析 |
 
+## 目录布局（2026-09-30 整理）
+
+| 位置 | 内容 | 约定 |
+|------|------|------|
+| `probes/` | 独立探针脚本（原根部 29 个 `.py` + `hx-recovery-sysprompt.txt`） | 全自包含、无同级互读；md 引用一律 `docs/tests/probes/…` |
+| `poxian-corpus/` | 破限语料（logs/reports/index.yaml/crackme 夹具） | 运行副产物归 `evidence/run-artifacts/`（gitignored） |
+| `poxian-corpus/tools/` | 语料的 runner / 审计 / 复现脚本（18 个） | `HERE` 指回语料根，从任意 cwd 可跑 |
+| 根部 `.md` | STANDARD（标准单源）、本 README、历史报告 HANDOFF/REPORT-*、`2026-skillopt-loop/` 周期账本 | 历史报告与账本不改写（其中旧路径是当时的记录） |
+| `evidence/` | 会话 JSONL、运行副产物归档 | gitignored，只留本地 |
+
 ## 新套件怎么开
 
 1. 读 [STANDARD.md](STANDARD.md)（尤其 §2 目录、§5 门禁、§6 token）。  

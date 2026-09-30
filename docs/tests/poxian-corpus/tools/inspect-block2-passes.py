@@ -13,7 +13,7 @@ from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-here = Path(__file__).parent
+here = Path(__file__).resolve().parent.parent
 stats = json.loads((here / "reports" / "block-win2-stats.json").read_text(encoding="utf-8"))
 passes = [r for r in stats["records"] if r.get("verdict") == "pass" and not r.get("skipped")]
 print(f"auto-pass rows: {len(passes)}")

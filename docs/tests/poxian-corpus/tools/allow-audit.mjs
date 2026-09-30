@@ -11,7 +11,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { classifyDelivery, isGateReportOnly, shouldRecover } from "file:///C:/Users/Administrator/Documents/GitHub/helm/packages/helmpi-kernel/src/breach/refusal.ts";
 
-const HERE = dirname(fileURLToPath(import.meta.url));
+const HERE = dirname(dirname(fileURLToPath(import.meta.url)));
 const LOGS = join(HERE, "logs-allow");
 if (!existsSync(LOGS)) {
 	console.log("logs-allow/ not present — run run-allow-win.mjs first");

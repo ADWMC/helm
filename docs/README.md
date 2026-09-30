@@ -20,10 +20,11 @@ helm 是基于 Pi 二改的自主渗透与逆向 Agent。唯一活动设计基�
 | [competitor-equivalence.md](competitor-equivalence.md) | 竞品对标（历史） | 能力对齐核验；**运行时不读** |
 | [PLAN-product.md](PLAN-product.md) | 完整产品规格（历史大文件，120 KB） | 查规格条目；**非活动基线** |
 | [plan-helmd-methodology-integration.md](plan-helmd-methodology-integration.md) | helm-d 方法论集成方案 | 看 references 移植与阶段契约的推理留痕 |
+| [HELMD-FUSION-PLAN.md](HELMD-FUSION-PLAN.md) | **helm × helm-d 融合方案（待拍板）** | 定"入口怎么更高级、旧痛点怎么闭合" |
 | [solpi-compat-0.85.1-to-0.87.1.md](solpi-compat-0.85.1-to-0.87.1.md) | SoL-Pi 版本兼容记录 | 升 SoL-Pi 时对照 |
 | [ab-mimo-vulncms.md](ab-mimo-vulncms.md) | Mimo/VulnCMS A/B 实验摘要 | 看实测数据 |
 | [agent-capability-comparison.md](agent-capability-comparison.md) | Agent 能力横向对比 | 定位自身能力边界 |
-| `../references/index.md` | Agent 领域知识总入口 | 会话按需 |
+| `../packages/helmpi-kernel/references/index.md` | Agent 领域知识总入口（**知识体在 kernel 包内**，仓库根无 `references/`） | 会话按需 |
 | `reference/repos/**` | 第三方克隆 | 仅人类调研；**不入发布、不进运行时** |
 
 > **没有 `DESIGN.md`。** 本文档地图曾引用根目录 `DESIGN.md`，该文件从未存在于本仓库的

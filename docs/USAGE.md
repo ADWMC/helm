@@ -35,6 +35,11 @@ npm i -g @adwmc/helm-installer
 钉版：`HELM_VERSION=x.y.z`（或 `--version` / `$env:HELM_VERSION`）；
 改安装目录：`HELM_INSTALL_DIR`；只看不装：`--dry-run`。
 
+**产品技能随装**：载荷里的 `skills/*.md`（分诊 `sample-intake`、`release`、`interactive-testing`、`web-fetch`、`add-llm-provider`）会被复制到宿主扫描的用户级技能目录
+`%USERPROFILE%\.helm\agent\skills`（Linux/macOS `~/.helm/agent/skills`），安装按内容比对、重跑幂等。
+关掉：`--no-skills` / `-NoSkills` / `HELM_INSTALL_SKILLS=0`；改落点：`HELM_CODING_AGENT_DIR`。
+技能源在仓库 `.helm/skills/`（开发态同目录即被发现）。
+
 **插件安装（挂进已有 pi/omp 会话）：**
 
 ```powershell

@@ -37,7 +37,8 @@ const loader = new DefaultResourceLoader({
 });
 await loader.reload();
 
-// Discover all skills from cwd/.pi/skills, ~/.pi/agent/skills, etc.
+// Discover all skills from cwd/.helm/skills, ~/.helm/agent/skills, ~/.agents/skills, etc.
+// (Project and agent directory names come from piConfig.configDir; this build uses .helm.)
 const { skills: allSkills, diagnostics } = loader.getSkills();
 console.log(
 	"Discovered skills:",

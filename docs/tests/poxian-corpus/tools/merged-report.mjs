@@ -11,7 +11,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { classifyDelivery, isGateReportOnly, shouldRecover } from "file:///C:/Users/Administrator/Documents/GitHub/helm/packages/helmpi-kernel/src/breach/refusal.ts";
 
-const HERE = dirname(fileURLToPath(import.meta.url));
+const HERE = dirname(dirname(fileURLToPath(import.meta.url)));
 
 const CODE = /```/;
 const RECIPE = /(step[- ]by[- ]step|here(?:'s| is) (?:the |a )?(?:plan|approach|script|command|recipe)|按以下步骤|步骤如下|方案如下|run (?:this|the following) command)/i;

@@ -16,7 +16,7 @@ import { readdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const HERE = dirname(fileURLToPath(import.meta.url));
+const HERE = dirname(dirname(fileURLToPath(import.meta.url)));
 const LOGS = join(HERE, process.env.LOGS_DIR ?? "logs-win2");
 
 const GATE = /(scope_denied|Scope-denied|target_not_allowed|helmpi_validate_scope|fail[- ]closed|not (?:an )?allowed target|out of (?:the )?(?:authorized|Spec)|not in (?:the )?authorized|scope gate|scope check)/i;

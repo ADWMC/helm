@@ -1,12 +1,16 @@
 # Configuration
 
-Pi supports user-level and project configuration. User-level configuration lives in the agent directory, which defaults to `~/.pi/agent`. Project configuration lives in `.pi` under the working directory and loads after [project trust](security.md#understand-project-trust) is granted. The only exception is `sessionDir`, which Pi reads before resolving trust so it can locate sessions.
+This build is helm (a Pi fork). The config directory name comes from `piConfig.configDir` in the
+package manifest and is `.helm` here (upstream Pi uses `.pi`), so the paths below are shown as
+`.helm/…`; substitute your build's value if you change `piConfig.configDir`.
 
-In interactive mode, use `/settings` to change common preferences. For other options, ask Pi to update the configuration or edit the relevant files directly. Run `/reload` after manually changing settings, keybindings, instructions, or resources.
+helm supports user-level and project configuration. User-level configuration lives in the agent directory, which defaults to `~/.helm/agent`. Project configuration lives in `.helm` under the working directory and loads after [project trust](security.md#understand-project-trust) is granted. The only exception is `sessionDir`, which helm reads before resolving trust so it can locate sessions.
+
+In interactive mode, use `/settings` to change common preferences. For other options, ask helm to update the configuration or edit the relevant files directly. Run `/reload` after manually changing settings, keybindings, instructions, or resources.
 
 ## Agent directory
 
-The agent directory is shown as `<agent-dir>` below. Set its location with the `PI_CODING_AGENT_DIR` environment variable or the SDK's [`agentDir`](sdk.md) option.
+The agent directory is shown as `<agent-dir>` below. Set its location with the `HELM_CODING_AGENT_DIR` environment variable or the SDK's [`agentDir`](sdk.md) option.
 
 | Path | Responsibility |
 |---|---|
@@ -22,17 +26,17 @@ The agent directory is shown as `<agent-dir>` below. Set its location with the `
 | `<agent-dir>/prompts/` | User [prompt templates](prompt-templates.md) exposed as slash commands. |
 | `<agent-dir>/themes/` | User [theme](themes.md) files. |
 
-## Project `.pi` directory
+## Project `.helm` directory
 
 | Path | Responsibility |
 |---|---|
-| `.pi/settings.json` | Project-level [settings](settings.md), resource paths, and Pi package declarations. |
-| `.pi/SYSTEM.md` | Replaces the system prompt for the project. |
-| `.pi/APPEND_SYSTEM.md` | Adds project-specific instructions to the system prompt. |
-| `.pi/extensions/` | Project extensions. |
-| `.pi/skills/` | Project skills and supporting files. |
-| `.pi/prompts/` | Project prompt templates exposed as slash commands. |
-| `.pi/themes/` | Project theme files. |
+| `.helm/settings.json` | Project-level [settings](settings.md), resource paths, and helm package declarations. |
+| `.helm/SYSTEM.md` | Replaces the system prompt for the project. |
+| `.helm/APPEND_SYSTEM.md` | Adds project-specific instructions to the system prompt. |
+| `.helm/extensions/` | Project extensions. |
+| `.helm/skills/` | Project skills (each `*.md` with `name`/`description` frontmatter, or `<name>/SKILL.md`). |
+| `.helm/prompts/` | Project prompt templates exposed as slash commands. |
+| `.helm/themes/` | Project theme files. |
 
 For `SYSTEM.md` and `APPEND_SYSTEM.md`, the trusted project file takes precedence over the corresponding agent-directory file. Files with the same name are not combined.
 
