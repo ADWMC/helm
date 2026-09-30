@@ -33,7 +33,11 @@ function metadataFromHeader(header: JsonlStorageHeader, path: string, modifiedAt
 	};
 }
 
-function sessionDirectoryName(cwd: string): string {
+/**
+ * Sessions directory name for a cwd. Exported so tests and foreign-file fixtures can
+ * derive the same encoding instead of hardcoding a POSIX-shaped name.
+ */
+export function sessionDirectoryName(cwd: string): string {
 	return `--${cwd.replace(/^[/\\]/, "").replace(/[/\\:]/g, "-")}--`;
 }
 

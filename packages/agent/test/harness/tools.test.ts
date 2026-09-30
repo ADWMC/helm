@@ -677,7 +677,11 @@ describe("AgentHarness tools", () => {
 				shellEnv: { PI_BASH_PREPARE_INHERITED: "inherited" },
 			});
 			getOrThrow(await env.createDir("workspace", undefined, BACKGROUND_CONTEXT));
-			const context = { env, workspace: `${env.cwd}/workspace` };
+			// Join through the env so the workspace uses the host separator, not a hardcoded "/".
+			const context = {
+				env,
+				workspace: getOrThrow(await env.joinPath([env.cwd, "workspace"], BACKGROUND_CONTEXT)),
+			};
 			const controller = new AbortController();
 			let receivedContext: typeof context | undefined;
 			let receivedSignal: AbortSignal | undefined;
@@ -704,9 +708,12 @@ describe("AgentHarness tools", () => {
 
 			expect(receivedContext).toBe(context);
 			expect(receivedSignal).toBe(controller.signal);
-			expect(textOutput(result)).toBe(
-				`ready::explicit:${getOrThrow(await env.canonicalPath(context.workspace, BACKGROUND_CONTEXT))}`,
-			);
+			// The shell reports $PWD in its own path flavor (bash on Windows prints /tmp/... for a
+			// drive path), so assert the parts that are flavor-independent: the prefix, that the
+			// inherited variable was NOT passed, the explicit one was, and the cwd is the workspace.
+			const output = textOutput(result);
+			expect(output.startsWith("ready::explicit:")).toBe(true);
+			expect(output.endsWith("/workspace") || output.endsWith("\\workspace")).toBe(true);
 		});
 
 		it("supports command prefixes", async () => {

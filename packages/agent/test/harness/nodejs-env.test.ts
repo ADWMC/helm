@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { access, chmod, realpath, symlink } from "node:fs/promises";
 import { homedir } from "node:os";
-import { delimiter, join } from "node:path";
+import { basename, delimiter, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 import { BACKGROUND_CONTEXT, withAbortSignal } from "../../src/harness/context.ts";
@@ -334,7 +334,12 @@ describe("NodeExecutionEnv", () => {
 			BACKGROUND_CONTEXT,
 		);
 		const result = getOrThrow(collected.result);
-		expect(collected.output?.text).toBe(`${await realpath(root)}:ok`);
+		// The shell reports its cwd in its own path flavor (a POSIX shell on Windows prints
+		// /c/... or /tmp/...), so assert the semantics: it ran in the requested directory
+		// (the temp dir name is unique per test) and saw the env override.
+		const [reportedCwd = "", override = ""] = (collected.output?.text ?? "").split(":");
+		expect(override).toBe("ok");
+		expect(reportedCwd.endsWith(basename(root))).toBe(true);
 		expect(result.exitCode).toBe(0);
 	});
 
