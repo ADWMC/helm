@@ -14,13 +14,16 @@
 ## Quickstart
 
 ```bash
-npm i -g @adwmc/helm-coding-agent     # bins: helm · helmpi（等价别名）· pi
-helm spec init                        # 生成 .helm/spec.json（L1–L6 lint 即时提示）
-$EDITOR .helm/spec.json               # allowedTargets / maxTokens / diagnosticSet（缺=拒进 run）
-helm run                              # 会话（Spec 驱动;G1 三段 prompt + G2 host 事前闸 + G4 预算）
-helm validate-scope <target>          # 事前查靶（3=拒, fail-closed; 2=spec 非法; 0=放行）
-helm report                           # REPORT.md + REPORT.json（--sarif 另出 SARIF 2.1.0）
-helm doctor                           # 工具链探测 → 写 .helm/tool-memory.db
+# 一键安装（主通道）：载荷=Release 二进制，SHA256 校验，装到 ~/.helm/bin
+curl -fsSL https://raw.githubusercontent.com/ADWMC/helm/main/install/install | bash
+# Windows: irm https://raw.githubusercontent.com/ADWMC/helm/main/install/install.ps1 | iex
+# npm 薄壳（副通道，postinstall 拉同版本载荷）：npm i -g @adwmc/helm-installer
+
+helm init --goal "..." --targets "http://127.0.0.1:18081*"   # 工作区向导：Spec+模型+模式一次配齐（run 闸校验不过不落盘）
+helm run                           # 会话（Spec 驱动；G1 三段 prompt + G2 host 事前闸 + G4 预算）
+helm validate-scope <target>       # 事前查靶（3=拒, fail-closed; 2=spec 非法; 0=放行）
+helm report                        # REPORT.md + REPORT.json（--sarif 另出 SARIF 2.1.0）
+helm doctor                        # 工具链探测 → 写 .helm/tool-memory.db
 ```
 
 ## Exit 语义（机读）

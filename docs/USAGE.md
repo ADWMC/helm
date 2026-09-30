@@ -15,6 +15,28 @@
 
 ### 1.2 安装 helm-pi
 
+**独立安装（一键脚本 / npm 薄壳）：**
+
+```powershell
+# Windows（装到 %USERPROFILE%\.helm\bin 并加入用户 PATH；SHA256 校验）
+irm https://raw.githubusercontent.com/ADWMC/helm/main/install/install.ps1 | iex
+```
+
+```bash
+# macOS / Linux（装到 ~/.helm/bin 并写入 shell profile）
+curl -fsSL https://raw.githubusercontent.com/ADWMC/helm/main/install/install | bash
+```
+
+```powershell
+# npm 薄壳（postinstall 拉同版本载荷，一样走 SHA256 校验）
+npm i -g @adwmc/helm-installer
+```
+
+钉版：`HELM_VERSION=x.y.z`（或 `--version` / `$env:HELM_VERSION`）；
+改安装目录：`HELM_INSTALL_DIR`；只看不装：`--dry-run`。
+
+**插件安装（挂进已有 pi/omp 会话）：**
+
 ```powershell
 cd C:\Users\Administrator\Documents\GitHub\helm-pi
 npm install
@@ -51,6 +73,39 @@ helmpi
 ```
 
 应返回：`helmpi online. Analyst active. Awaiting task.`
+
+### 1.4 初始化工作区（`helm init` 向导）
+
+新工作区一次配齐 **Spec / 模型 / 强度档**，并用与 run 闸完全相同的校验
+（`validateHelmSpec` + `lintHelmSpec`）把关：**写出来的 Spec 一定能过 `helm run`**，
+不合格就整份拒绝、一条错误不落盘。
+
+```powershell
+# 交互（缺啥问啥）
+helm init
+
+# 非交互（脚本/CI）
+helm init `
+  --goal "Enumerate the endpoints of http://127.0.0.1:18081/ and report their status codes" `
+  --targets "http://127.0.0.1:18081*" `
+  --diagnostics "status codes" `
+  --high-risk deny --max-tokens 500000 `
+  --mode full --model xiaomi/mimo-v2.6-flash
+```
+
+| 参数 | 说明 |
+|------|------|
+| `--goal` | 一句话目标；L1 要求 ≥16 字符且含可测锚点（数字/端点/状态码/发现类词） |
+| `--targets` | 逗号分隔白名单：精确串 / `*` 通配 / CIDR |
+| `--diagnostics` | 必查属性集；**L3 要求其中的词出现在 goal 里**（可测 goal 必填，L2） |
+| `--high-risk` | `deny`（默认）/`hitl`/`allow` |
+| `--max-tokens` | 单次 Run 预算（默认 500000） |
+| `--allow-external` | 允许非私网目标（默认关） |
+| `--mode` | `lite`/`full`/`deep` → 写 `~/.helm-pi/analysis-mode` |
+| `--model` | `provider/modelId` → 写 settings 默认模型 |
+| `--force` | 覆盖已存在的 spec |
+
+写完即打印校验结论与下一步命令（`helm validate-scope` / `helm run`）。
 
 ---
 
