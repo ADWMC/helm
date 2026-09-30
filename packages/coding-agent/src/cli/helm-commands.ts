@@ -7,7 +7,7 @@ import { homedir } from "node:os";
  * process.exitCode where applicable); return false otherwise so the host falls
  * through to its normal flow untouched.
  *
- * Commands: spec init · run · resume · report · validate-scope ·
+ * Commands: init · spec init · run · resume · report · validate-scope ·
  *           attack-coverage · doctor   (`helmpi` is the same binary).
  * Stubs print honest "not yet" states instead of pretending coverage:
  * doctor probes land with W1-T06 (tool-memory), attack data with W3.
@@ -22,8 +22,10 @@ import { Ledger } from "@adwmc/helm-kernel/ledger";
 import { openToolMemory } from "@adwmc/helm-kernel/memory";
 import { validateScopeQuery } from "@adwmc/helm-kernel/scope";
 import { lintHelmSpec } from "@adwmc/helm-kernel/spec-lint";
+import { initSummary, runHelmInit } from "./helm-init.ts";
 
 const HELM_COMMANDS: ReadonlySet<string> = new Set([
+	"init",
 	"spec",
 	"run",
 	"resume",
@@ -56,6 +58,21 @@ export async function runHelmCommand(args: string[], cwd: string = process.cwd()
 	const specPath = join(helmDir, "spec.json");
 
 	switch (cmd) {
+		case "init": {
+			// Workspace wizard: Spec + model + mode, validated with the same checkers
+			// the run gate uses — it never writes a Spec the gate would refuse.
+			const r = await runHelmInit(args.slice(1), cwd);
+			if (r.ok) {
+				console.log(initSummary(r, cwd));
+			} else {
+				console.error("helm init failed:");
+				for (const e of r.errors) console.error(`  ${e}`);
+				if (r.written.length === 0) console.error("nothing was written.");
+				else for (const w of r.written) console.error(`  already wrote ${w}`);
+				process.exitCode = r.exitCode;
+			}
+			return true;
+		}
 		case "spec": {
 			if (args[1] !== "init") {
 				console.error("usage: helm spec init [--force]");

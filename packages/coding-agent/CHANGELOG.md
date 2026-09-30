@@ -10,6 +10,7 @@
 - Added the `provider_stream_event` extension event for observing parsed provider events before normalization, with an opt-in `/debug-provider` example viewer ([#9784](https://github.com/earendil-works/pi/issues/9784)).
 - Added a show/hide toggle (`H`) in HTML exports for custom messages marked `display: false`. Messages remain hidden by default and can also be revealed from the sidebar ([#8896](https://github.com/earendil-works/pi/issues/8896)).
 - Added the `after_stream` extension event, fired once per settled assistant message before its tool calls are dispatched (dispatched from the `Agent.afterStream` hook). Observe-only: handlers cannot rewrite the message or block execution.
+- Added the `helm init` workspace wizard: one command sets the Spec (`--goal/--targets/--diagnostics/--high-risk/--max-tokens`), the default model (`--model provider/modelId`) and the analysis mode (`--mode`). It refuses to write a Spec the run gate would reject — `validateHelmSpec` and `lintHelmSpec` (L1-L6) must both pass first, with every failing rule named and nothing written on failure. Interactive prompts fill only the missing values; every value also has a flag for scripts/CI.
 
 ### Fixed
 
