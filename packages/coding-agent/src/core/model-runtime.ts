@@ -60,7 +60,7 @@ import {
 	classifierErrorResult,
 	imageErrorResult,
 } from "@adwmc/helm-ai/utils/model-operations";
-import { getAgentDir } from "../config.ts";
+import { getAgentDir, isOfflineModeEnabled } from "../config.ts";
 import { operationSignal, raceWithAbortSignal } from "../utils/abort.ts";
 import { AuthStorage as DefaultAuthStorage } from "./auth-storage.ts";
 import { ModelConfig } from "./model-config.ts";
@@ -216,7 +216,7 @@ export class ModelRuntime implements Models {
 			modelsPath,
 			modelsStore,
 			providers,
-			process.env.PI_OFFLINE === undefined,
+			!isOfflineModeEnabled(),
 		);
 		runtime.configureRadiusProviders();
 		runtime.rebuildProviders();

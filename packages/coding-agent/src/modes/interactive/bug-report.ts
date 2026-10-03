@@ -1,6 +1,7 @@
 import * as path from "node:path";
 import type { Container, EditorComponent, TUI } from "@adwmc/helm-tui";
 import { getAuthCredential } from "../../cli/auth-command.ts";
+import { isOfflineModeEnabled } from "../../config.ts";
 import type { AgentSession } from "../../core/agent-session.ts";
 import {
 	BUG_REPORT_CUSTOM_ENTRY_TYPE,
@@ -53,7 +54,7 @@ export async function reportBug(context: BugReportContext, initialHint?: string)
 		context.showStatus("Bug report cancelled");
 		return;
 	}
-	if (options.delivery === "upload" && process.env.PI_OFFLINE) {
+	if (options.delivery === "upload" && isOfflineModeEnabled()) {
 		context.showError("Uploading bug reports requires online mode. Use Export as Zip instead.");
 		return;
 	}

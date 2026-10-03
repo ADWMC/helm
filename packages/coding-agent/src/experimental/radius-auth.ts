@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { normalizeRadiusGatewayUrl } from "@adwmc/helm-ai/providers/radius-config";
 import { getAuthCredential } from "../cli/auth-command.ts";
 import type { AuthInput } from "../cli/experimental/command-options.ts";
+import { isOfflineModeEnabled } from "../config.ts";
 import { ModelRuntime } from "../core/model-runtime.ts";
 import { getRadiusGatewayUrl } from "../core/radius.ts";
 import { resolvePath } from "../utils/paths.ts";
@@ -33,7 +34,7 @@ export class RadiusRelayAuthResolver {
 		readonly signal?: AbortSignal;
 	}): Promise<RadiusRelayAuth | undefined> {
 		options.signal?.throwIfAborted();
-		if (process.env.PI_OFFLINE !== undefined) {
+		if (isOfflineModeEnabled()) {
 			if (options.required) throw new Error("Radius relay connections are unavailable in offline mode");
 			return undefined;
 		}

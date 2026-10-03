@@ -59,8 +59,7 @@ export function redactJsonValue(value: unknown): unknown {
 }
 
 function redactSettings(settings: Settings): Settings {
-	const { trackingId: _trackingId, ...rest } = settings;
-	return redactJsonValue(rest) as Settings;
+	return redactJsonValue(settings) as Settings;
 }
 
 function collectEnvironment() {

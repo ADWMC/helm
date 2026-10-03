@@ -145,6 +145,5 @@ Resource arrays support glob exclusions with `!pattern`, exact inclusion with `+
 | Setting | Type | Default | Description |
 |---|---|---|---|
 | `collapseChangelog` | boolean | `false` | Show a condensed changelog after an update. |
-| `enableInstallTelemetry` | boolean | `true` | Enable anonymous install/update reporting and selected provider attribution headers. Does not control update checks. |
-| `enableAnalytics` | boolean | `false` | Opt in to analytics data sharing. Currently used only by the experimental first-run setup. |
+| `enableInstallTelemetry` | boolean | `true` | Declare identity headers (referer, title, user-agent) to third-party model providers. No usage data is sent. Does not control update checks. |
 | `warnings.anthropicExtraUsage` | boolean | `true` | Warn when Anthropic subscription authentication may use paid extra usage. |
