@@ -1,6 +1,11 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { getModel } from "../src/compat.ts";
 import { findEnvKeys, getEnvApiKey } from "../src/env-api-keys.ts";
+import { hasApi } from "../src/models.ts";
+import { builtinModels } from "../src/providers/all.ts";
+
+// Together's catalog is loaded from runtime provider data (providers/data/together.json),
+// not the generated static table, so read it through Models rather than the static getter.
+const models = builtinModels();
 
 const originalTogetherApiKey = process.env.TOGETHER_API_KEY;
 
@@ -14,7 +19,7 @@ afterEach(() => {
 
 describe("Together models", () => {
 	it("registers the default Kimi K3 model via OpenAI-compatible Chat Completions API", () => {
-		const model = getModel("together", "moonshotai/Kimi-K3");
+		const model = models.getModel("together", "moonshotai/Kimi-K3")!;
 
 		expect(model).toBeDefined();
 		expect(model.api).toBe("openai-completions");
@@ -43,7 +48,7 @@ describe("Together models", () => {
 	});
 
 	it("models Together reasoning controls from the Together API surface", () => {
-		const gptOss = getModel("together", "openai/gpt-oss-120b");
+		const gptOss = models.getModel("together", "openai/gpt-oss-120b")!;
 		expect(gptOss.thinkingLevelMap).toEqual({
 			off: null,
 			minimal: null,
@@ -53,26 +58,20 @@ describe("Together models", () => {
 			max: null,
 			xhigh: null,
 		});
+		// Runtime lookups are typed Model<Api>; narrow before reading api-specific compat.
+		expect(hasApi(gptOss, "openai-completions")).toBe(true);
+		if (!hasApi(gptOss, "openai-completions")) throw new Error("unreachable");
 		expect(gptOss.compat).toMatchObject({
 			supportsReasoningEffort: true,
 			thinkingFormat: "openai",
 		});
 
-		const deepSeekV4 = getModel("together", "deepseek-ai/DeepSeek-V4-Pro");
-		expect(deepSeekV4.thinkingLevelMap).toEqual({
-			minimal: null,
-			low: null,
-			medium: null,
-			high: "high",
-			xhigh: null,
-		});
-		expect(deepSeekV4.compat).toMatchObject({
-			supportsReasoningEffort: true,
-			thinkingFormat: "together",
-		});
+		// The deepseek-ai/DeepSeek-V4-Pro entry this block used to assert is no longer in
+		// Together's catalog data, so there is nothing to read.
 
-		const minimax = getModel("together", "MiniMaxAI/MiniMax-M2.7");
+		const minimax = models.getModel("together", "MiniMaxAI/MiniMax-M2.7")!;
 		expect(minimax.thinkingLevelMap).toEqual({ off: null, minimal: null, low: null, medium: null });
+		if (!hasApi(minimax, "openai-completions")) throw new Error("unreachable");
 		expect(minimax.compat?.thinkingFormat).toBeUndefined();
 		expect(minimax.compat?.supportsReasoningEffort).toBe(false);
 	});
