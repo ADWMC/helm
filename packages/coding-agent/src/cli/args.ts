@@ -333,7 +333,7 @@ ${chalk.bold("Options:")}
   --tui-mode <mode>              TUI mode: regular (default) or fullscreen
   --approve, -a                  Trust project-local files for this run
   --no-approve, -na              Ignore project-local files for this run
-  --offline                      Disable startup network operations (same as PI_OFFLINE=1)
+  --offline                      Disable startup network operations (same as HELM_OFFLINE=1)
   --                             End option parsing; treat remaining arguments as messages/files
   --help, -h                     Show this help
   --version, -v                  Show version number
@@ -449,9 +449,12 @@ ${chalk.bold("Environment Variables:")}
   ${ENV_AGENT_DIR.padEnd(32)} - Config directory (default: ~/${CONFIG_DIR_NAME}/agent)
   ${ENV_SESSION_DIR.padEnd(32)} - Session storage directory (overridden by --session-dir)
   PI_PACKAGE_DIR                   - Override package directory (for Nix/Guix store paths)
-  PI_OFFLINE                       - Disable startup network operations when set to 1/true/yes
-  PI_TELEMETRY                     - Override install telemetry when set to 1/true/yes or 0/false/no
-  PI_SHARE_VIEWER_URL              - Base URL for /share command (default: https://pi.dev/session/)
+  HELM_OFFLINE                     - Disable startup network operations when set to 1/true/yes (legacy: PI_OFFLINE)
+  HELM_TELEMETRY                   - Override provider attribution headers when set to 1/true/yes or 0/false/no
+  HELM_SHARE_VIEWER_URL            - Base URL for /share command (default: https://gist.github.com/)
+  HELM_RELEASE_API_BASE            - Release source for update checks (default: the ADWMC/helm repository)
+  HELM_CATALOG_BASE_URL            - Optional remote model-catalog overlay (unset: built-in catalog only)
+  HELM_RADIUS_GATEWAY              - Gateway for the radius provider (unset: must come from the credential)
 
 ${chalk.bold("Built-in Tool Names:")}
   read       - Read file contents

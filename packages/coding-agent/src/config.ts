@@ -338,7 +338,7 @@ export function getSelfUpdateUnavailableInstruction(
 	const method = detectInstallMethod();
 	const target = normalizeSelfUpdatePackageTarget(updatePackageTarget);
 	if (method === "bun-binary") {
-		return `Download from: https://github.com/earendil-works/pi/releases/latest`;
+		return `Download from: https://github.com/ADWMC/helm/releases/latest`;
 	}
 	const command = getSelfUpdateCommandForMethod(method, packageName, target, npmCommand);
 	if (command) {
@@ -508,16 +508,37 @@ export const VERSION: string = pkg.version || "0.0.0";
 // e.g., HELM_CODING_AGENT_DIR / HELM_CODING_AGENT_SESSION_DIR.
 export const ENV_AGENT_DIR = "HELM_CODING_AGENT_DIR";
 export const ENV_SESSION_DIR = "HELM_CODING_AGENT_SESSION_DIR";
+export const ENV_OFFLINE = "HELM_OFFLINE";
+export const ENV_SKIP_VERSION_CHECK = "HELM_SKIP_VERSION_CHECK";
+
+function isTruthyEnvValue(value: string | undefined): boolean {
+	if (!value) return false;
+	const normalized = value.trim().toLowerCase();
+	return normalized === "1" || normalized === "true" || normalized === "yes";
+}
+
+/**
+ * Whether startup network operations are disabled.
+ *
+ * One reader for the whole app: this was duplicated in package-manager and tools-manager,
+ * which is how the two drifted apart from the flag documented in the CLI help. The legacy
+ * PI_OFFLINE name is still honoured so existing scripts do not start making network calls.
+ */
+export function isOfflineModeEnabled(): boolean {
+	return isTruthyEnvValue(process.env.ENV_OFFLINE) || isTruthyEnvValue(process.env.PI_OFFLINE);
+}
 
 export function expandTildePath(path: string): string {
 	return normalizePath(path);
 }
 
-const DEFAULT_SHARE_VIEWER_URL = "https://pi.dev/session/";
+// Sharing uploads a gist and shows it through a viewer. helm has no viewer service of
+// its own, so the default points at the gist itself; set HELM_SHARE_VIEWER_URL to use one.
+const DEFAULT_SHARE_VIEWER_URL = "https://gist.github.com/";
 
 /** Get the share viewer URL for a gist ID. */
 export function getShareViewerUrl(gistId: string): string {
-	const baseUrl = process.env.PI_SHARE_VIEWER_URL || DEFAULT_SHARE_VIEWER_URL;
+	const baseUrl = process.env.HELM_SHARE_VIEWER_URL || DEFAULT_SHARE_VIEWER_URL;
 	return `${baseUrl}#${gistId}`;
 }
 

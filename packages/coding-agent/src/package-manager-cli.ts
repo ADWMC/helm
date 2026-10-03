@@ -47,7 +47,7 @@ export type PackageCommand = "install" | "remove" | "update" | "list";
 
 type UpdateTarget = { type: "all" } | { type: "self" } | { type: "extensions"; source?: string } | { type: "models" };
 
-const DEFAULT_INSTALLER_API_BASE = "https://pi.dev/api/installer/releases";
+const DEFAULT_INSTALLER_API_BASE = "https://api.github.com/repos/ADWMC/helm/releases/latest";
 const MANAGED_INSTALL_MARKER = "managed-install.json";
 const MANAGED_RELEASE_VERSION_RE = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 
@@ -186,10 +186,11 @@ async function runManagedSelfUpdate(managedRoot: string, version: string): Promi
 	let stageDir: string | undefined;
 	try {
 		cleanupManagedStaging(managedRoot);
-		const installerApiBase = (process.env.PI_INSTALLER_API_BASE?.trim() || DEFAULT_INSTALLER_API_BASE).replace(
-			/\/+$/,
-			"",
-		);
+		const installerApiBase = (
+			process.env.HELM_INSTALLER_API_BASE?.trim() ||
+			process.env.PI_INSTALLER_API_BASE?.trim() ||
+			DEFAULT_INSTALLER_API_BASE
+		).replace(/\/+$/, "");
 		const releaseUrl = `${installerApiBase}/${encodeURIComponent(version)}`;
 		const stagingRoot = join(managedRoot, "staging");
 		const releasesRoot = join(managedRoot, "releases");
@@ -672,9 +673,9 @@ async function getSelfUpdatePlan(force: boolean): Promise<SelfUpdatePlan> {
 		throw new Error(`Could not determine latest ${APP_NAME} version.`);
 	}
 
-	const packageName = latestRelease.packageName ?? PACKAGE_NAME;
+	const packageName = PACKAGE_NAME;
 	const installSpec = `${packageName}@${latestRelease.version}`;
-	if (force || packageName !== PACKAGE_NAME || isNewerPackageVersion(latestRelease.version, VERSION)) {
+	if (force || isNewerPackageVersion(latestRelease.version, VERSION)) {
 		return {
 			packageName,
 			installSpec,

@@ -34,7 +34,17 @@ import { listModels } from "./cli/list-models.ts";
 import { createProjectTrustContext } from "./cli/project-trust.ts";
 import { selectSession } from "./cli/session-picker.ts";
 import { shouldRunFirstTimeSetup, showFirstTimeSetup, showStartupSelector } from "./cli/startup-ui.ts";
-import { APP_NAME, ENV_SESSION_DIR, expandTildePath, getAgentDir, getPackageDir, VERSION } from "./config.ts";
+import {
+	APP_NAME,
+	ENV_OFFLINE,
+	ENV_SESSION_DIR,
+	ENV_SKIP_VERSION_CHECK,
+	expandTildePath,
+	getAgentDir,
+	getPackageDir,
+	isOfflineModeEnabled,
+	VERSION,
+} from "./config.ts";
 import { type CreateAgentSessionRuntimeFactory, createAgentSessionRuntime } from "./core/agent-session-runtime.ts";
 import {
 	type AgentSessionRuntimeDiagnostic,
@@ -568,10 +578,10 @@ export interface MainOptions {
 export async function main(args: string[], options?: MainOptions) {
 	resetTimings();
 	const extensionFactories = [...builtInExtensions, ...(options?.extensionFactories ?? [])];
-	const offlineMode = args.includes("--offline") || isTruthyEnvFlag(process.env.PI_OFFLINE);
+	const offlineMode = args.includes("--offline") || isOfflineModeEnabled();
 	if (offlineMode) {
-		process.env.PI_OFFLINE = "1";
-		process.env.PI_SKIP_VERSION_CHECK = "1";
+		process.env[ENV_OFFLINE] = "1";
+		process.env[ENV_SKIP_VERSION_CHECK] = "1";
 	}
 
 	if (await runAuthCommand(args)) {

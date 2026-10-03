@@ -8,7 +8,14 @@ export interface ChangelogEntry {
 	content: string;
 }
 
-const GITHUB_REPO = "earendil-works/pi";
+/**
+ * Repository the changelog's relative links resolve against.
+ *
+ * Links are rewritten into absolute URLs for the TUI, so this decides where "see the
+ * source for this change" points. It follows the repository that ships this fork; using
+ * upstream's name sent readers to pi's tree, where the linked path does not describe helm.
+ */
+const GITHUB_REPO = "ADWMC/helm";
 const CHANGELOG_LINK_BASE_PATH = "packages/coding-agent";
 const LEGACY_REPO_RE = /^https:\/\/github\.com\/(?:badlogic|earendil-works)\/pi-mono(?=\/|$)/;
 const URL_SCHEME_RE = /^[a-z][a-z0-9+.-]*:/i;

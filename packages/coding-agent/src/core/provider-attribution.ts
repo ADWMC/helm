@@ -1,12 +1,22 @@
 import type { Api, Model, ProviderHeaders } from "@adwmc/helm-ai";
+import { APP_NAME, PACKAGE_NAME } from "../config.ts";
 import type { SettingsManager } from "./settings-manager.ts";
-import { isInstallTelemetryEnabled } from "./telemetry.ts";
+import { isProviderAttributionEnabled } from "./telemetry.ts";
 
 const OPENROUTER_HOST = "openrouter.ai";
 const NVIDIA_NIM_HOST = "integrate.api.nvidia.com";
 const CLOUDFLARE_API_HOST = "api.cloudflare.com";
 const CLOUDFLARE_AI_GATEWAY_HOST = "gateway.ai.cloudflare.com";
 const OPENCODE_HOST = "opencode.ai";
+
+/**
+ * Identity this client declares to upstream providers.
+ *
+ * These headers tell a provider who is calling; sending upstream pi's name would
+ * misattribute helm's traffic (and, for OpenRouter, publish a title that is not ours).
+ * The project URL follows the repository that ships this fork.
+ */
+const ATTRIBUTION_PROJECT_URL = "https://github.com/ADWMC/helm";
 
 function matchesHost(baseUrl: string, expectedHost: string): boolean {
 	try {
@@ -37,27 +47,27 @@ function getDefaultAttributionHeaders(
 	model: Model<Api>,
 	settingsManager: SettingsManager,
 ): Record<string, string> | undefined {
-	if (!isInstallTelemetryEnabled(settingsManager)) {
+	if (!isProviderAttributionEnabled(settingsManager)) {
 		return undefined;
 	}
 
 	if (isOpenRouterModel(model)) {
 		return {
-			"HTTP-Referer": "https://pi.dev",
-			"X-OpenRouter-Title": "pi",
+			"HTTP-Referer": ATTRIBUTION_PROJECT_URL,
+			"X-OpenRouter-Title": APP_NAME,
 			"X-OpenRouter-Categories": "cli-agent",
 		};
 	}
 
 	if (isNvidiaNimModel(model)) {
 		return {
-			"X-BILLING-INVOKE-ORIGIN": "Pi",
+			"X-BILLING-INVOKE-ORIGIN": APP_NAME,
 		};
 	}
 
 	if (isCloudflareModel(model)) {
 		return {
-			"User-Agent": "pi-coding-agent",
+			"User-Agent": PACKAGE_NAME,
 		};
 	}
 
@@ -73,7 +83,7 @@ function getSessionHeaders(model: Model<Api>, sessionId: string | undefined): Re
 	) {
 		return undefined;
 	}
-	return { "x-opencode-session": sessionId, "x-opencode-client": "pi" };
+	return { "x-opencode-session": sessionId, "x-opencode-client": APP_NAME };
 }
 
 export function mergeProviderAttributionHeaders(

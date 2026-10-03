@@ -2,8 +2,23 @@ import { compare, valid } from "semver";
 import { fetchWithRetry } from "./management-http.ts";
 import { getPiUserAgent } from "./pi-user-agent.ts";
 
-const LATEST_VERSION_URL = "https://pi.dev/api/latest-version";
+/**
+ * Release source for update checks.
+ *
+ * This fork does not run the upstream pi.dev API, and pointing at it would be worse than
+ * useless: the endpoint reports *pi's* version, so helm would either announce a version it
+ * can never be, or (via `helm update`) install the upstream package over itself. The check
+ * therefore resolves helm releases from the repository that publishes them.
+ *
+ * Overridable for mirrors/private forks via HELM_RELEASE_API_BASE.
+ */
+const DEFAULT_RELEASE_API_BASE = "https://api.github.com/repos/ADWMC/helm/releases/latest";
 const DEFAULT_VERSION_CHECK_TIMEOUT_MS = 10000;
+
+function releaseApiUrl(): string {
+	const override = process.env.HELM_RELEASE_API_BASE?.trim();
+	return override && override.length > 0 ? override : DEFAULT_RELEASE_API_BASE;
+}
 
 export interface LatestPiRelease {
 	version: string;
@@ -52,14 +67,14 @@ export async function getLatestPiRelease(
 	currentVersion: string,
 	options: { timeoutMs?: number; retry?: boolean } = {},
 ): Promise<LatestPiRelease | undefined> {
-	if (process.env.PI_OFFLINE) return undefined;
+	if (process.env.HELM_OFFLINE) return undefined;
 
 	const response = await fetchWithRetry(
-		LATEST_VERSION_URL,
+		releaseApiUrl(),
 		{
 			headers: {
 				"User-Agent": getPiUserAgent(currentVersion),
-				accept: "application/json",
+				accept: "application/vnd.github+json",
 			},
 		},
 		{
@@ -70,19 +85,19 @@ export async function getLatestPiRelease(
 	if (!response.ok) return undefined;
 
 	const data = (await response.json()) as {
-		packageName?: unknown;
-		version?: unknown;
-		note?: unknown;
+		tag_name?: unknown;
+		name?: unknown;
+		body?: unknown;
 	};
-	if (typeof data.version !== "string" || !data.version.trim()) {
+	// GitHub releases carry the version in tag_name; strip a leading v.
+	const rawTag = typeof data.tag_name === "string" ? data.tag_name.trim() : "";
+	const version = rawTag.startsWith("v") ? rawTag.slice(1) : rawTag;
+	if (!version) {
 		return undefined;
 	}
-	const packageName =
-		typeof data.packageName === "string" && data.packageName.trim() ? data.packageName.trim() : undefined;
-	const note = typeof data.note === "string" && data.note.trim() ? data.note.trim() : undefined;
+	const note = typeof data.name === "string" && data.name.trim() ? data.name.trim() : undefined;
 	return {
-		version: data.version.trim(),
-		packageName,
+		version,
 		...(note ? { note } : {}),
 	};
 }
@@ -95,7 +110,7 @@ export async function getLatestPiVersion(
 }
 
 export async function checkForNewPiVersion(currentVersion: string): Promise<LatestPiRelease | undefined> {
-	if (process.env.PI_SKIP_VERSION_CHECK) return undefined;
+	if (process.env.HELM_SKIP_VERSION_CHECK) return undefined;
 
 	try {
 		const latestRelease = await getLatestPiRelease(currentVersion);

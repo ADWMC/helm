@@ -9,9 +9,12 @@ import { CONFIG_DIR_NAME, getAgentDir, getBinDir } from "./config.ts";
 import { migrateKeybindingsConfig } from "./core/keybindings.ts";
 import { stripBom } from "./utils/text.ts";
 
+// Migration output has to point at docs this fork actually ships, and at the anchor in
+// the copy of the changelog the reader has. Upstream's URLs sent them to pi's tree,
+// where the extensions API described is not the one helm runs.
 const MIGRATION_GUIDE_URL =
-	"https://github.com/earendil-works/pi/blob/main/packages/coding-agent/CHANGELOG.md#extensions-migration";
-const EXTENSIONS_DOC_URL = "https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/extensions.md";
+	"https://github.com/ADWMC/helm/blob/main/packages/coding-agent/CHANGELOG.md#extensions-migration";
+const EXTENSIONS_DOC_URL = "https://github.com/ADWMC/helm/blob/main/packages/coding-agent/docs/extensions.md";
 
 /**
  * Migrate legacy oauth.json and settings.json apiKeys to auth.json.
