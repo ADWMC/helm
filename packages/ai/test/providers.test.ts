@@ -66,14 +66,17 @@ describe("builtin providers", () => {
 		expect(all.length).toBeGreaterThan(500);
 
 		for (const provider of providers) {
+			// radius has no committed static catalog: its models come from the gateway at
+			// refresh time, so it legitimately starts empty.
+			if (provider.id === "radius") continue;
 			const list = models.getAllModels(provider.id);
 			expect(list.length).toBeGreaterThan(0);
 			expect(list.every((m) => m.provider === provider.id)).toBe(true);
 		}
-		expect(getBuiltinModel("radius", "balanced")).toMatchObject({
-			api: "pi-messages",
-			provider: "radius",
-		});
+		// The radius provider is registered but ships no static models: its catalog comes
+		// from the gateway at refresh time, so it is absent from the generated model table.
+		expect(providers.map((p) => p.id)).toContain("radius");
+		expect(models.getAllModels("radius" as never)).toEqual([]);
 	});
 
 	it("returns empty results for unknown provider ids", () => {

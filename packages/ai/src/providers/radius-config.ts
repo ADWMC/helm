@@ -1,7 +1,14 @@
 import type { OAuthCredential } from "../auth/types.ts";
 import type { Model, ThinkingLevelMap } from "../types.ts";
 
-export const DEFAULT_RADIUS_GATEWAY = "https://radius.pi.dev";
+/**
+ * Fallback gateway for the radius provider.
+ *
+ * Upstream shipped a pi-operated gateway here. helm does not run one, and guessing a
+ * substitute would send credentials to an endpoint that cannot serve them, so the
+ * default is empty: callers must supply a gateway (OAuth credential or HELM_RADIUS_GATEWAY).
+ */
+export const DEFAULT_RADIUS_GATEWAY = process.env.HELM_RADIUS_GATEWAY?.trim() ?? "";
 
 export type RadiusGatewayModel = {
 	id: string;
@@ -50,7 +57,11 @@ function sanitizeRadiusGatewayConfig(config: unknown): RadiusGatewayConfig | und
 }
 
 export function normalizeRadiusGatewayUrl(value: string): string {
-	const withScheme = /^https?:\/\//iu.test(value) ? value : `https://${value}`;
+	// An unset gateway stays unset: prefixing a scheme onto "" would yield the invalid
+	// URL "https:", which then fails deep inside fetch instead of reading as "not configured".
+	const trimmed = value.trim();
+	if (trimmed === "") return "";
+	const withScheme = /^https?:\/\//iu.test(trimmed) ? trimmed : `https://${trimmed}`;
 	return withScheme.replace(/\/+$/u, "");
 }
 

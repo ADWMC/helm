@@ -36,12 +36,11 @@ afterEach(() => {
 });
 
 describe("Radius provider catalogs", () => {
-	it("ships a static public catalog for the default gateway", () => {
+	it("ships no static catalog: models come from the gateway", () => {
+		// The upstream build committed a catalog fetched from its own gateway. This fork does
+		// not bake that data in, so a provider with no configured gateway has no models yet.
 		const provider = radiusProvider();
-		expect(provider.getModels().length).toBeGreaterThan(0);
-		expect(provider.getModels()).toContainEqual(
-			expect.objectContaining({ id: "balanced", provider: "radius", api: "pi-messages" }),
-		);
+		expect(provider.getModels()).toEqual([]);
 	});
 
 	it("does not apply the public Radius catalog to custom gateways", () => {
@@ -49,7 +48,7 @@ describe("Radius provider catalogs", () => {
 		expect(provider.getModels()).toEqual([]);
 	});
 
-	it("overlays refreshed models on the static public catalog", async () => {
+	it("exposes the refreshed gateway catalog", async () => {
 		vi.spyOn(globalThis, "fetch").mockResolvedValue(
 			new Response(JSON.stringify(radiusConfig()), {
 				status: 200,
@@ -59,7 +58,8 @@ describe("Radius provider catalogs", () => {
 		const credentials = new InMemoryCredentialStore();
 		await credentials.modify("radius", async () => ({ type: "api_key", key: "radius-key" }));
 		const models = createModels({ credentials });
-		models.setProvider(radiusProvider());
+		// A gateway must be configured: with none, there is nothing to refresh from.
+		models.setProvider(radiusProvider({ gateway: "https://radius.example" }));
 
 		const result = await models.refresh({ providers: ["radius"] });
 
@@ -70,7 +70,7 @@ describe("Radius provider catalogs", () => {
 			contextWindow: 424242,
 		});
 		expect(models.getModel("radius", "organization-only")).toBeDefined();
-		expect(models.getModels("radius").length).toBeGreaterThan(radiusConfig().models.length);
+		expect(models.getModels("radius").length).toBe(radiusConfig().models.length);
 	});
 
 	it("overlays a cached effective catalog without network access", async () => {

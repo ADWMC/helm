@@ -2,10 +2,13 @@ import { spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 import { VERSION } from "../src/config.ts";
 
-const sourceResolverPath = resolve(__dirname, "../src/experimental/source-resolver.ts");
+// --import requires a file:// URL (a Windows drive path is read as the scheme "c:"),
+// while the entry script is accepted as a path.
+const sourceResolverPath = pathToFileURL(resolve(__dirname, "../src/experimental/source-resolver.ts")).href;
 const tempDirs: string[] = [];
 
 afterEach(() => {
@@ -35,7 +38,7 @@ function runEntry(entry: string, experimental: boolean) {
 				HOME: directory,
 				USERPROFILE: directory,
 				HELM_CODING_AGENT_DIR: join(directory, "agent"),
-				PI_OFFLINE: "1",
+				HELM_OFFLINE: "1",
 				PI_EXPERIMENTAL: experimental ? "1" : "0",
 			},
 		},

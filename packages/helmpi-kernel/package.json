@@ -11,6 +11,11 @@
 			"types": "./src/spec-lint.ts",
 			"import": "./dist/spec-lint.js"
 		},
+		"./guard": {
+			"source": "./src/guard/cai.ts",
+			"types": "./src/guard/cai.ts",
+			"import": "./dist/guard/cai.js"
+		},
 		"./i18n": {
 			"source": "./src/i18n/index.ts",
 			"types": "./src/i18n/index.ts",

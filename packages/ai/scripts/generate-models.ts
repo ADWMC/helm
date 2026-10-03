@@ -1306,6 +1306,13 @@ async function fetchOpenRouterModels(): Promise<OpenRouterCatalog> {
 }
 
 async function fetchRadiusModels(): Promise<Model<"pi-messages">[]> {
+	// The radius provider's catalog comes from an external gateway that helm does not
+	// operate. With no gateway configured there is nothing to fetch, and that is not an
+	// error: the provider simply ships without a generated model list.
+	if (!DEFAULT_RADIUS_GATEWAY) {
+		console.log("Skipping Radius API: no gateway configured (set HELM_RADIUS_GATEWAY to fetch)");
+		return [];
+	}
 	try {
 		console.log("Fetching models from Radius API...");
 		const config = await loadRadiusGatewayConfig(DEFAULT_RADIUS_GATEWAY);

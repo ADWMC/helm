@@ -3,7 +3,6 @@ import { envApiKeyAuth, lazyOAuth } from "../auth/helpers.ts";
 import { loadRadiusOAuth } from "../auth/oauth/load.ts";
 import type { Provider } from "../models.ts";
 import type { Model } from "../types.ts";
-import { RADIUS_MODELS } from "./radius.models.ts";
 import {
 	DEFAULT_RADIUS_GATEWAY,
 	getRadiusModels,
@@ -18,15 +17,18 @@ export interface RadiusProviderOptions {
 	gateway?: string;
 }
 
-/** Radius gateway provider with a persisted, dynamically refreshed catalog. */
+/**
+ * Radius gateway provider with a persisted, dynamically refreshed catalog.
+ *
+ * There is no committed baseline catalog: the model list comes from the gateway itself
+ * (OAuth credential or a configured gateway URL) and is cached after the first refresh.
+ * A gateway with no configured URL yields no models rather than a hardcoded list.
+ */
 export function radiusProvider(options: RadiusProviderOptions = {}): Provider<"pi-messages"> {
 	const id = options.id ?? "radius";
 	const name = options.name ?? "Radius";
 	const gateway = normalizeRadiusGatewayUrl(options.gateway ?? DEFAULT_RADIUS_GATEWAY);
-	const baselineModels: Model<"pi-messages">[] =
-		gateway === normalizeRadiusGatewayUrl(DEFAULT_RADIUS_GATEWAY)
-			? Object.values(RADIUS_MODELS).map((model) => ({ ...model, provider: id }))
-			: [];
+	const baselineModels: Model<"pi-messages">[] = [];
 	let dynamicModels = getRadiusModels(id, undefined);
 	const streams = piMessagesApi();
 
@@ -79,6 +81,9 @@ export function radiusProvider(options: RadiusProviderOptions = {}): Provider<"p
 			}
 
 			if (!context.allowNetwork || context.signal.aborted) return;
+			// No gateway configured means there is nothing to refresh from; the cached
+			// overlay above is all this provider has.
+			if (gateway === "") return;
 			const apiKey = context.credential?.type === "oauth" ? context.credential.access : context.credential?.key;
 			const config = await loadRadiusGatewayConfig(gateway, apiKey, context.signal);
 			if (context.signal.aborted) return;
